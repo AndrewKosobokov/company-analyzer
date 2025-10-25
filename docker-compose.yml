@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # Наш сервис базы данных
+  db:
+    image: postgres:16-alpine # Используем официальный, легкий образ PostgreSQL
+    restart: always # Всегда перезапускать, если произошел сбой
+    environment:
+      # Эти переменные ДОЛЖНЫ совпадать с DATABASE_URL в вашем .env
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: company_analyzer
+    ports:
+      # Пробрасываем порт 5432 контейнера на порт 5432 вашей машины
+      - '5432:5432'
+    volumes:
+      # Сохраняем данные БД на ваш диск
+      - postgres_data:/var/lib/postgresql/data
+
+# Определяем том для постоянного хранения данных
+volumes:
+  postgres_data:

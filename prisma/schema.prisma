@@ -1,0 +1,80 @@
+// Ensure your provider is set correctly (e.g., postgresql)
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ===========================================
+// MODEL 1: USER 
+// Stores user credentials, organization info, and request limits
+// ===========================================
+model User {
+  id               String    @id @default(uuid())
+  // Authentication Data
+  email            String    @unique
+  passwordHash     String   
+  name             String?   // User's display name
+  // Organization Data from specs
+  organizationName String?  
+  inn              String?  
+  phone            String?
+  
+  // MVP Trial Logic
+  plan             String    @default("trial") // "trial", "start", "optimal", "profi"
+  analysesRemaining Int     @default(5)       // Counter for reports left in current period/trial
+  planStartDate    DateTime? // Optional: tracking to reset limits monthly
+  role             String    @default("user") // "user" | "admin"
+  
+  // Legacy fields (keeping for compatibility)
+  requestsLimit    Int       @default(50) // Starting limit
+  requestsUsed     Int       @default(0)  // Used requests
+  isEmailVerified  Boolean   @default(false)
+  
+  // Email Verification
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+  
+  // Password Reset
+  passwordResetToken       String?
+  passwordResetExpires     DateTime?
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  // Relationship to Archive
+  analyses         Analysis[]
+}
+
+// ===========================================
+// MODEL 2: ANALYSIS (The Archive)
+// Stores saved company reports
+// ===========================================
+model Analysis {
+  id          String   @id @default(uuid())
+  // Link to User
+  userId      String   
+  user        User     @relation(fields: [userId], references: [id])
+  
+  // Report Data
+  companyName String
+  companyInn  String
+  reportText  String   @db.Text
+  
+  // Target Proposal (generated once, cached)
+  targetProposal String? @db.Text
+  
+  // "Trash" functionality
+  isDeleted   Boolean  @default(false) // true = in trash (корзина)
+  
+  // Non-target client qualification
+  isNonTarget Boolean  @default(false) // true = non-target client (нецелевой клиент)
+  
+  createdAt   DateTime @default(now())
+}
+
+
+

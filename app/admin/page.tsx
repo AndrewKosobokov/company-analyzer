@@ -1,0 +1,271 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
+interface Stats {
+  totalUsers: number;
+  activeUsers: number;
+  totalAnalyses: number;
+  planDistribution: Array<{ plan: string; _count: number }>;
+}
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  plan: string;
+  analysesRemaining: number;
+  createdAt: string;
+  _count: { analyses: number };
+}
+
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [editingUser, setEditingUser] = useState<string | null>(null);
+  const [newLimit, setNewLimit] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push('/');
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      // Fetch stats
+      const statsRes = await fetch('/api/admin/stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (statsRes.status === 403) {
+        setError('Доступ запрещён');
+        return;
+      }
+
+      if (statsRes.status === 401) {
+        router.push('/login');
+        return;
+      }
+
+      const statsData = await statsRes.json();
+      setStats(statsData);
+
+      // Fetch users
+      const usersRes = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const usersData = await usersRes.json();
+      setUsers(usersData.users);
+
+    } catch (err) {
+      setError('Ошибка загрузки');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateLimit = async (userId: string) => {
+    const token = localStorage.getItem('token');
+    try {
+      await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId, analysesRemaining: newLimit })
+      });
+
+      setEditingUser(null);
+      setNewLimit('');
+      fetchStats(); // Refresh data
+    } catch (error) {
+      alert('Ошибка обновления');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>Загрузка...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>{error}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <header className="header">
+        <div className="header-container">
+          <Link href="/" className="logo">
+            <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Админ-панель</div>
+          </Link>
+          <nav className="nav">
+            <Link href="/analysis" className="button-primary header-button">Анализ</Link>
+            <Link href="/companies" className="nav-link">Отчеты</Link>
+            <Link href="/pricing" className="nav-link">Тарифы</Link>
+            <Link href="/profile" className="nav-link">Профиль</Link>
+            <Link href="/admin" className="nav-link" style={{ fontWeight: 600 }}>Админ-панель</Link>
+            <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Выйти</button>
+          </nav>
+        </div>
+      </header>
+
+      <main className="container" style={{ maxWidth: '1200px', paddingTop: '120px' }}>
+        <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Админ-панель</h1>
+
+        {stats && (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+            gap: '24px',
+            marginBottom: '48px'
+          }}>
+            <div className="card" style={{ padding: '24px' }}>
+              <div style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Всего пользователей
+              </div>
+              <div style={{ fontSize: '32px', fontWeight: 600 }}>
+                {stats.totalUsers}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '24px' }}>
+              <div style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Активных (7 дней)
+              </div>
+              <div style={{ fontSize: '32px', fontWeight: 600 }}>
+                {stats.activeUsers}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '24px' }}>
+              <div style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                Всего анализов
+              </div>
+              <div style={{ fontSize: '32px', fontWeight: 600 }}>
+                {stats.totalAnalyses}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="card" style={{ padding: '32px' }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>Распределение по тарифам</h2>
+          {stats && stats.planDistribution.map(plan => (
+            <div key={plan.plan} style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              padding: '12px 0',
+              borderBottom: '1px solid var(--border-color)'
+            }}>
+              <span style={{ fontSize: '15px' }}>{plan.plan}</span>
+              <span style={{ fontSize: '15px', fontWeight: 600 }}>{plan._count}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* User Management Table */}
+        <div className="card" style={{ padding: '32px', marginTop: '32px' }}>
+          <h2 style={{ fontSize: '24px', marginBottom: '24px' }}>Управление пользователями</h2>
+          
+          {users.length > 0 ? (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '15px', fontWeight: 600 }}>Email</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '15px', fontWeight: 600 }}>Имя</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '15px', fontWeight: 600 }}>План</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '15px', fontWeight: 600 }}>Лимит</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '15px', fontWeight: 600 }}>Анализов</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '15px', fontWeight: 600 }}>Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map(user => (
+                    <tr key={user.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '12px', fontSize: '15px' }}>{user.email}</td>
+                      <td style={{ padding: '12px', fontSize: '15px' }}>{user.name}</td>
+                      <td style={{ padding: '12px', fontSize: '15px' }}>{user.plan}</td>
+                      <td style={{ padding: '12px', fontSize: '15px' }}>
+                        {editingUser === user.id ? (
+                          <input
+                            type="number"
+                            value={newLimit}
+                            onChange={(e) => setNewLimit(e.target.value)}
+                            className="input"
+                            style={{ width: '80px', padding: '4px 8px' }}
+                          />
+                        ) : (
+                          user.analysesRemaining
+                        )}
+                      </td>
+                      <td style={{ padding: '12px', fontSize: '15px' }}>{user._count.analyses}</td>
+                      <td style={{ padding: '12px' }}>
+                        {editingUser === user.id ? (
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              onClick={() => updateLimit(user.id)}
+                              className="button-primary"
+                              style={{ padding: '4px 12px', fontSize: '13px' }}
+                            >
+                              Сохранить
+                            </button>
+                            <button 
+                              onClick={() => { setEditingUser(null); setNewLimit(''); }}
+                              className="button-secondary"
+                              style={{ padding: '4px 12px', fontSize: '13px' }}
+                            >
+                              Отмена
+                            </button>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => { 
+                              setEditingUser(user.id); 
+                              setNewLimit(user.analysesRemaining.toString()); 
+                            }}
+                            className="button-secondary"
+                            style={{ padding: '4px 12px', fontSize: '13px' }}
+                          >
+                            Изменить
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>Загрузка пользователей...</p>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
