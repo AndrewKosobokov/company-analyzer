@@ -19,6 +19,7 @@ export default function LoginForm() {
   // Form fields state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   
   const handleLogin = async (e: React.FormEvent) => {
@@ -61,6 +62,12 @@ export default function LoginForm() {
       return;
     }
     
+    if (password !== confirmPassword) {
+      setError('Пароли не совпадают');
+      setLoading(false);
+      return;
+    }
+    
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -85,6 +92,7 @@ export default function LoginForm() {
       setActiveTab('login');
       setEmail('');
       setPassword('');
+      setConfirmPassword('');
       setName('');
       
     } catch (err) {
@@ -263,6 +271,21 @@ export default function LoginForm() {
                 value={password}
                 onChange={setPassword}
                 placeholder="Минимум 8 символов"
+                disabled={loading}
+                autoComplete="new-password"
+                minLength={8}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="register-confirm-password" className="form-label">
+                Подтвердите пароль
+              </label>
+              <PasswordInput
+                id="register-confirm-password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                placeholder="Повторите пароль"
                 disabled={loading}
                 autoComplete="new-password"
                 minLength={8}
