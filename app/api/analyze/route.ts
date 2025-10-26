@@ -128,22 +128,33 @@ export async function POST(request: Request) {
     const workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://metalvector-proxy.apiforjobproject.workers.dev';
     
     console.log('🤖 Using stable Gemini 2.5 Pro via Cloudflare Worker');
+    console.log('🔑 API Key:', geminiApiKey?.substring(0, 20) + '...');
+    console.log('🌐 Worker URL:', workerUrl);
+    console.log('🤖 Model: gemini-2.5-pro');
+    
+    const requestBody = {
+      contents: [{
+        parts: [{ text: prompt }]
+      }],
+      generationConfig: {
+        temperature: 0.6,
+        maxOutputTokens: 30000,  // Increased for thinking model (thinking phase + output)
+        topP: 0.95,
+        topK: 40,
+      },
+      tools: [{
+        googleSearch: {}
+      }]
+    };
+
+    console.log('📤 Отправляем в Gemini API:', JSON.stringify(requestBody, null, 2));
+    
     const geminiResponse = await fetch(
       `${workerUrl}/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{ text: prompt }]
-          }],
-          generationConfig: {
-            temperature: 0.6,
-            maxOutputTokens: 30000,  // Increased for thinking model (thinking phase + output)
-            topP: 0.95,
-            topK: 40,
-          }
-        })
+        body: JSON.stringify(requestBody)
       }
     );
 

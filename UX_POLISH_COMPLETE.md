@@ -234,3 +234,9 @@ The application now follows Apple-Style minimalist design principles:
 
 
 
+
+
+
+
+
+
