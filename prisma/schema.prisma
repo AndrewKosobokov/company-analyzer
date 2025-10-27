@@ -25,7 +25,7 @@ model User {
   
   // MVP Trial Logic
   plan             String    @default("trial") // "trial", "start", "optimal", "profi"
-  analysesRemaining Int     @default(5)       // Counter for reports left in current period/trial
+  analysesRemaining Int     @default(3)       // Counter for reports left in current period/trial
   planStartDate    DateTime? // Optional: tracking to reset limits monthly
   role             String    @default("user") // "user" | "admin"
   

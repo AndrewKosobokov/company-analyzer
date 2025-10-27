@@ -149,7 +149,60 @@ export async function POST(request: Request) {
 
     console.log('📤 Отправляем в Gemini API:', JSON.stringify(requestBody, null, 2));
     
-    const geminiResponse = await fetch(
+    // Функция для retry при ошибках 503
+    const fetchGeminiWithRetry = async (url: string, options: any, maxRetries = 3) => {
+      let delay = 5000; // Начальная задержка 5 секунд
+      
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        console.log(`🔄 Попытка ${attempt + 1}/${maxRetries} запроса к Gemini API...`);
+        
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          
+          // Проверяем на ошибку 503
+          if (data.error && data.error.code === 503) {
+            if (attempt < maxRetries - 1) {
+              console.log(`⏳ API перегружен (503), повтор через ${delay/1000} секунд...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+              delay *= 2; // Удваиваем задержку: 5s → 10s → 20s
+              continue;
+            } else {
+              console.log(`❌ Все ${maxRetries} попытки исчерпаны, API всё ещё перегружен`);
+            }
+          }
+          
+          // Проверяем на другие ошибки API
+          if (!response.ok || data.error) {
+            if (data.error && data.error.code === 503) {
+              if (attempt < maxRetries - 1) {
+                console.log(`⏳ API перегружен (503), повтор через ${delay/1000} секунд...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                delay *= 2;
+                continue;
+              }
+            }
+          }
+          
+          // Если нет ошибки 503 - возвращаем результат
+          return data;
+          
+        } catch (error) {
+          if (attempt < maxRetries - 1) {
+            console.log(`⏳ Ошибка сети, повтор через ${delay/1000} секунд...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+            continue;
+          }
+          throw error;
+        }
+      }
+      
+      // Если все попытки исчерпаны
+      throw new Error('Все попытки запроса к API исчерпаны');
+    };
+    
+    const geminiData = await fetchGeminiWithRetry(
       `${workerUrl}/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiApiKey}`,
       {
         method: 'POST',
@@ -158,16 +211,14 @@ export async function POST(request: Request) {
       }
     );
 
-    if (!geminiResponse.ok) {
-      const errorData = await geminiResponse.json();
-      console.error('❌ Gemini API Error:', errorData);
+    // Проверяем на ошибки после всех попыток
+    if (geminiData.error) {
+      console.error('❌ Gemini API Error:', geminiData);
       return NextResponse.json(
         { error: 'Ошибка анализа. Попробуйте позже.' },
         { status: 500 }
       );
     }
-
-    const geminiData = await geminiResponse.json();
 
     // LOG FULL RESPONSE FOR DEBUGGING
     console.log('=== GEMINI RESPONSE ===');

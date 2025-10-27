@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
         isEmailVerified: true,
         emailVerificationToken: null,
         emailVerificationExpires: null,
-        analysesRemaining: 5, // Grant 5 trial analyses
+        analysesRemaining: 3, // Grant 3 trial analyses
       },
     });
 

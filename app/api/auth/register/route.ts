@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         organizationName: organization,
         phone,
         plan: 'trial',
-        analysesRemaining: 0, // Will be 5 after verification
+        analysesRemaining: 0, // Will be 3 after verification
         isEmailVerified: false,
         emailVerificationToken: verificationToken,
         emailVerificationExpires: verificationExpires,

@@ -4,6 +4,35 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Функция для извлечения только нужных разделов из отчёта
+function extractKeySections(reportText: string) {
+  const sections = {
+    companyInfo: '',
+    keyRecommendations: '',
+    insights: ''
+  };
+  
+  // Извлекаем информацию о компании (первые 500 символов до первого ##)
+  const headerMatch = reportText.match(/^([\s\S]*?)(?=##)/);
+  if (headerMatch) {
+    sections.companyInfo = headerMatch[1].trim();
+  }
+  
+  // Извлекаем "КЛЮЧЕВЫЕ РЕКОМЕНДАЦИИ"
+  const keyRecsMatch = reportText.match(/## КЛЮЧЕВЫЕ РЕКОМЕНДАЦИИ[\s\S]*?(?=##|$)/);
+  if (keyRecsMatch) {
+    sections.keyRecommendations = keyRecsMatch[0];
+  }
+  
+  // Извлекаем "ИНСАЙТЫ И СТРАТЕГИЯ ВЗАИМОДЕЙСТВИЯ"
+  const insightsMatch = reportText.match(/## ИНСАЙТЫ И СТРАТЕГИЯ ВЗАИМОДЕЙСТВИЯ[\s\S]*?(?=##|$)/);
+  if (insightsMatch) {
+    sections.insights = insightsMatch[0];
+  }
+  
+  return sections;
+}
+
 const TARGET_PROPOSAL_PROMPT = `
 ВАЖНО: Начни ответ СРАЗУ с заголовка. БЕЗ вступительных фраз типа "Отлично, задача ясна", "Я проанализировал", "Хорошо, создам предложение" и т.п.
 
@@ -83,8 +112,12 @@ const TARGET_PROPOSAL_PROMPT = `
 
 Пиши по делу, профессионально, но человеческим языком.
 
-АНАЛИТИЧЕСКИЙ ОТЧЕТ:
-{reportText}
+ИНФОРМАЦИЯ О КОМПАНИИ:
+{companyInfo}
+
+{insights}
+
+{keyRecommendations}
 
 ФОРМАТ ОТВЕТА:
 Начни ответ ПРЯМО с заголовка:
@@ -137,10 +170,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Извлекаем только нужные разделы из отчёта
+    const keySections = extractKeySections(reportText);
+
     const prompt = TARGET_PROPOSAL_PROMPT
-      .replace('{reportText}', reportText)
+      .replace('{companyInfo}', keySections.companyInfo)
+      .replace('{insights}', keySections.insights)
+      .replace('{keyRecommendations}', keySections.keyRecommendations)
       .replace('{companyName}', companyName || 'компанию');
 
+    console.log('📏 Размер исходного отчёта:', reportText.length, 'символов');
+    console.log('📏 Размер оптимизированного промпта:', prompt.length, 'символов');
     console.log('🤖 Using stable Gemini 2.5 Pro for production');
     const geminiResponse = await fetch(
       `${workerUrl}/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiApiKey}`,
