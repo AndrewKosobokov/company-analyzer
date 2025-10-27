@@ -175,7 +175,7 @@ export default function HomePage() {
             marginBottom: 'var(--space-xl)',
             lineHeight: '1.4'
           }}>
-            Получите 5 бесплатных анализов при регистрации. 
+            Получите 3 бесплатных анализа при регистрации. 
             Кредитная карта не требуется.
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
