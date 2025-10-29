@@ -2,6 +2,7 @@ import { tildaSans } from './fonts';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from '@/components/NotificationProvider';
 import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/components/StructuredData';
+import Footer from '@/components/Footer';
 import './globals.css';
 
 export const metadata = {
@@ -9,7 +10,7 @@ export const metadata = {
     default: 'Металл Вектор — Анализ потенциальных клиентов для металлоторговли',
     template: '%s | Металл Вектор'
   },
-  description: 'B2B SaaS для анализа компаний-покупателей металлопроката. AI-анализ финансов, снабжения и генерация персонализированных коммерческих предложений.',
+  description: 'B2B SaaS для анализа компаний-покупателей металлопроката. ИИ-анализ финансов, снабжения и генерация персонализированных коммерческих предложений.',
   keywords: ['анализ клиентов металлоторговля', 'B2B металлопрокат', 'анализ компаний', 'металл клиенты', 'поиск клиентов металл'],
   authors: [{ name: 'Металл Вектор' }],
   creator: 'Металл Вектор',
@@ -72,7 +73,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WebSiteSchema />
         <AuthProvider>
           <NotificationProvider>
-            {children}
+            <div className="min-h-screen flex flex-col">
+              <div className="flex-1">
+                {children}
+              </div>
+              <Footer />
+            </div>
           </NotificationProvider>
         </AuthProvider>
       </body>

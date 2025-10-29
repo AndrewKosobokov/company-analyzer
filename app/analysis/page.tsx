@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ProgressBar from '@/components/ProgressBar';
@@ -16,6 +16,10 @@ export default function AnalysisPage() {
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [analysesRemaining, setAnalysesRemaining] = useState<number | null>(null);
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showUrlErrorModal, setShowUrlErrorModal] = useState(false);
+  const innInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const { showNotification } = useNotification();
   
@@ -37,6 +41,12 @@ export default function AnalysisPage() {
       setError('Введите ИНН компании');
       return;
     }
+
+    // Pre-check user limit before attempting request
+    if (typeof analysesRemaining === 'number' && analysesRemaining <= 0) {
+      setShowLimitModal(true);
+      return;
+    }
     
     setLoading(true);
     setProgress(0);
@@ -56,10 +66,10 @@ export default function AnalysisPage() {
     }, 1400); // Update every 800ms
     
     // Update messages at different stages
-    setTimeout(() => setProgressMessage('Сбор данных о компании...'), 1000);
-    setTimeout(() => setProgressMessage('Анализ информации...'), 10000);
-    setTimeout(() => setProgressMessage('Генерация отчёта...'), 20000);
-    setTimeout(() => setProgressMessage('Финализация...'), 30000);
+    setTimeout(() => setProgressMessage('Сбор данных о компании...'), 5000);
+    setTimeout(() => setProgressMessage('Анализ информации...'), 20000);
+    setTimeout(() => setProgressMessage('Генерация отчёта...'), 40000);
+    setTimeout(() => setProgressMessage('Финализация...'), 60000);
     
     try {
       const response = await fetch('/api/analyze', {
@@ -79,8 +89,17 @@ export default function AnalysisPage() {
       setProgressMessage('Готово!');
       
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Ошибка анализа');
+        const data = await response.json().catch(() => ({}));
+        // If limit exceeded on server
+        if (response.status === 403 && (data?.analysesRemaining === 0 || (data?.error || '').includes('Лимит анализов'))) {
+          setShowLimitModal(true);
+          throw new Error(data?.error || 'Лимит анализов исчерпан');
+        }
+        // If URL path failed and user tried URL
+        if (!noWebsite) {
+          setShowUrlErrorModal(true);
+        }
+        throw new Error(data?.error || 'Ошибка анализа');
       }
       
       const data = await response.json();
@@ -107,7 +126,7 @@ export default function AnalysisPage() {
   };
 
   useEffect(() => {
-    const checkAdmin = async () => {
+    const checkStatus = async () => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
@@ -117,12 +136,15 @@ export default function AnalysisPage() {
         });
         const data = await res.json();
         setIsAdmin(data.role === 'admin');
+        if (typeof data.analysesRemaining === 'number') {
+          setAnalysesRemaining(data.analysesRemaining);
+        }
       } catch (err) {
         // Ignore errors
       }
     };
     
-    checkAdmin();
+    checkStatus();
   }, []);
 
   // Progress bar animation
@@ -301,6 +323,7 @@ export default function AnalysisPage() {
                   value={inn}
                   onChange={handleInnChange}
                   disabled={loading}
+                  ref={innInputRef}
                 />
               </div>
             </div>
@@ -349,6 +372,51 @@ export default function AnalysisPage() {
         </div>
       </main>
       
+      {/* Limit reached modal */}
+      {showLimitModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowLimitModal(false)}>
+          <div className="bg-white max-w-md w-full mx-4 p-8" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Лимит анализов исчерпан</h2>
+              <button onClick={() => setShowLimitModal(false)} className="text-gray-500 hover:text-gray-700">×</button>
+            </div>
+            <p className="text-gray-600 mb-6">Для дальнейшего использования ознакомьтесь с тарифами</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowLimitModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Закрыть</button>
+              <Link href="/pricing" className="px-4 py-2 bg-gray-900 text-white hover:bg-gray-800">Посмотреть тарифы</Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* URL analysis error modal */}
+      {showUrlErrorModal && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowUrlErrorModal(false)}>
+          <div className="bg-white max-w-md w-full mx-4 p-8" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">Ошибка анализа</h2>
+              <button onClick={() => setShowUrlErrorModal(false)} className="text-gray-500 hover:text-gray-700">×</button>
+            </div>
+            <p className="text-gray-600 mb-6">Попробуйте ввести ИНН организации</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setShowUrlErrorModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Закрыть</button>
+              <button
+                onClick={() => {
+                  setShowUrlErrorModal(false);
+                  setNoWebsite(true);
+                  setUrl('');
+                  setTimeout(() => {
+                    innInputRef.current?.focus();
+                  }, 50);
+                }}
+                className="px-4 py-2 bg-gray-900 text-white hover:bg-gray-800"
+              >
+                Ввести ИНН
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

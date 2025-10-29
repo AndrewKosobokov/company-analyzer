@@ -233,7 +233,7 @@ export async function POST(request: Request) {
       console.error('❌ No analysis text in response!');
       console.error('Response structure:', geminiData);
       return NextResponse.json(
-        { error: 'Не удалось получить анализ от AI' },
+        { error: 'Не удалось получить анализ от ИИ' },
         { status: 500 }
       );
     }

@@ -160,18 +160,22 @@ export default function TargetProposalModal({
   };
 
   const handleShareTelegram = () => {
+    const shareUrl = `${window.location.origin}/public/targeted-offer/${analysisId}`;
     shareToTelegram(
       `Целевое предложение - ${companyName}`,
       companyInn,
-      proposalText
+      proposalText,
+      shareUrl
     );
   };
 
   const handleShareWhatsApp = () => {
+    const shareUrl = `${window.location.origin}/public/targeted-offer/${analysisId}`;
     shareToWhatsApp(
       `Целевое предложение - ${companyName}`,
       companyInn,
-      proposalText
+      proposalText,
+      shareUrl
     );
   };
 

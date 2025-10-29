@@ -185,61 +185,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ 
-        padding: 'var(--space-2xl) var(--space-lg)',
-        background: 'var(--background-secondary)',
-        borderTop: '1px solid var(--border-color)'
-      }}>
-        <div style={{ 
-          maxWidth: '1200px', 
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 'var(--space-lg)'
-        }}>
-          <div>
-            <div style={{ fontSize: '20px', fontWeight: 600, marginBottom: 'var(--space-xs)' }}>Металл Вектор</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Анализ компаний с ИИ</div>
-          </div>
-          
-          <div style={{ display: 'flex', gap: 'var(--space-xl)', flexWrap: 'wrap' }}>
-            <Link href="/pricing" style={{ 
-              color: 'var(--text-secondary)', 
-              textDecoration: 'none',
-              fontSize: '15px',
-              transition: 'color var(--transition-fast)'
-            }}>Тарифы</Link>
-            <Link href="/login" style={{ 
-              color: 'var(--text-secondary)', 
-              textDecoration: 'none',
-              fontSize: '15px',
-              transition: 'color var(--transition-fast)'
-            }}>Войти</Link>
-            <Link href="/login" style={{ 
-              color: 'var(--text-secondary)', 
-              textDecoration: 'none',
-              fontSize: '15px',
-              transition: 'color var(--transition-fast)'
-            }}>Регистрация</Link>
-          </div>
-        </div>
-        
-        <div style={{ 
-          maxWidth: '1200px', 
-          margin: '0 auto',
-          marginTop: 'var(--space-lg)',
-          paddingTop: 'var(--space-lg)',
-          borderTop: '1px solid var(--border-color)',
-          fontSize: '13px',
-          color: 'var(--text-secondary)',
-          textAlign: 'center'
-        }}>
-          © 2025 Металл Вектор. Все права защищены.
-        </div>
-      </footer>
+      
     </div>
   );
 }

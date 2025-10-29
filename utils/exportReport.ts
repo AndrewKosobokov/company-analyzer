@@ -123,11 +123,12 @@ export async function exportToWord(companyName: string, inn: string, reportText:
 }
 
 // Share to Telegram
-export function shareToTelegram(companyName: string, inn: string, reportText: string) {
+export function shareToTelegram(companyName: string, inn: string, reportText: string, shareUrlOverride?: string) {
   const plainText = markdownToPlainText(reportText);
-  const message = `📊 АНАЛИТИЧЕСКИЙ ОТЧЕТ\n\n🏢 Компания: ${companyName}\n🔢 ИНН: ${inn}\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n\n${plainText.substring(0, 500)}...\n\n👉 Полный отчёт: ${window.location.href}`;
-  const webUrl = `https://telegram.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(message)}`;
-  const telegramApp = `tg://msg?text=${encodeURIComponent(message + '\n' + window.location.href)}`;
+  const shareUrl = shareUrlOverride || window.location.href;
+  const message = `📊 АНАЛИТИЧЕСКИЙ ОТЧЕТ\n\n🏢 Компания: ${companyName}\n🔢 ИНН: ${inn}\n📅 Дата: ${new Date().toLocaleDateString('ru-RU')}\n\n${plainText.substring(0, 500)}...\n\n👉 Полный отчёт: ${shareUrl}`;
+  const webUrl = `https://telegram.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(message)}`;
+  const telegramApp = `tg://msg?text=${encodeURIComponent(message + '\n' + shareUrl)}`;
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
   if (isMobile) {
     window.location.href = telegramApp;
@@ -140,9 +141,10 @@ export function shareToTelegram(companyName: string, inn: string, reportText: st
 }
 
 // Share to WhatsApp
-export function shareToWhatsApp(companyName: string, inn: string, reportText: string) {
+export function shareToWhatsApp(companyName: string, inn: string, reportText: string, shareUrlOverride?: string) {
   const plainText = markdownToPlainText(reportText);
-  const message = `*АНАЛИТИЧЕСКИЙ ОТЧЕТ*\n\nКомпания: ${companyName}\nИНН: ${inn}\n\n${plainText.substring(0, 1500)}...\n\nПолный отчёт: ${window.location.href}`;
+  const shareUrl = shareUrlOverride || window.location.href;
+  const message = `*АНАЛИТИЧЕСКИЙ ОТЧЕТ*\n\nКомпания: ${companyName}\nИНН: ${inn}\n\n${plainText.substring(0, 1500)}...\n\nПолный отчёт: ${shareUrl}`;
   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank');
 }

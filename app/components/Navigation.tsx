@@ -12,7 +12,7 @@ export default function Navigation({ currentPage = 'home', showAuth = true }: Na
     <nav className="nav">
       <div className="nav-container">
         <Link href="/" className="nav-brand">
-          Metal Vector
+          Металл Вектор
         </Link>
         <div className="nav-links">
           <Link href="/analysis" className="nav-link">
