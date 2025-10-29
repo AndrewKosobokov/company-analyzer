@@ -75,12 +75,14 @@ export default function CompanyDetailPage() {
   };
 
   const shareToTelegram = () => {
+    if (!company) return;
     const shareUrl = `${window.location.origin}/public/report/${company.id}?v=2`;
     const message = `Отчет по закупкам компании "${company.companyName}"\n${shareUrl}`;
     window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const shareToWhatsApp = () => {
+    if (!company) return;
     const shareUrl = `${window.location.origin}/public/report/${company.id}?v=2`;
     const message = `Отчет по закупкам компании "${company.companyName}"\n${shareUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
