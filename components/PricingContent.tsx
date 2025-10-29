@@ -152,6 +152,17 @@ export default function PricingContent() {
             >
               Выбрать Start
             </Link>
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Оплачивая услугу, вы подтверждаете согласие с{' '}
+              <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Публичной офертой
+              </a>
+              {' '}и{' '}
+              <a href="/privacy" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Политикой конфиденциальности
+              </a>
+              .
+            </p>
           </div>
           
           {/* Card 2 - Optimal (Recommended) */}
@@ -214,6 +225,17 @@ export default function PricingContent() {
             >
               Выбрать Optimal
             </Link>
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Оплачивая услугу, вы подтверждаете согласие с{' '}
+              <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Публичной офертой
+              </a>
+              {' '}и{' '}
+              <a href="/privacy" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Политикой конфиденциальности
+              </a>
+              .
+            </p>
           </div>
           
           {/* Card 3 - Profi */}
@@ -259,6 +281,17 @@ export default function PricingContent() {
             >
               Выбрать Profi
             </Link>
+            <p className="text-xs text-gray-500 text-center mt-3">
+              Оплачивая услугу, вы подтверждаете согласие с{' '}
+              <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Публичной офертой
+              </a>
+              {' '}и{' '}
+              <a href="/privacy" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Политикой конфиденциальности
+              </a>
+              .
+            </p>
           </div>
         </div>
         

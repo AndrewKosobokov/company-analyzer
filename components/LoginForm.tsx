@@ -224,6 +224,13 @@ export default function LoginForm() {
             >
               {loading ? 'Вход...' : 'Войти'}
             </button>
+            <p className="text-xs text-gray-500 text-center mt-4">
+              Используя сервис, вы соглашаетесь с{' '}
+              <a href="/terms" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                условиями использования
+              </a>
+              .
+            </p>
           </form>
         )}
 
@@ -300,6 +307,21 @@ export default function LoginForm() {
             >
               {loading ? 'Регистрация...' : 'Зарегистрироваться'}
             </button>
+            <p className="text-xs text-gray-500 text-center mt-4">
+              Нажимая кнопку «Зарегистрироваться», вы соглашаетесь с условиями{' '}
+              <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Публичной оферты
+              </a>
+              ,{' '}
+              <a href="/terms" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Пользовательского соглашения
+              </a>
+              {' '}и{' '}
+              <a href="/privacy" target="_blank" className="text-gray-700 underline hover:text-gray-900">
+                Политики конфиденциальности
+              </a>
+              .
+            </p>
           </form>
         )}
 

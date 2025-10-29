@@ -28,6 +28,13 @@ export default function AdminDashboard() {
   const [newLimit, setNewLimit] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentEmail, setCurrentEmail] = useState<string>('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetEmail, setDeleteTargetEmail] = useState<string>('');
+  const [confirmEmail, setConfirmEmail] = useState<string>('');
+  const [deleteError, setDeleteError] = useState<string>('');
+  const [deleting, setDeleting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string>('');
   const router = useRouter();
 
   const handleLogout = () => {
@@ -72,6 +79,17 @@ export default function AdminDashboard() {
       const usersData = await usersRes.json();
       setUsers(usersData.users);
 
+      // Fetch current admin email for self-delete prevention
+      try {
+        const meRes = await fetch('/api/auth/status', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (meRes.ok) {
+          const me = await meRes.json();
+          setCurrentEmail(me.email || '');
+        }
+      } catch {}
+
     } catch (err) {
       setError('Ошибка загрузки');
     } finally {
@@ -96,6 +114,53 @@ export default function AdminDashboard() {
       fetchStats(); // Refresh data
     } catch (error) {
       alert('Ошибка обновления');
+    }
+  };
+
+  const openDeleteModal = (email: string) => {
+    setDeleteTargetEmail(email);
+    setConfirmEmail('');
+    setDeleteError('');
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeleteTargetEmail('');
+    setConfirmEmail('');
+    setDeleteError('');
+  };
+
+  const handleDeleteUser = async () => {
+    if (confirmEmail !== deleteTargetEmail) {
+      setDeleteError('Email не совпадает');
+      return;
+    }
+    const token = localStorage.getItem('token');
+    try {
+      setDeleting(true);
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: deleteTargetEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setDeleteError(data.error || 'Не удалось удалить пользователя');
+        setDeleting(false);
+        return;
+      }
+      setSuccessMessage('Пользователь успешно удалён');
+      closeDeleteModal();
+      await fetchStats();
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (e) {
+      setDeleteError('Ошибка сети');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -244,16 +309,27 @@ export default function AdminDashboard() {
                             </button>
                           </div>
                         ) : (
-                          <button 
-                            onClick={() => { 
-                              setEditingUser(user.id); 
-                              setNewLimit(user.analysesRemaining.toString()); 
-                            }}
-                            className="button-secondary"
-                            style={{ padding: '4px 12px', fontSize: '13px' }}
-                          >
-                            Изменить
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              onClick={() => { 
+                                setEditingUser(user.id); 
+                                setNewLimit(user.analysesRemaining.toString()); 
+                              }}
+                              className="button-secondary"
+                              style={{ padding: '4px 12px', fontSize: '13px' }}
+                            >
+                              Изменить
+                            </button>
+                            <button
+                              onClick={() => openDeleteModal(user.email)}
+                              className="bg-red-600 text-white"
+                              style={{ padding: '4px 12px', fontSize: '13px', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: '#dc2626' }}
+                              disabled={user.email === currentEmail}
+                              title={user.email === currentEmail ? 'Нельзя удалить самого себя' : 'Удалить пользователя'}
+                            >
+                              Удалить
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -265,7 +341,51 @@ export default function AdminDashboard() {
             <p>Загрузка пользователей...</p>
           )}
         </div>
+        {successMessage && (
+          <div className="card" style={{ marginTop: '16px', padding: '12px', color: '#065f46', background: '#ecfdf5', border: '1px solid #a7f3d0' }}>
+            {successMessage}
+          </div>
+        )}
       </main>
+
+      {showDeleteModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div style={{ width: '100%', maxWidth: '480px', background: 'white', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 600 }}>Удалить пользователя?</h3>
+            </div>
+            <div style={{ padding: '20px 24px' }}>
+              <p style={{ marginBottom: '12px', color: '#991b1b' }}>Это действие необратимо! Все данные пользователя будут удалены.</p>
+              <p style={{ marginBottom: '12px' }}>Подтвердите удаление, введя точный email пользователя:</p>
+              <div style={{ marginBottom: '12px' }}>
+                <input
+                  type="text"
+                  value={confirmEmail}
+                  onChange={(e) => { setConfirmEmail(e.target.value); if (deleteError) setDeleteError(''); }}
+                  placeholder="Введите email для подтверждения"
+                  className="input"
+                  style={{ width: '100%', padding: '10px 12px' }}
+                />
+              </div>
+              {deleteError && (
+                <div style={{ color: '#b91c1c', fontSize: '14px', marginBottom: '8px' }}>{deleteError}</div>
+              )}
+              <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Удаляемый email: <span style={{ fontWeight: 600 }}>{deleteTargetEmail}</span></div>
+            </div>
+            <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--border-color)' }}>
+              <button onClick={closeDeleteModal} className="button-secondary" style={{ padding: '8px 14px' }}>Отмена</button>
+              <button
+                onClick={handleDeleteUser}
+                className="bg-red-600 text-white"
+                style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: '#dc2626' }}
+                disabled={!confirmEmail || confirmEmail !== deleteTargetEmail || deleting}
+              >
+                {deleting ? 'Удаление...' : 'Удалить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
