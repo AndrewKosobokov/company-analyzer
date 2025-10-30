@@ -117,6 +117,7 @@ export function getPasswordResetEmailTemplate(resetUrl: string, email: string) {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           line-height: 1.6;
           color: #1d1d1f;
+          background: #ffffff;
           max-width: 600px;
           margin: 0 auto;
           padding: 20px;
@@ -148,15 +149,17 @@ export function getPasswordResetEmailTemplate(resetUrl: string, email: string) {
         .button {
           display: inline-block;
           padding: 12px 24px;
-          background: #000000;
-          color: #ffffff;
+          background: #ffffff;
+          color: #000000;
           text-decoration: none;
           border-radius: 8px;
           font-weight: 500;
           margin: 20px 0;
+          border: 2px solid #000000;
         }
         .button:hover {
-          background: #1d1d1f;
+          background: #000000;
+          color: #ffffff;
         }
         .link {
           word-break: break-all;

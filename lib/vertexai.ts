@@ -7,7 +7,7 @@ export async function callVertexAI(
   
   const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0523149055';
   const location = process.env.VERTEX_AI_LOCATION || 'us-central1';
-  const model = 'gemini-2.0-flash-exp';
+  const model = 'gemini-2.5-pro';
 
   console.log(`[VertexAI] Initializing client for project: ${projectId}, location: ${location}`);
 
@@ -50,6 +50,14 @@ export async function callVertexAI(
     }
 
     console.log(`[VertexAI] Successfully received response. Text length: ${generatedText.length}`);
+    
+    // Verify Google Search was used
+    if (groundingMetadata?.webSearchQueries?.length) {
+      console.log(`✅ Google Search was used! Queries: ${groundingMetadata.webSearchQueries.length}`);
+      console.log(`📚 Sources found: ${groundingMetadata.groundingChunks?.length || 0}`);
+    } else {
+      console.log('⚠️ Google Search was NOT used for this prompt');
+    }
     
     return {
       text: generatedText,

@@ -26,9 +26,9 @@ export default async function VerifyEmail({ searchParams }: PageProps) {
   if (!token) {
     return (
       <div className="mx-auto max-w-xl p-6 text-center">
-        <h1 className="text-2xl font-semibold mb-3">Ошибка</h1>
-        <p className="mb-6">Токен не предоставлен. Проверьте ссылку из письма.</p>
-        <a href="/login" className="inline-block rounded bg-blue-600 px-4 py-2 text-white">Войти</a>
+        <h1 className="text-2xl font-semibold mb-3 text-gray-900">Ошибка</h1>
+        <p className="mb-6 text-gray-700">Токен не предоставлен. Проверьте ссылку из письма.</p>
+        <a href="/login" className="inline-block rounded border border-black px-4 py-2 text-black">Войти</a>
       </div>
     );
   }
@@ -64,11 +64,11 @@ export default async function VerifyEmail({ searchParams }: PageProps) {
   if (success) {
     return (
       <div className="mx-auto max-w-xl p-6 text-center">
-        <h1 className="text-2xl font-semibold mb-3">Почта подтверждена!</h1>
-        <p className="mb-6">{message}</p>
+        <h1 className="text-2xl font-semibold mb-3 text-gray-900">Почта подтверждена!</h1>
+        <p className="mb-6 text-gray-700">{message}</p>
         <div className="flex items-center justify-center gap-3">
-          <a href="/" className="inline-block rounded bg-blue-600 px-4 py-2 text-white">Перейти на сайт</a>
-          <a href="/login" className="inline-block rounded border border-gray-300 px-4 py-2">Войти</a>
+          <a href="/" className="inline-block rounded border border-black px-4 py-2 text-black">Перейти на сайт</a>
+          <a href="/login" className="inline-block rounded border border-black px-4 py-2 text-black">Войти</a>
         </div>
       </div>
     );
@@ -76,11 +76,11 @@ export default async function VerifyEmail({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-xl p-6 text-center">
-      <h1 className="text-2xl font-semibold mb-3">Не удалось подтвердить почту</h1>
-      <p className="mb-6">{error || 'Недействительный или истёкший токен'}</p>
+      <h1 className="text-2xl font-semibold mb-3 text-gray-900">Не удалось подтвердить почту</h1>
+      <p className="mb-6 text-gray-700">{error || 'Недействительный или истёкший токен'}</p>
       <div className="flex items-center justify-center gap-3">
-        <a href="/login" className="inline-block rounded bg-blue-600 px-4 py-2 text-white">Войти</a>
-        <a href="/" className="inline-block rounded border border-gray-300 px-4 py-2">На главную</a>
+        <a href="/login" className="inline-block rounded border border-black px-4 py-2 text-black">Войти</a>
+        <a href="/" className="inline-block rounded border border-black px-4 py-2 text-black">На главную</a>
       </div>
     </div>
   );
