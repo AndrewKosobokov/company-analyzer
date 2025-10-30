@@ -115,7 +115,7 @@ export default function AdminDashboard() {
       setNewLimit('');
       fetchStats(); // Refresh data
     } catch (error) {
-      showToast('Ошибка обновления');
+      showToast('Ошибка обновления', { variant: 'error' });
     }
   };
 
@@ -351,35 +351,39 @@ export default function AdminDashboard() {
       </main>
 
       {showDeleteModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div style={{ width: '100%', maxWidth: '480px', background: 'white', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)' }}>
-              <h3 style={{ fontSize: '20px', fontWeight: 600 }}>Удалить пользователя?</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl px-10 py-8">
+            <button onClick={closeDeleteModal} aria-label="Закрыть" className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <div className="border-b border-black/10 pb-6 mb-6">
+              <h3 className="text-2xl font-semibold text-black">Удалить пользователя?</h3>
             </div>
-            <div style={{ padding: '20px 24px' }}>
-              <p style={{ marginBottom: '12px', color: '#991b1b' }}>Это действие необратимо! Все данные пользователя будут удалены.</p>
-              <p style={{ marginBottom: '12px' }}>Подтвердите удаление, введя точный email пользователя:</p>
-              <div style={{ marginBottom: '12px' }}>
+            <div>
+              <p className="mb-3 text-base text-[#1d1d1f]">Это действие необратимо! Все данные пользователя будут удалены.</p>
+              <p className="mb-3 text-base text-[#1d1d1f]">Подтвердите удаление, введя точный email пользователя:</p>
+              <div className="mb-4">
                 <input
                   type="text"
                   value={confirmEmail}
                   onChange={(e) => { setConfirmEmail(e.target.value); if (deleteError) setDeleteError(''); }}
                   placeholder="Введите email для подтверждения"
-                  className="input"
-                  style={{ width: '100%', padding: '10px 12px' }}
+                  className="w-full rounded-xl border border-black/10 px-3 py-2 focus:outline-none focus:ring-0"
                 />
               </div>
               {deleteError && (
-                <div style={{ color: '#b91c1c', fontSize: '14px', marginBottom: '8px' }}>{deleteError}</div>
+                <div className="text-sm text-[#1d1d1f] mb-4">{deleteError}</div>
               )}
-              <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Удаляемый email: <span style={{ fontWeight: 600 }}>{deleteTargetEmail}</span></div>
+              <div className="text-sm text-[#86868b] mb-8">Удаляемый email: <span className="font-semibold text-black">{deleteTargetEmail}</span></div>
             </div>
-            <div style={{ padding: '16px 24px', display: 'flex', justifyContent: 'flex-end', gap: '8px', borderTop: '1px solid var(--border-color)' }}>
-              <button onClick={closeDeleteModal} className="button-secondary" style={{ padding: '8px 14px' }}>Отмена</button>
+            <div className="flex justify-end gap-4">
+              <button onClick={closeDeleteModal} className="bg-transparent text-gray-600 hover:text-black rounded-xl px-8 py-3 font-medium transition-colors">Отмена</button>
               <button
                 onClick={handleDeleteUser}
-                className="bg-red-600 text-white"
-                style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: '#dc2626' }}
+                className="bg-black text-white hover:bg-gray-800 rounded-xl px-8 py-3 font-medium transition-colors"
                 disabled={!confirmEmail || confirmEmail !== deleteTargetEmail || deleting}
               >
                 {deleting ? 'Удаление...' : 'Удалить'}

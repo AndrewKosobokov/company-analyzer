@@ -7,10 +7,11 @@ import Toast from './Toast';
 type ToastItem = {
   id: string;
   message: string;
+  variant: 'info' | 'success' | 'error' | 'warning';
 };
 
 type ToastContextValue = {
-  showToast: (message: string) => void;
+  showToast: (message: string, options?: { variant?: 'info' | 'success' | 'error' | 'warning'; durationMs?: number }) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
@@ -34,10 +35,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const showToast = useCallback((message: string) => {
+  const showToast = useCallback((message: string, options?: { variant?: 'info' | 'success' | 'error' | 'warning'; durationMs?: number }) => {
     const id = Math.random().toString(36).slice(2);
-    setToasts(prev => [{ id, message }, ...prev]);
-    timersRef.current[id] = window.setTimeout(() => remove(id), 4000);
+    const variant = options?.variant ?? 'info';
+    const duration = options?.durationMs ?? 4000;
+    setToasts(prev => [{ id, message, variant }, ...prev]);
+    timersRef.current[id] = window.setTimeout(() => remove(id), duration);
   }, [remove]);
 
   // Clear timers on unmount
@@ -54,14 +57,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       {typeof window !== 'undefined' && createPortal(
-        <div className="pointer-events-none fixed left-1/2 top-6 z-[1000] -translate-x-1/2 px-4 sm:px-0" style={{ width: '100%' }}>
-          <div className="mx-auto flex w-full max-w-[400px] flex-col items-center gap-2 sm:px-0">
+        <div className="pointer-events-none fixed top-6 right-6 z-[1000] px-4 sm:px-0">
+          <div className="flex w-full max-w-[400px] flex-col items-end gap-2 sm:px-0">
             {toasts.map((t) => (
               <div
                 key={t.id}
                 className="w-full transform transition-all duration-300 ease-out animate-[fadeSlideIn_0.3s_ease-out] will-change-transform"
               >
-                <Toast id={t.id} message={t.message} onClose={remove} />
+                <Toast id={t.id} message={t.message} variant={t.variant} onClose={remove} />
               </div>
             ))}
           </div>

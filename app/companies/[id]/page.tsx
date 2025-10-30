@@ -61,13 +61,13 @@ export default function CompanyDetailPage() {
       });
 
       if (response.ok) {
-        showToast('Анализ удален');
+        showToast('Анализ удален', { variant: 'success' });
         router.push('/companies');
       } else {
-        showToast('Ошибка удаления');
+        showToast('Ошибка удаления', { variant: 'error' });
       }
     } catch (err) {
-      showToast('Ошибка удаления');
+      showToast('Ошибка удаления', { variant: 'error' });
     }
   };
   
@@ -232,13 +232,13 @@ export default function CompanyDetailPage() {
             className="company-actions-detail"
           >
               <button
-              onClick={() => showToast('Функция в разработке')}
+              onClick={() => showToast('Функция в разработке', { variant: 'warning' })}
               className="button-primary"
               >
                 Скачать PDF
               </button>
               <button
-              onClick={() => showToast('Функция в разработке')}
+              onClick={() => showToast('Функция в разработке', { variant: 'warning' })}
               className="button-secondary"
               >
                 Скачать Word

@@ -374,16 +374,14 @@ export default function AnalysisPage() {
       
       {/* Limit reached modal */}
       {showLimitModal && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowLimitModal(false)}>
-          <div className="bg-white max-w-md w-full mx-4 p-8" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Лимит анализов исчерпан</h2>
-              <button onClick={() => setShowLimitModal(false)} className="text-gray-500 hover:text-gray-700">×</button>
-            </div>
-            <p className="text-gray-600 mb-6">Для дальнейшего использования ознакомьтесь с тарифами</p>
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowLimitModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Закрыть</button>
-              <Link href="/pricing" className="px-4 py-2 bg-gray-900 text-white hover:bg-gray-800">Посмотреть тарифы</Link>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLimitModal(false)}>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 px-10 py-8" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowLimitModal(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black" aria-label="Закрыть">×</button>
+            <h2 className="text-2xl font-semibold text-black mb-4">Лимит анализов исчерпан</h2>
+            <p className="text-base text-[#1d1d1f] leading-relaxed mb-8">Для дальнейшего использования ознакомьтесь с тарифами</p>
+            <div className="flex gap-4">
+              <Link href="/pricing" className="bg-black text-white hover:bg-gray-800 rounded-xl px-8 py-3 font-medium transition-colors text-center">Посмотреть тарифы</Link>
+              <button onClick={() => setShowLimitModal(false)} className="text-gray-600 hover:text-black rounded-xl px-8 py-3 font-medium transition-colors">Закрыть</button>
             </div>
           </div>
         </div>
@@ -391,15 +389,13 @@ export default function AnalysisPage() {
 
       {/* URL analysis error modal */}
       {showUrlErrorModal && (
-        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50" onClick={() => setShowUrlErrorModal(false)}>
-          <div className="bg-white max-w-md w-full mx-4 p-8" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Ошибка анализа</h2>
-              <button onClick={() => setShowUrlErrorModal(false)} className="text-gray-500 hover:text-gray-700">×</button>
-            </div>
-            <p className="text-gray-600 mb-6">Попробуйте ввести ИНН организации</p>
-            <div className="flex gap-3 justify-end">
-              <button onClick={() => setShowUrlErrorModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800">Закрыть</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowUrlErrorModal(false)}>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 px-10 py-8" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowUrlErrorModal(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black" aria-label="Закрыть">×</button>
+            <h2 className="text-2xl font-semibold text-black mb-4">Ошибка анализа</h2>
+            <p className="text-base text-[#1d1d1f] leading-relaxed mb-8">Попробуйте ввести ИНН организации</p>
+            <div className="flex gap-4 justify-end">
+              <button onClick={() => setShowUrlErrorModal(false)} className="text-gray-600 hover:text-black rounded-xl px-8 py-3 font-medium transition-colors">Закрыть</button>
               <button
                 onClick={() => {
                   setShowUrlErrorModal(false);
@@ -409,7 +405,7 @@ export default function AnalysisPage() {
                     innInputRef.current?.focus();
                   }, 50);
                 }}
-                className="px-4 py-2 bg-gray-900 text-white hover:bg-gray-800"
+                className="bg-black text-white hover:bg-gray-800 rounded-xl px-8 py-3 font-medium transition-colors"
               >
                 Ввести ИНН
               </button>

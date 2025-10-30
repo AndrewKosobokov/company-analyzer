@@ -168,10 +168,10 @@ export default function ReportPage() {
       if (response.ok) {
         router.push('/companies');
       } else {
-        showToast('Ошибка удаления');
+        showToast('Ошибка удаления', { variant: 'error' });
       }
     } catch (error) {
-      showToast('Ошибка удаления');
+      showToast('Ошибка удаления', { variant: 'error' });
     } finally {
       setShowDeleteModal(false);
     }
@@ -399,7 +399,7 @@ export default function ReportPage() {
                     report.reportText
                   );
                 } catch (error) {
-                  showToast('Ошибка экспорта в PDF');
+                  showToast('Ошибка экспорта в PDF', { variant: 'error' });
                 }
               }} 
               className="button-secondary"
@@ -421,7 +421,7 @@ export default function ReportPage() {
                     report.reportText
                   );
                 } catch (error) {
-                  showToast('Ошибка экспорта в Word');
+                  showToast('Ошибка экспорта в Word', { variant: 'error' });
                 }
               }} 
               className="button-secondary"
@@ -442,7 +442,7 @@ export default function ReportPage() {
                   setCopySuccess(true);
                   setTimeout(() => setCopySuccess(false), 2000);
                 } else {
-                  showToast('Ошибка копирования');
+                  showToast('Ошибка копирования', { variant: 'error' });
                 }
               }} 
               className="button-secondary"
@@ -757,47 +757,19 @@ export default function ReportPage() {
 
       {/* Delete Modal */}
       {showDeleteModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            padding: '32px',
-            maxWidth: '400px',
-            width: '90%',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)'
-          }}>
-            <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>
-              Удалить отчёт?
-            </h3>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              Это действие нельзя отменить. Отчёт будет удалён навсегда.
-            </p>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="button-secondary"
-                style={{ flex: 1 }}
-              >
-                Отмена
-              </button>
-              <button
-                onClick={handleDelete}
-                className="button-primary"
-                style={{ flex: 1 }}
-              >
-                Удалить
-              </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="relative w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl px-10 py-8">
+            <button onClick={() => setShowDeleteModal(false)} aria-label="Закрыть" className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <h3 className="text-2xl font-semibold text-black mb-4">Удалить отчёт?</h3>
+            <p className="text-base text-[#1d1d1f] leading-relaxed mb-8">Это действие нельзя отменить. Отчёт будет удалён навсегда.</p>
+            <div className="flex gap-4">
+              <button onClick={() => setShowDeleteModal(false)} className="bg-transparent text-gray-600 hover:text-black rounded-xl px-8 py-3 font-medium transition-colors">Отмена</button>
+              <button onClick={handleDelete} className="bg-black text-white hover:bg-gray-800 rounded-xl px-8 py-3 font-medium transition-colors">Удалить</button>
             </div>
           </div>
         </div>

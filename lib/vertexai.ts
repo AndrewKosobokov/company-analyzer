@@ -19,7 +19,19 @@ export async function callVertexAI(
       safetySettings: [
         {
           category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_NONE,
         },
       ],
     });
@@ -34,6 +46,22 @@ export async function callVertexAI(
     } as any;
 
     const response = await generativeModel.generateContent(request);
+    
+    const candidate = response.response.candidates?.[0];
+    const finishReason = candidate?.finishReason;
+    const safetyRatings = candidate?.safetyRatings;
+    
+    // Логирование блокировок
+    if (finishReason === 'SAFETY') {
+      console.error('🚫 [VertexAI] Response was BLOCKED by safety filters!');
+      console.error('Safety Ratings:', JSON.stringify(safetyRatings, null, 2));
+    } else if (finishReason) {
+      console.log(`[VertexAI] Finish reason: ${finishReason}`);
+    }
+    
+    if (safetyRatings && safetyRatings.length > 0) {
+      console.log('[VertexAI] Safety ratings:', JSON.stringify(safetyRatings, null, 2));
+    }
     
     const generatedText = response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
     

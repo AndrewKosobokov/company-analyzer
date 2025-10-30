@@ -133,7 +133,7 @@ export default function TargetProposalModal({
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } else {
-      showToast('Ошибка копирования');
+      showToast('Ошибка копирования', { variant: 'error' });
     }
   };
 
@@ -145,7 +145,7 @@ export default function TargetProposalModal({
         proposalText
       );
     } catch (error) {
-      showToast('Ошибка экспорта в PDF');
+      showToast('Ошибка экспорта в PDF', { variant: 'error' });
     }
   };
 
@@ -157,7 +157,7 @@ export default function TargetProposalModal({
         proposalText
       );
     } catch (error) {
-      showToast('Ошибка экспорта в Word');
+      showToast('Ошибка экспорта в Word', { variant: 'error' });
     }
   };
 
@@ -184,97 +184,21 @@ export default function TargetProposalModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(4px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 10000,
-        padding: '24px',
-        overflow: 'auto'
-      }}
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 backdrop-blur-sm p-6 overflow-auto" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: 'var(--background-primary)',
-          borderRadius: 'var(--radius-xl)',
-          boxShadow: 'var(--shadow-lg)',
-          width: '100%',
-          maxWidth: '900px',
-          maxHeight: '90vh',
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column'
-        }}
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col animate-[fadeZoomIn_0.2s_ease-out]"
       >
         {/* Header */}
-        <div style={{
-          padding: '32px',
-          borderBottom: '1px solid var(--border-color)'
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            marginBottom: proposalText && !loading ? '24px' : '0'
-          }}>
+        <div className="px-10 py-8 border-b border-black/10 relative">
+          <div className={`flex items-start justify-between ${proposalText && !loading ? 'mb-6' : ''}`}>
             <div>
-              <h1 style={{
-                fontSize: '32px',
-                fontWeight: '600',
-                marginBottom: '8px',
-                letterSpacing: '-0.022em'
-              }}>
-                Целевое предложение
-              </h1>
-              <p style={{
-                fontSize: '17px',
-                color: 'var(--text-secondary)',
-                margin: 0
-              }}>
-                {companyName}
-              </p>
-              <p style={{
-                fontSize: '15px',
-                color: 'var(--text-secondary)',
-                margin: '4px 0 0 0'
-              }}>
-                ИНН: {companyInn}
-              </p>
+              <h1 className="text-2xl font-semibold text-black mb-2 tracking-tight">Целевое предложение</h1>
+              <p className="text-[17px] text-[#1d1d1f] m-0">{companyName}</p>
+              <p className="text-[15px] text-[#86868b] mt-1">ИНН: {companyInn}</p>
             </div>
-            
-            <button
-              onClick={onClose}
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                border: 'none',
-                background: 'var(--background-secondary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background var(--transition-fast)',
-                flexShrink: 0
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'var(--border-color)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'var(--background-secondary)';
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <button onClick={onClose} aria-label="Закрыть" className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18" />
                 <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
@@ -283,16 +207,10 @@ export default function TargetProposalModal({
 
           {/* Export Buttons - Same as main report */}
           {proposalText && !loading && (
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              flexWrap: 'wrap',
-              alignItems: 'center'
-            }}>
+            <div className="flex gap-3 flex-wrap items-center">
               <button 
                 onClick={handleExportPDF}
-                className="button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="button-secondary flex items-center gap-2"
               >
                 <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
                   <path d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm250.2-143.7c-12.2-12-47-8.7-64.4-6.5-17.2-10.5-28.7-25-36.8-46.3 3.9-16.1 10.1-40.6 5.4-56-4.2-26.2-37.8-23.6-42.6-5.9-4.4 16.1-.4 38.5 7 67.1-10 23.9-24.9 56-35.4 74.4-20 10.3-47 26.2-51 46.2-3.3 15.8 26 55.2 76.1-31.2 22.4-7.4 46.8-16.5 68.4-20.1 18.9 10.2 41 17 55.8 17 25.5 0 28-28.2 17.5-38.7zm-198.1 77.8c5.1-13.7 24.5-29.5 30.4-35-19 30.3-24.2 31.6-30.4 35zm81.6-190.6c7.4 0 6.7 32.1 1.8 40.8-4.4-13.9-4.3-40.8-1.8-40.8zm-24.4 136.6c9.7-16.9 18-37 24.7-54.7 8.3 15.1 18.9 27.2 30.1 35.5-20.8 4.3-38.9 13.1-54.8 19.2zm131.6-5s-5 6-37.3-7.8c35.1-2.6 40.9 5.4 37.3 7.8z"/>
@@ -302,8 +220,7 @@ export default function TargetProposalModal({
               
               <button 
                 onClick={handleExportWord}
-                className="button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="button-secondary flex items-center gap-2"
               >
                 <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
                   <path d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm220.1-208c-5.7 0-10.6 4-11.7 9.5-20.6 97.7-20.4 95.4-21 103.5-.2-1.2-.4-2.6-.7-4.3-.8-5.1.3.2-23.6-99.5-1.3-5.4-6.1-9.2-11.7-9.2h-13.3c-5.5 0-10.3 3.8-11.7 9.1-24.4 99-24 96.2-24.8 103.7-.1-1.1-.2-2.5-.5-4.2-.7-5.2-14.1-73.3-19.1-99-1.1-5.6-6-9.7-11.8-9.7h-16.8c-7.8 0-13.5 7.3-11.7 14.8 8 32.6 26.7 109.5 33.2 136 1.3 5.4 6.1 9.1 11.7 9.1h25.2c5.5 0 10.3-3.7 11.6-9.1l17.9-71.4c1.5-6.2 2.5-12 3-17.3l2.9 17.3c.1.4 12.6 50.5 17.9 71.4 1.3 5.3 6.1 9.1 11.6 9.1h24.7c5.5 0 10.3-3.7 11.6-9.1 20.8-81.9 30.2-119 34.5-136 1.9-7.6-3.8-14.9-11.6-14.9h-15.8z"/>
@@ -313,8 +230,7 @@ export default function TargetProposalModal({
 
               <button 
                 onClick={handleCopy}
-                className="button-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="button-secondary flex items-center gap-2"
                 title="Копировать текст"
               >
                 {copySuccess ? (
@@ -336,17 +252,12 @@ export default function TargetProposalModal({
               </button>
 
               {/* Divider */}
-              <div style={{ 
-                height: '32px', 
-                width: '1px', 
-                backgroundColor: 'var(--border-color)' 
-              }} />
+              <div className="h-8 w-px bg-black/10" />
 
               {/* Telegram Button */}
               <button
                 onClick={handleShareTelegram}
-                className="button-secondary"
-                style={{ padding: '8px 16px' }}
+                className="button-secondary px-4 py-2"
                 title="Отправить в Telegram"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -357,8 +268,7 @@ export default function TargetProposalModal({
               {/* WhatsApp Button */}
               <button
                 onClick={handleShareWhatsApp}
-                className="button-secondary"
-                style={{ padding: '8px 16px' }}
+                className="button-secondary px-4 py-2"
                 title="Отправить в WhatsApp"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -370,11 +280,7 @@ export default function TargetProposalModal({
         </div>
 
         {/* Content */}
-        <div style={{
-          padding: '32px',
-          overflowY: 'auto',
-          flex: 1
-        }}>
+        <div className="px-10 py-8 overflow-y-auto flex-1">
           {/* Loading State */}
           {loading && (
             <div style={{
@@ -390,14 +296,7 @@ export default function TargetProposalModal({
 
           {/* Error State */}
           {error && (
-            <div style={{
-              padding: '16px 20px',
-              backgroundColor: '#fee',
-              border: '1px solid #fcc',
-              borderRadius: 'var(--radius-md)',
-              color: '#c33',
-              fontSize: '15px'
-            }}>
+            <div className="rounded-xl border border-black/10 bg-[#f5f5f7] text-[#1d1d1f] text-[15px] px-5 py-4">
               {error}
             </div>
           )}
@@ -513,8 +412,9 @@ export default function TargetProposalModal({
       </div>
 
       <style jsx>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
+        @keyframes fadeZoomIn {
+          from { opacity: 0; transform: scale(0.98); }
+          to { opacity: 1; transform: scale(1); }
         }
       `}</style>
     </div>
