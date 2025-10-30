@@ -24,7 +24,7 @@ export async function callVertexAI(
       ],
     });
 
-    const tools = useGoogleSearch ? [{ googleSearchRetrieval: {} }] : [];
+    const tools = useGoogleSearch ? [{ googleSearch: {} }] : [];
 
     console.log(`[VertexAI] Calling model: ${model} with search: ${useGoogleSearch}`);
     
