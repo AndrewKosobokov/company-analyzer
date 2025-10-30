@@ -150,6 +150,15 @@ export async function POST(request: Request) {
       ? `Компания ${finalUrl}`
       : `Компания ИНН ${finalCompanyInn || 'Не указан'}`;
 
+    // Guard: prevent saving empty report text
+    if (!analysisText || analysisText.trim().length === 0) {
+      console.error('❌ Cannot save analysis: empty report text');
+      return NextResponse.json(
+        { error: 'Не удалось получить ответ от AI. Попробуйте снова.' },
+        { status: 500 }
+      );
+    }
+
     const analysis = await prisma.analysis.create({
       data: {
         userId: userId,
