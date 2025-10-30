@@ -113,132 +113,18 @@ export async function POST(request: Request) {
     const prompt = generatePrompt(siteText, finalUrl, finalInn);
     console.log(`📝 Generated prompt (${prompt.length} chars)`);
 
-    // 6. CALL GEMINI API VIA CLOUDFLARE WORKER
-    console.log('🤖 Calling Gemini API via Cloudflare Worker...');
-
-    const geminiApiKey = process.env.GEMINI_API_KEY;
-    if (!geminiApiKey) {
-      return NextResponse.json(
-        { error: 'Gemini API key not configured' },
-        { status: 500 }
-      );
+    // 6. CALL VERTEX AI
+    console.log('🤖 Calling Vertex AI...');
+    const { callVertexAI } = await import('@/lib/vertexai');
+    let aiResponse;
+    try {
+      aiResponse = await callVertexAI(prompt, true);
+      console.log(`✅ Received ${aiResponse.text.length} characters from Vertex AI`);
+    } catch (error) {
+      console.error('❌ Vertex AI Error:', error);
+      return NextResponse.json({ error: 'Ошибка при анализе компании через Vertex AI' }, { status: 500 });
     }
-
-    // ✅ ИЗМЕНЕНО: Используем Cloudflare Worker вместо прямого обращения к Google API
-    const workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://metalvector-proxy.apiforjobproject.workers.dev';
-    
-    console.log('🤖 Using stable Gemini 2.5 Pro via Cloudflare Worker');
-    console.log('🔑 API Key:', geminiApiKey?.substring(0, 20) + '...');
-    console.log('🌐 Worker URL:', workerUrl);
-    console.log('🤖 Model: gemini-2.5-pro');
-    
-    const requestBody = {
-      contents: [{
-        parts: [{ text: prompt }]
-      }],
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 30000,  // Increased for thinking model (thinking phase + output)
-        topP: 0.95,
-        topK: 40,
-      },
-      tools: [{
-        googleSearch: {}
-      }]
-    };
-
-    console.log('📤 Отправляем в Gemini API:', JSON.stringify(requestBody, null, 2));
-    
-    // Функция для retry при ошибках 503
-    const fetchGeminiWithRetry = async (url: string, options: any, maxRetries = 3) => {
-      let delay = 5000; // Начальная задержка 5 секунд
-      
-      for (let attempt = 0; attempt < maxRetries; attempt++) {
-        console.log(`🔄 Попытка ${attempt + 1}/${maxRetries} запроса к Gemini API...`);
-        
-        try {
-          const response = await fetch(url, options);
-          const data = await response.json();
-          
-          // Проверяем на ошибку 503
-          if (data.error && data.error.code === 503) {
-            if (attempt < maxRetries - 1) {
-              console.log(`⏳ API перегружен (503), повтор через ${delay/1000} секунд...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-              delay *= 2; // Удваиваем задержку: 5s → 10s → 20s
-              continue;
-            } else {
-              console.log(`❌ Все ${maxRetries} попытки исчерпаны, API всё ещё перегружен`);
-            }
-          }
-          
-          // Проверяем на другие ошибки API
-          if (!response.ok || data.error) {
-            if (data.error && data.error.code === 503) {
-              if (attempt < maxRetries - 1) {
-                console.log(`⏳ API перегружен (503), повтор через ${delay/1000} секунд...`);
-                await new Promise(resolve => setTimeout(resolve, delay));
-                delay *= 2;
-                continue;
-              }
-            }
-          }
-          
-          // Если нет ошибки 503 - возвращаем результат
-          return data;
-          
-        } catch (error) {
-          if (attempt < maxRetries - 1) {
-            console.log(`⏳ Ошибка сети, повтор через ${delay/1000} секунд...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            delay *= 2;
-            continue;
-          }
-          throw error;
-        }
-      }
-      
-      // Если все попытки исчерпаны
-      throw new Error('Все попытки запроса к API исчерпаны');
-    };
-    
-    const geminiData = await fetchGeminiWithRetry(
-      `${workerUrl}/v1beta/models/gemini-2.5-pro:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-      }
-    );
-
-    // Проверяем на ошибки после всех попыток
-    if (geminiData.error) {
-      console.error('❌ Gemini API Error:', geminiData);
-      return NextResponse.json(
-        { error: 'Ошибка анализа. Попробуйте позже.' },
-        { status: 500 }
-      );
-    }
-
-    // LOG FULL RESPONSE FOR DEBUGGING
-    console.log('=== GEMINI RESPONSE ===');
-    console.log(JSON.stringify(geminiData, null, 2));
-    console.log('======================');
-
-    // Combine ALL parts of the response (Gemini may split into multiple parts)
-    const parts = geminiData.candidates?.[0]?.content?.parts || [];
-    const rawAnalysisText = parts.map((part: any) => part.text || '').join('');
-
-    if (!rawAnalysisText) {
-      console.error('❌ No analysis text in response!');
-      console.error('Response structure:', geminiData);
-      return NextResponse.json(
-        { error: 'Не удалось получить анализ от ИИ' },
-        { status: 500 }
-      );
-    }
-
-    console.log(`✅ Received ${rawAnalysisText.length} characters from Gemini`);
+    const rawAnalysisText = aiResponse.text;
 
     // FORMAT TEXT: Remove *, #, format headers
     const analysisText = formatAnalysisText(rawAnalysisText);

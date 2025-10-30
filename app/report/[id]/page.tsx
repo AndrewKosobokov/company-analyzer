@@ -9,6 +9,7 @@ import { exportToPDF, exportToWord, shareToTelegram, shareToWhatsApp, copyToClip
 import ScrollToTop from '@/components/ScrollToTop';
 import ReportTOC from '@/app/components/ReportTOC';
 import TargetProposalModal from '@/app/components/TargetProposalModal';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface ReportData {
   id: string;
@@ -57,6 +58,7 @@ export default function ReportPage() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [targetProposal, setTargetProposal] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { showToast } = useToast();
   
   /**
    * Utility to safely and recursively extract clean text content from React children.
@@ -166,10 +168,10 @@ export default function ReportPage() {
       if (response.ok) {
         router.push('/companies');
       } else {
-        alert('Ошибка удаления');
+        showToast('Ошибка удаления');
       }
     } catch (error) {
-      alert('Ошибка удаления');
+      showToast('Ошибка удаления');
     } finally {
       setShowDeleteModal(false);
     }
@@ -397,7 +399,7 @@ export default function ReportPage() {
                     report.reportText
                   );
                 } catch (error) {
-                  alert('Ошибка экспорта в PDF');
+                  showToast('Ошибка экспорта в PDF');
                 }
               }} 
               className="button-secondary"
@@ -419,7 +421,7 @@ export default function ReportPage() {
                     report.reportText
                   );
                 } catch (error) {
-                  alert('Ошибка экспорта в Word');
+                  showToast('Ошибка экспорта в Word');
                 }
               }} 
               className="button-secondary"
@@ -440,7 +442,7 @@ export default function ReportPage() {
                   setCopySuccess(true);
                   setTimeout(() => setCopySuccess(false), 2000);
                 } else {
-                  alert('Ошибка копирования');
+                  showToast('Ошибка копирования');
                 }
               }} 
               className="button-secondary"

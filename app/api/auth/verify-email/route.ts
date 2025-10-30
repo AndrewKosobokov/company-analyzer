@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
     if (!token) {
       return NextResponse.json(
-        { error: 'Токен не предоставлен' },
+        { success: false, error: 'Токен не предоставлен' },
         { status: 400 }
       );
     }
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: 'Недействительный или истёкший токен' },
+        { success: false, error: 'Недействительный или истёкший токен' },
         { status: 400 }
       );
     }
@@ -45,15 +45,13 @@ export async function GET(req: NextRequest) {
 
     console.log('Email verified for user:', user.email);
 
-    // Redirect to login with success message
-    return NextResponse.redirect(
-      new URL('/login?verified=true', req.url)
-    );
+    // Return success JSON
+    return NextResponse.json({ success: true, message: 'Email подтверждён' });
 
   } catch (error) {
     console.error('Error verifying email:', error);
     return NextResponse.json(
-      { error: 'Ошибка сервера' },
+      { success: false, error: 'Ошибка сервера' },
       { status: 500 }
     );
   } finally {

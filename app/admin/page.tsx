@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface Stats {
   totalUsers: number;
@@ -36,6 +37,7 @@ export default function AdminDashboard() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleLogout = () => {
     localStorage.clear();
@@ -113,7 +115,7 @@ export default function AdminDashboard() {
       setNewLimit('');
       fetchStats(); // Refresh data
     } catch (error) {
-      alert('Ошибка обновления');
+      showToast('Ошибка обновления');
     }
   };
 

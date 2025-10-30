@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { exportTargetProposalToPDF, exportTargetProposalToWord, shareToTelegram, shareToWhatsApp, copyToClipboard } from '@/utils/exportReport';
 import ProgressBar from '@/components/ProgressBar';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface TargetProposalModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export default function TargetProposalModal({
   const [progress, setProgress] = useState(0);
   const [progressMessage, setProgressMessage] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
@@ -131,7 +133,7 @@ export default function TargetProposalModal({
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } else {
-      alert('Ошибка копирования');
+      showToast('Ошибка копирования');
     }
   };
 
@@ -143,7 +145,7 @@ export default function TargetProposalModal({
         proposalText
       );
     } catch (error) {
-      alert('Ошибка экспорта в PDF');
+      showToast('Ошибка экспорта в PDF');
     }
   };
 
@@ -155,7 +157,7 @@ export default function TargetProposalModal({
         proposalText
       );
     } catch (error) {
-      alert('Ошибка экспорта в Word');
+      showToast('Ошибка экспорта в Word');
     }
   };
 

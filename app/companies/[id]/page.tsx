@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface CompanyDetail {
   id: string;
@@ -15,6 +16,7 @@ interface CompanyDetail {
 export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
   const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -59,13 +61,13 @@ export default function CompanyDetailPage() {
       });
 
       if (response.ok) {
-        alert('Анализ удален');
+        showToast('Анализ удален');
         router.push('/companies');
       } else {
-        alert('Ошибка удаления');
+        showToast('Ошибка удаления');
       }
     } catch (err) {
-      alert('Ошибка удаления');
+      showToast('Ошибка удаления');
     }
   };
   
@@ -230,13 +232,13 @@ export default function CompanyDetailPage() {
             className="company-actions-detail"
           >
               <button
-              onClick={() => alert('Функция в разработке')}
+              onClick={() => showToast('Функция в разработке')}
               className="button-primary"
               >
                 Скачать PDF
               </button>
               <button
-              onClick={() => alert('Функция в разработке')}
+              onClick={() => showToast('Функция в разработке')}
               className="button-secondary"
               >
                 Скачать Word

@@ -1,6 +1,7 @@
 import { tildaSans } from './fonts';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from '@/components/NotificationProvider';
+import { ToastProvider } from '@/components/ui/ToastProvider';
 import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/components/StructuredData';
 import Footer from '@/components/Footer';
 import './globals.css';
@@ -73,12 +74,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WebSiteSchema />
         <AuthProvider>
           <NotificationProvider>
-            <div className="min-h-screen flex flex-col">
-              <div className="flex-1">
-                {children}
+            <ToastProvider>
+              <div className="min-h-screen flex flex-col">
+                <div className="flex-1">
+                  {children}
+                </div>
+                <Footer />
               </div>
-              <Footer />
-            </div>
+            </ToastProvider>
           </NotificationProvider>
         </AuthProvider>
       </body>
