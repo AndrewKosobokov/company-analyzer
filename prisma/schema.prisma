@@ -47,6 +47,7 @@ model User {
 
   // Relationship to Archive
   analyses         Analysis[]
+  payments         Payment[]
 }
 
 // ===========================================
@@ -74,6 +75,25 @@ model Analysis {
   isNonTarget Boolean  @default(false) // true = non-target client (нецелевой клиент)
   
   createdAt   DateTime @default(now())
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  userId        String
+  amount        Float
+  currency      String   @default("RUB")
+  status        String
+  paymentId     String   @unique
+  planName      String
+  analysesCount Int
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([paymentId])
 }
 
 

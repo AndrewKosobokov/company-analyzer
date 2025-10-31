@@ -8,6 +8,7 @@ export default function PricingContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
   
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -36,6 +37,53 @@ export default function PricingContent() {
   const handleLogout = () => {
     localStorage.clear();
     router.push('/');
+  };
+
+  const handleSelectPlan = async (planId: string) => {
+    console.log('🎯 BUTTON CLICKED! Plan:', planId);
+    setLoading(planId);
+
+    try {
+      const token = localStorage.getItem('token');
+      console.log('🔑 Token exists:', !!token);
+      
+      if (!token) {
+        console.log('❌ No token, redirecting to /login');
+        router.push('/login');
+        return;
+      }
+
+      console.log('📤 Sending POST to /api/payment/create');
+      const response = await fetch('/api/payment/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ planId }),
+      });
+
+      console.log('📥 Response status:', response.status);
+      console.log('📥 Response ok:', response.ok);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ Error response:', errorData);
+        throw new Error('Failed to create payment');
+      }
+
+      const data = await response.json();
+      console.log('✅ Payment data:', data);
+      console.log('🔗 Confirmation URL:', data.confirmationUrl);
+      
+      window.location.href = data.confirmationUrl;
+    } catch (error) {
+      console.error('💥 PAYMENT ERROR:', error);
+      alert('Ошибка создания платежа. Попробуйте позже.');
+    } finally {
+      console.log('🏁 Finally block');
+      setLoading(null);
+    }
   };
   
   return (
@@ -145,13 +193,15 @@ export default function PricingContent() {
               </li>
             </ul>
             
-            <Link 
-              href="/login"
+            <button 
+              type="button"
+              onClick={() => handleSelectPlan('start')}
+              disabled={loading === 'start'}
               className="button-primary"
               style={{ width: '100%', marginTop: 'var(--space-lg)' }}
             >
-              Выбрать Start
-            </Link>
+              {loading === 'start' ? 'Загрузка...' : 'Выбрать Start'}
+            </button>
             <p className="text-xs text-gray-500 text-center mt-3">
               Оплачивая услугу, вы подтверждаете согласие с{' '}
               <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
@@ -218,13 +268,15 @@ export default function PricingContent() {
               </li>
             </ul>
             
-            <Link 
-              href="/login"
+            <button 
+              type="button"
+              onClick={() => handleSelectPlan('optimal')}
+              disabled={loading === 'optimal'}
               className="button-primary"
               style={{ width: '100%', marginTop: 'var(--space-lg)' }}
             >
-              Выбрать Optimal
-            </Link>
+              {loading === 'optimal' ? 'Загрузка...' : 'Выбрать Optimal'}
+            </button>
             <p className="text-xs text-gray-500 text-center mt-3">
               Оплачивая услугу, вы подтверждаете согласие с{' '}
               <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
@@ -274,13 +326,15 @@ export default function PricingContent() {
               </li>
             </ul>
             
-            <Link 
-              href="/login"
+            <button 
+              type="button"
+              onClick={() => handleSelectPlan('profi')}
+              disabled={loading === 'profi'}
               className="button-primary"
               style={{ width: '100%', marginTop: 'var(--space-lg)' }}
             >
-              Выбрать Profi
-            </Link>
+              {loading === 'profi' ? 'Загрузка...' : 'Выбрать Profi'}
+            </button>
             <p className="text-xs text-gray-500 text-center mt-3">
               Оплачивая услугу, вы подтверждаете согласие с{' '}
               <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
