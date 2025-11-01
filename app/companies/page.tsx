@@ -8,6 +8,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import SearchBar from '../components/SearchBar';
 import SuccessToast from '../components/SuccessToast';
 import CardSkeleton from '@/components/CardSkeleton';
+import { getToken } from '@/app/lib/auth';
 
 interface Company {
   id: string;
@@ -32,7 +33,7 @@ export default function CompaniesPage() {
   
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) return;
       
       try {
@@ -54,7 +55,7 @@ export default function CompaniesPage() {
       try {
         const response = await fetch('/api/analysis/manage?isDeleted=false', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${getToken()}`
           }
         });
         if (!response.ok) throw new Error('Ошибка загрузки');
@@ -65,7 +66,7 @@ export default function CompaniesPage() {
             try {
               const reportResponse = await fetch(`/api/analysis/report/${company.id}`, {
                 headers: {
-                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                  'Authorization': `Bearer ${getToken()}`
                 }
               });
               if (reportResponse.ok) {
@@ -156,7 +157,7 @@ export default function CompaniesPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${getToken()}`
         },
         body: JSON.stringify({ 
           analysisId: id, 

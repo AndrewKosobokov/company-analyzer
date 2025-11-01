@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/ToastProvider';
+import { getToken } from '@/app/lib/auth';
 
 interface CompanyDetail {
   id: string;
@@ -26,7 +27,7 @@ export default function CompanyDetailPage() {
       try {
         const response = await fetch(`/api/analysis/${params.id}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${getToken()}`
           }
         });
         
@@ -52,7 +53,7 @@ export default function CompanyDetailPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${getToken()}`
         },
         body: JSON.stringify({ 
           analysisId: params.id, 

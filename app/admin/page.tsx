@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/ToastProvider';
+import { getToken } from '@/app/lib/auth';
 
 interface Stats {
   totalUsers: number;
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchStats = async () => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       router.push('/login');
       return;
@@ -100,7 +101,7 @@ export default function AdminDashboard() {
   };
 
   const updateLimit = async (userId: string) => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     try {
       await fetch('/api/admin/users', {
         method: 'PATCH',
@@ -138,7 +139,7 @@ export default function AdminDashboard() {
       setDeleteError('Email не совпадает');
       return;
     }
-    const token = localStorage.getItem('token');
+    const token = getToken();
     try {
       setDeleting(true);
       const res = await fetch('/api/admin/delete-user', {

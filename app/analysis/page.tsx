@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ProgressBar from '@/components/ProgressBar';
 import { useNotification } from '@/components/NotificationProvider';
+import { getToken } from '@/app/lib/auth';
 
 export default function AnalysisPage() {
   const [url, setUrl] = useState('');
@@ -76,7 +77,7 @@ export default function AnalysisPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${getToken()}`
         },
         body: JSON.stringify({ 
           url: noWebsite ? '' : url.trim(), 
@@ -127,7 +128,7 @@ export default function AnalysisPage() {
 
   useEffect(() => {
     const checkStatus = async () => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) return;
       
       try {

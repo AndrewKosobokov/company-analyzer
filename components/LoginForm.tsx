@@ -6,6 +6,7 @@ import Link from 'next/link';
 import PasswordInput from '@/app/components/PasswordInput';
 import { getErrorMessage, translateError } from '@/utils/errorMessages';
 import { useNotification } from '@/components/NotificationProvider';
+import { login as saveToken } from '@/app/lib/auth';
 
 export default function LoginForm() {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -40,7 +41,7 @@ export default function LoginForm() {
         throw new Error(data.error || data.message || 'Invalid credentials');
       }
       
-      localStorage.setItem('token', data.token);
+      saveToken(data.token);
       router.push('/analysis');
     } catch (err) {
       const errorMessage = getErrorMessage(err);

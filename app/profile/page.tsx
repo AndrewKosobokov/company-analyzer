@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SuccessToast from '../components/SuccessToast';
+import { getToken } from '@/app/lib/auth';
 
 interface UserProfile {
   name: string;
@@ -38,7 +39,7 @@ export default function ProfilePage() {
   
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) return;
       
       try {
@@ -58,7 +59,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         
         // Fetch profile
         const profileRes = await fetch('/api/auth/status', {
@@ -105,7 +106,7 @@ export default function ProfilePage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${getToken()}`
         },
         body: JSON.stringify({ currentPassword, newPassword }),
       });

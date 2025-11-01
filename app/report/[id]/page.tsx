@@ -10,6 +10,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import ReportTOC from '@/app/components/ReportTOC';
 import TargetProposalModal from '@/app/components/TargetProposalModal';
 import { useToast } from '@/components/ui/ToastProvider';
+import { getToken } from '@/app/lib/auth';
 
 interface ReportData {
   id: string;
@@ -78,7 +79,7 @@ export default function ReportPage() {
   
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) return;
       
       try {
@@ -100,7 +101,7 @@ export default function ReportPage() {
       try {
         const response = await fetch(`/api/analysis/report/${params.id}`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${getToken()}`
           }
         });
         
@@ -157,7 +158,7 @@ export default function ReportPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${getToken()}`
         },
         body: JSON.stringify({
           analysisId: report!.id,

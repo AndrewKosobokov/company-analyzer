@@ -50,6 +50,7 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
       },
       description: params.description,
       metadata: params.metadata,
+      payment_orders: [],
       receipt: {
         customer: {
           email: params.metadata.userEmail || 'customer@metalvector.ru'
@@ -61,7 +62,9 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
             value: params.amount.toFixed(2),
             currency: 'RUB'
           },
-          vat_code: 1
+          vat_code: 1,
+          payment_mode: 'full_prepayment',
+          payment_subject: 'service'
         }]
       }
     }),

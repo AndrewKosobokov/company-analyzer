@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getToken } from '@/app/lib/auth';
 
 export default function PricingContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -11,13 +12,13 @@ export default function PricingContent() {
   const [loading, setLoading] = useState<string | null>(null);
   
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     setIsLoggedIn(!!token);
   }, []);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       if (!token) return;
       
       try {
@@ -44,7 +45,7 @@ export default function PricingContent() {
     setLoading(planId);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       console.log('🔑 Token exists:', !!token);
       
       if (!token) {

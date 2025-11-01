@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { getToken } from '@/app/lib/auth';
 
 export default function PaymentSuccessPage() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export default function PaymentSuccessPage() {
       }
 
       try {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         const response = await fetch(`/api/payment/check/${paymentId}`, {
           headers: {
             Authorization: `Bearer ${token}`,

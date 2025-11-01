@@ -34,3 +34,33 @@ export const verifyAuth = (req: NextRequest) => {
         return null;
     }
 };
+
+/**
+ * Сохраняет JWT токен в localStorage
+ * @param token JWT токен
+ */
+export const login = (token: string) => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('authToken', token);
+  }
+};
+
+/**
+ * Удаляет JWT токен из localStorage
+ */
+export const logout = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('authToken');
+  }
+};
+
+/**
+ * Получает JWT токен из localStorage
+ * @returns JWT токен или null
+ */
+export const getToken = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken');
+  }
+  return null;
+};
