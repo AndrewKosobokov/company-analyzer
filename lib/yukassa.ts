@@ -11,6 +11,7 @@ export interface CreatePaymentParams {
     userId: string;
     planName: string;
     analysesCount: number;
+    userEmail?: string;
   };
   returnUrl: string;
 }
@@ -49,6 +50,20 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
       },
       description: params.description,
       metadata: params.metadata,
+      receipt: {
+        customer: {
+          email: params.metadata.userEmail || 'customer@metalvector.ru'
+        },
+        items: [{
+          description: params.description,
+          quantity: '1',
+          amount: {
+            value: params.amount.toFixed(2),
+            currency: 'RUB'
+          },
+          vat_code: 1
+        }]
+      }
     }),
   });
 

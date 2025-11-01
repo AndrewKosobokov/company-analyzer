@@ -31,6 +31,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
+    // Получаем email пользователя
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { email: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
     const payment = await createPayment({
       amount: plan.price,
       description: `MetalVector - Тариф ${plan.name}`,
@@ -38,6 +48,7 @@ export async function POST(req: NextRequest) {
         userId: decoded.userId,
         planName: plan.name,
         analysesCount: plan.analyses,
+        userEmail: user.email
       },
       returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?paymentId={paymentId}`,
     });
