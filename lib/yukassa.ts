@@ -63,8 +63,9 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
             currency: 'RUB'
           },
           vat_code: 1,
-          payment_mode: 'full_prepayment',
-          payment_subject: 'service'
+          payment_mode: 'full_payment',
+          payment_subject: 'service',
+          measure: 'piece'
         }]
       }
     }),
