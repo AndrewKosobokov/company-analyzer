@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
-import { generatePrompt } from '@/utils/prompt';
-import { formatAnalysisText } from '@/utils/formatAnalysisText';
-import { extractAndValidateInn } from '@/utils/extractInn';
-import NodeCache from 'node-cache';
 
 const prisma = new PrismaClient();
-const cache = new NodeCache({ stdTTL: 86400 }); // 24 часа
 
 export async function POST(request: Request) {
   try {
@@ -56,22 +51,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Проверяем кэш (по ИНН или URL)
-    let cacheKey: string = '';
-    if (finalInn) {
-      cacheKey = `analysis_inn_${finalInn}`;
-    } else if (finalUrl) {
-      cacheKey = `analysis_url_${finalUrl}`;
-    }
-
-    if (cacheKey) {
-      const cached = cache.get(cacheKey);
-      if (cached) {
-        console.log(`📦 Cache hit for: ${finalInn || finalUrl}`);
-        return NextResponse.json(cached);
-      }
-    }
-
     // 3. CHECK USER LIMITS
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -89,145 +68,23 @@ export async function POST(request: Request) {
       }, { status: 403 });
     }
 
-    // 4. FETCH WEBSITE CONTENT (ONLY if URL provided)
-    let siteText = '';
-
-    if (finalUrl) {
-      try {
-        console.log('📥 Fetching website:', finalUrl);
-
-        const siteResponse = await fetch(finalUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          },
-          signal: AbortSignal.timeout(15000) // 15 second timeout
-        });
-
-        if (siteResponse.ok) {
-          const html = await siteResponse.text();
-
-          // Extract text from HTML (remove scripts, styles, tags)
-          siteText = html
-            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-            .replace(/<[^>]+>/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim()
-            .substring(0, 50000); // Limit to 50k characters
-
-          console.log(`✅ Fetched ${siteText.length} characters from website`);
-        } else {
-          console.warn(`⚠️ Could not fetch website (${siteResponse.status}). Continuing with analysis...`);
-        }
-      } catch (error) {
-        console.warn('⚠️ Error fetching website:', error);
-        // Continue with analysis even if fetch fails
-      }
-    } else {
-      console.log('📝 Analysis by INN only (no website parsing)');
-    }
-
-    // 5. GENERATE PROMPT
-    const prompt = generatePrompt(siteText, finalUrl, finalInn);
-    console.log(`📝 Generated prompt (${prompt.length} chars)`);
-
-    // 6. CALL VERTEX AI
-    console.log('🤖 Calling Vertex AI...');
-    const { callVertexAI } = await import('@/lib/vertexai');
-    let aiResponse;
-    try {
-      aiResponse = await callVertexAI(prompt, true);
-      console.log(`✅ Received ${aiResponse.text.length} characters from Vertex AI`);
-        } catch (error) {
-      console.error('❌ Vertex AI Error:', error);
-      return NextResponse.json({ error: 'Ошибка при анализе компании через Vertex AI' }, { status: 500 });
-    }
-    const rawAnalysisText = aiResponse.text;
-
-    // FORMAT TEXT: Remove *, #, format headers
-    const analysisText = formatAnalysisText(rawAnalysisText);
-    console.log(`✅ Formatted to ${analysisText.length} characters (clean Markdown)`);
-
-    // CHECK IF NON-TARGET CLIENT
-    const isNonTargetClient = analysisText.includes("## АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН");
-    console.log(`🎯 [QUALIFICATION] Is non-target client: ${isNonTargetClient}`);
-
-    // EXTRACT INN FROM REPORT (if AI found it)
-    const extractedInn = extractAndValidateInn(analysisText);
-
-    // INN priority: User provided > Extracted from report > null
-    const finalCompanyInn = finalInn || extractedInn || null;
-
-    // Add detailed logging for debugging
-    console.log('📊 [INN] User provided INN:', finalInn || 'None');
-    console.log('📊 [INN] Extracted from report:', extractedInn || 'Not found');
-    console.log('📊 [INN] Final INN to save:', finalCompanyInn || 'None');
-
-    // 7. SAVE TO DATABASE
-    const companyName = finalUrl
-      ? `Компания ${finalUrl}`
-      : `Компания ИНН ${finalCompanyInn || 'Не указан'}`;
-
-    // Guard: prevent saving empty report text
-    if (!analysisText || analysisText.trim().length === 0) {
-      console.error('❌ Cannot save analysis: empty report text');
-      return NextResponse.json(
-        { error: 'Не удалось получить ответ от AI. Попробуйте снова.' },
-        { status: 500 }
-      );
-    }
-
-    const analysis = await prisma.analysis.create({
+    // 4. CREATE JOB
+    const job = await prisma.job.create({
       data: {
         userId: userId,
-        companyName: companyName,
-        companyInn: finalCompanyInn,
-        reportText: analysisText,
-        isDeleted: false,
-        isNonTarget: isNonTargetClient,
+        type: 'analysis',
+        status: 'pending',
+        inputData: { url: finalUrl, inn: finalInn }
       }
     });
 
-    // 8. UPDATE USER ANALYSES COUNT (ONLY for target clients)
-    let updatedAnalysesRemaining = user.analysesRemaining;
-    if (!isNonTargetClient) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { analysesRemaining: { decrement: 1 } }
-      });
-      updatedAnalysesRemaining = user.analysesRemaining - 1;
-      console.log(`✅ Analysis count decremented for target client. Remaining: ${updatedAnalysesRemaining}`);
-    } else {
-      console.log(`ℹ️ Analysis count NOT decremented for non-target client. Remaining: ${updatedAnalysesRemaining}`);
-    }
+    console.log(`✅ Job created: ${job.id}`);
 
-    console.log(`✅ Analysis saved. ID: ${analysis.id}, User remaining: ${updatedAnalysesRemaining}`);
-
-    // Сохраняем в кэш (по ИНН или URL)
-    cacheKey = '';
-    if (finalCompanyInn) {
-      cacheKey = `analysis_inn_${finalCompanyInn}`;
-    } else if (finalUrl) {
-      cacheKey = `analysis_url_${finalUrl}`;
-    }
-
-    if (cacheKey) {
-      const responseData = {
-        id: analysis.id,
-        message: isNonTargetClient ? 'Анализ завершён (нецелевой клиент)' : 'Анализ завершён',
-        analysesRemaining: updatedAnalysesRemaining,
-        isNonTarget: isNonTargetClient
-      };
-      cache.set(cacheKey, responseData);
-      console.log(`💾 Cached analysis for: ${finalCompanyInn || finalUrl}`);
-    }
-
-    // 9. RETURN RESPONSE
+    // 5. RETURN JOB ID (мгновенно!)
     return NextResponse.json({
-      id: analysis.id,
-      message: isNonTargetClient ? 'Анализ завершён (нецелевой клиент)' : 'Анализ завершён',
-      analysesRemaining: updatedAnalysesRemaining,
-      isNonTarget: isNonTargetClient
+      jobId: job.id,
+      status: 'pending',
+      message: 'Анализ запущен. Ожидайте...'
     });
 
   } catch (error) {
