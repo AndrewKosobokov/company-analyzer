@@ -31,93 +31,84 @@ export default function AnalysisPage() {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setError('');
     
     if (!noWebsite && !url.trim()) {
       setError('Введите сайт компании или отметьте "Сайт отсутствует"');
+      setLoading(false);
       return;
     }
     
     if (noWebsite && !inn.trim()) {
       setError('Введите ИНН компании');
+      setLoading(false);
       return;
     }
 
     // Pre-check user limit before attempting request
     if (typeof analysesRemaining === 'number' && analysesRemaining <= 0) {
       setShowLimitModal(true);
+      setLoading(false);
       return;
     }
     
-    setLoading(true);
-    setProgress(0);
-    setProgressMessage('Инициализация анализа...');
-    
-    // Simulate progress with realistic stages
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 95) {
-          clearInterval(progressInterval);
-          return 95; // Stop at 95%, jump to 100% when done
-        }
-        // Slow down as we approach the end
-        const increment = prev < 30 ? 3 : prev < 60 ? 2 : 1;
-        return prev + increment;
-      });
-    }, 1400); // Update every 800ms
-    
-    // Update messages at different stages
-    setTimeout(() => setProgressMessage('Сбор данных о компании...'), 5000);
-    setTimeout(() => setProgressMessage('Анализ информации...'), 20000);
-    setTimeout(() => setProgressMessage('Генерация отчёта...'), 40000);
-    setTimeout(() => setProgressMessage('Финализация...'), 60000);
-    
     try {
+      const token = getToken();
+      
+      // 1. Создаём Job
       const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          url: noWebsite ? '' : url.trim(), 
-          inn: inn.trim() 
-        }),
+        body: JSON.stringify({ url: noWebsite ? '' : url.trim(), inn: inn.trim() })
       });
-      
-      clearInterval(progressInterval);
-      setProgress(100);
-      setProgressMessage('Готово!');
-      
+
+      const data = await response.json();
+
       if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
         // If limit exceeded on server
         if (response.status === 403 && (data?.analysesRemaining === 0 || (data?.error || '').includes('Лимит анализов'))) {
           setShowLimitModal(true);
-          throw new Error(data?.error || 'Лимит анализов исчерпан');
         }
         // If URL path failed and user tried URL
-        if (!noWebsite) {
+        if (!noWebsite && response.status !== 403) {
           setShowUrlErrorModal(true);
         }
-        throw new Error(data?.error || 'Ошибка анализа');
+        throw new Error(data.error || 'Ошибка создания анализа');
       }
-      
-      const data = await response.json();
-      
-      // Small delay to show completion
-      setTimeout(() => {
-        router.push(`/report/${data.id}`);
-      }, 500);
-      
-    } catch (err) {
-      clearInterval(progressInterval);
-      const errorMessage = err instanceof Error ? err.message : 'Ошибка при анализе компании';
+
+      const jobId = data.jobId;
+
+      // 2. Запускаем Worker
+      await fetch('/api/worker', { method: 'POST' });
+
+      // 3. Опрашиваем статус каждые 3 секунды
+      const checkStatus = async () => {
+        const statusResponse = await fetch(`/api/job/${jobId}`);
+        const statusData = await statusResponse.json();
+
+        if (statusData.status === 'completed') {
+          // Анализ готов!
+          router.push(`/report/${statusData.resultId}`);
+        } else if (statusData.status === 'failed') {
+          setError(statusData.error || 'Ошибка анализа');
+          setLoading(false);
+        } else {
+          // Ещё обрабатывается - проверим снова через 3 секунды
+          setTimeout(checkStatus, 3000);
+        }
+      };
+
+      checkStatus();
+
+    } catch (error: any) {
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при анализе компании';
       setError(errorMessage);
       showNotification(errorMessage, 'error');
       setLoading(false);
-      setProgress(0);
-      setProgressMessage('');
     }
   };
   
@@ -363,6 +354,9 @@ export default function AnalysisPage() {
             
             {loading && (
               <div style={{ marginTop: '32px', textAlign: 'center' }}>
+                <p style={{ marginBottom: '16px', fontSize: '15px', color: 'var(--text-secondary)' }}>
+                  ⏳ Анализ в процессе... Это может занять до 30 секунд.
+                </p>
                 <ProgressBar 
                   progress={progress} 
                   message={progressMessage}
