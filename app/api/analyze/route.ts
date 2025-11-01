@@ -4,8 +4,10 @@ import jwt from 'jsonwebtoken';
 import { generatePrompt } from '@/utils/prompt';
 import { formatAnalysisText } from '@/utils/formatAnalysisText';
 import { extractAndValidateInn } from '@/utils/extractInn';
+import NodeCache from 'node-cache';
 
 const prisma = new PrismaClient();
+const cache = new NodeCache({ stdTTL: 86400 }); // 24 часа
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +54,22 @@ export async function POST(request: Request) {
         { error: 'ИНН должен содержать только цифры' },
         { status: 400 }
       );
+    }
+
+    // Проверяем кэш (по ИНН или URL)
+    let cacheKey: string = '';
+    if (finalInn) {
+      cacheKey = `analysis_inn_${finalInn}`;
+    } else if (finalUrl) {
+      cacheKey = `analysis_url_${finalUrl}`;
+    }
+
+    if (cacheKey) {
+      const cached = cache.get(cacheKey);
+      if (cached) {
+        console.log(`📦 Cache hit for: ${finalInn || finalUrl}`);
+        return NextResponse.json(cached);
+      }
     }
 
     // 3. CHECK USER LIMITS
@@ -120,7 +138,7 @@ export async function POST(request: Request) {
     try {
       aiResponse = await callVertexAI(prompt, true);
       console.log(`✅ Received ${aiResponse.text.length} characters from Vertex AI`);
-    } catch (error) {
+        } catch (error) {
       console.error('❌ Vertex AI Error:', error);
       return NextResponse.json({ error: 'Ошибка при анализе компании через Vertex AI' }, { status: 500 });
     }
@@ -184,6 +202,25 @@ export async function POST(request: Request) {
     }
 
     console.log(`✅ Analysis saved. ID: ${analysis.id}, User remaining: ${updatedAnalysesRemaining}`);
+
+    // Сохраняем в кэш (по ИНН или URL)
+    cacheKey = '';
+    if (finalCompanyInn) {
+      cacheKey = `analysis_inn_${finalCompanyInn}`;
+    } else if (finalUrl) {
+      cacheKey = `analysis_url_${finalUrl}`;
+    }
+
+    if (cacheKey) {
+      const responseData = {
+        id: analysis.id,
+        message: isNonTargetClient ? 'Анализ завершён (нецелевой клиент)' : 'Анализ завершён',
+        analysesRemaining: updatedAnalysesRemaining,
+        isNonTarget: isNonTargetClient
+      };
+      cache.set(cacheKey, responseData);
+      console.log(`💾 Cached analysis for: ${finalCompanyInn || finalUrl}`);
+    }
 
     // 9. RETURN RESPONSE
     return NextResponse.json({
