@@ -48,6 +48,7 @@ model User {
   // Relationship to Archive
   analyses         Analysis[]
   payments         Payment[]
+  jobs             Job[]
 }
 
 // ===========================================
@@ -75,6 +76,19 @@ model Analysis {
   isNonTarget Boolean  @default(false) // true = non-target client (нецелевой клиент)
   
   createdAt   DateTime @default(now())
+}
+
+model Job {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // "analysis"
+  status      String   @default("pending") // pending, processing, completed, failed
+  inputData   Json     // { url, inn }
+  resultId    String?  // ID созданного Analysis
+  error       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Payment {
