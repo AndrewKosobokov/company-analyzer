@@ -8,7 +8,6 @@ import remarkGfm from 'remark-gfm';
 import { exportToPDF, exportToWord, shareToTelegram, shareToWhatsApp, copyToClipboard } from '@/utils/exportReport';
 import ScrollToTop from '@/components/ScrollToTop';
 import ReportTOC from '@/app/components/ReportTOC';
-import TargetProposalModal from '@/app/components/TargetProposalModal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
 
@@ -17,7 +16,7 @@ interface ReportData {
   companyName: string;
   companyInn: string;
   reportText: string;
-  targetProposal?: string | null;
+  firstContactExample?: string | null;
   createdAt: string;
 }
 
@@ -55,9 +54,8 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showProposalModal, setShowProposalModal] = useState(false);
+  const [showFirstContact, setShowFirstContact] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [targetProposal, setTargetProposal] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const { showToast } = useToast();
   
@@ -109,13 +107,6 @@ export default function ReportPage() {
         
         const data = await response.json();
         setReport(data);
-        setTargetProposal(data.targetProposal || null);
-        
-        // 🔍 DEBUG: Check if targetProposal is fetched from database
-        console.log('📊 [Report Page] Target Proposal from DB:', data.targetProposal ? 'EXISTS' : 'NULL');
-        if (data.targetProposal) {
-          console.log('📊 [Report Page] Cached proposal length:', data.targetProposal.length);
-        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Не удалось загрузить отчет');
       } finally {
@@ -126,10 +117,6 @@ export default function ReportPage() {
     fetchReport();
   }, [params.id]);
 
-  const handleProposalGenerated = (proposal: string) => {
-    console.log('📊 [Report Page] Proposal generated, updating cache. Length:', proposal.length);
-    setTargetProposal(proposal);
-  };
 
   // STEP 1: Debug - Show actual h2 headers from report
   useEffect(() => {
@@ -318,10 +305,10 @@ export default function ReportPage() {
             {/* Table of Contents */}
             <ReportTOC items={navigationItems} />
             
-            {/* Target Proposal Button - Only show for target clients */}
-            {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && (
+            {/* First Contact Example Button - Only show for target clients */}
+            {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && report.firstContactExample && (
               <button
-                onClick={() => setShowProposalModal(true)}
+                onClick={() => setShowFirstContact(!showFirstContact)}
                 style={{
                   width: '100%',
                   padding: '16px 20px',
@@ -350,7 +337,7 @@ export default function ReportPage() {
                   e.currentTarget.style.boxShadow = 'var(--shadow-md)';
                 }}
               >
-                Целевое предложение
+                {showFirstContact ? 'Скрыть' : 'Показать'} пример первого контакта
               </button>
             )}
           </div>
@@ -752,6 +739,120 @@ export default function ReportPage() {
                 {report.reportText}
               </ReactMarkdown>
             </div>
+
+            {/* First Contact Example - Only show for target clients */}
+            {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && showFirstContact && report.firstContactExample && (
+              <>
+                <div style={{ 
+                  borderTop: '1px solid var(--border-color)', 
+                  margin: '32px 0' 
+                }} />
+                <div 
+                  className="markdown-content"
+                  style={{
+                    fontSize: '17px',
+                    lineHeight: '1.8',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      // Main headings (##)
+                      h2: ({node, ...props}) => (
+                        <h2 style={{
+                          fontSize: '28px',
+                          fontWeight: '700',
+                          marginTop: '32px',
+                          marginBottom: '20px',
+                          color: 'var(--text-primary)',
+                          paddingBottom: '12px',
+                          borderBottom: '2px solid var(--border-color)'
+                        }} {...props} />
+                      ),
+                      
+                      // Subsections (###)
+                      h3: ({node, ...props}) => (
+                        <h3 style={{
+                          fontSize: '22px',
+                          fontWeight: '700',
+                          marginTop: '24px',
+                          marginBottom: '16px',
+                          color: 'var(--text-primary)'
+                        }} {...props} />
+                      ),
+                      
+                      // Bold (**text**)
+                      strong: ({node, ...props}) => (
+                        <strong style={{
+                          fontWeight: '700',
+                          color: 'var(--text-primary)'
+                        }} {...props} />
+                      ),
+                      
+                      // Italic (*text*)
+                      em: ({node, ...props}) => (
+                        <em style={{
+                          fontStyle: 'italic',
+                          color: 'var(--text-secondary)'
+                        }} {...props} />
+                      ),
+                      
+                      // Paragraphs
+                      p: ({node, ...props}) => (
+                        <p style={{
+                          marginTop: '16px',
+                          marginBottom: '16px',
+                          lineHeight: '1.7',
+                          color: 'var(--text-primary)'
+                        }} {...props} />
+                      ),
+                      
+                      // Unordered lists
+                      ul: ({node, ...props}) => (
+                        <ul style={{
+                          listStyleType: 'disc',
+                          paddingLeft: '32px',
+                          marginTop: '16px',
+                          marginBottom: '16px'
+                        }} {...props} />
+                      ),
+                      
+                      // Ordered lists
+                      ol: ({node, ...props}) => (
+                        <ol style={{
+                          listStyleType: 'decimal',
+                          paddingLeft: '32px',
+                          marginTop: '16px',
+                          marginBottom: '16px'
+                        }} {...props} />
+                      ),
+                      
+                      // List items
+                      li: ({node, ...props}) => (
+                        <li style={{
+                          marginBottom: '8px',
+                          lineHeight: '1.6',
+                          color: 'var(--text-primary)'
+                        }} {...props} />
+                      ),
+                      
+                      // Dividers
+                      hr: ({node, ...props}) => (
+                        <hr style={{
+                          border: 'none',
+                          borderTop: '2px solid var(--border-color)',
+                          marginTop: '32px',
+                          marginBottom: '32px'
+                        }} {...props} />
+                      ),
+                    }}
+                  >
+                    {report.firstContactExample}
+                  </ReactMarkdown>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </main>
@@ -776,22 +877,6 @@ export default function ReportPage() {
         </div>
       )}
 
-      {/* Target Proposal Modal */}
-      {report && (
-        <TargetProposalModal
-          isOpen={showProposalModal}
-          onClose={() => {
-            console.log('📊 [Report Page] Modal closed');
-            setShowProposalModal(false);
-          }}
-          analysisId={report.id}
-          reportText={report.reportText}
-          companyName={extractCompanyInfo(report.reportText).companyName || report.companyName}
-          companyInn={extractCompanyInfo(report.reportText).inn || report.companyInn}
-          existingProposal={targetProposal}
-          onProposalGenerated={handleProposalGenerated}
-        />
-      )}
 
       {/* Scroll to Top Button */}
       <ScrollToTop />

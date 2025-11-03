@@ -26,7 +26,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
                 companyName: true,
                 companyInn: true,
                 reportText: true, // Включаем полный текст
-                targetProposal: true, // Включаем кэшированное целевое предложение
+                firstContactExample: true, // Включаем кэшированный пример первого контакта
                 createdAt: true,
                 isDeleted: true,
             }
@@ -36,9 +36,9 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
             return NextResponse.json({ error: 'Отчёт не найден' }, { status: 404 });
         }
 
-        // 🔍 DEBUG: Log if targetProposal is cached
+        // 🔍 DEBUG: Log if firstContactExample is cached
         console.log('📄 [Report API] Fetching report:', analysisId);
-        console.log('📄 [Report API] Target proposal cached:', report.targetProposal ? `YES (${report.targetProposal.length} chars)` : 'NO');
+        console.log('📄 [Report API] First contact example cached:', report.firstContactExample ? `YES (${report.firstContactExample.length} chars)` : 'NO');
 
         return NextResponse.json(report, { status: 200 });
 

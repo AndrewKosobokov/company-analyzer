@@ -58,23 +58,29 @@ model Analysis {
   id          String   @id @default(uuid())
   // Link to User
   userId      String   
-  user        User     @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Report Data
   companyName String
-  companyInn  String
+  companyInn  String?
   reportText  String
   
-  // Target Proposal (generated once, cached)
-  targetProposal String?
+  // First Contact Example (generated once, cached)
+  firstContactExample String?
   
   // "Trash" functionality
   isDeleted   Boolean  @default(false) // true = in trash (корзина)
   
   // Non-target client qualification
-  isNonTarget Boolean  @default(false) // true = non-target client (нецелевой клиент)
+  isNonTargetClient Boolean  @default(false) // true = non-target client (нецелевой клиент)
+  
+  // Credits used for this analysis
+  creditsUsed Int      @default(1)
   
   createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model Payment {
