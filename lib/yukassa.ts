@@ -31,52 +31,61 @@ export interface PaymentResponse {
 export async function createPayment(params: CreatePaymentParams): Promise<PaymentResponse> {
   const idempotenceKey = crypto.randomUUID();
   
-  const response = await fetch(`${YUKASSA_API_URL}/payments`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Idempotence-Key': idempotenceKey,
-      'Authorization': `Basic ${Buffer.from(`${YUKASSA_SHOP_ID}:${YUKASSA_SECRET_KEY}`).toString('base64')}`,
+  const requestBody = {
+    amount: {
+      value: params.amount.toFixed(2),
+      currency: 'RUB',
     },
-    body: JSON.stringify({
-      amount: {
-        value: params.amount.toFixed(2),
-        currency: 'RUB',
+    capture: true,
+    confirmation: {
+      type: 'redirect',
+      return_url: params.returnUrl,
+    },
+    description: params.description,
+    metadata: params.metadata,
+    receipt: {
+      customer: {
+        email: params.metadata.userEmail || 'customer@metalvector.ru'
       },
-      capture: true,
-      confirmation: {
-        type: 'redirect',
-        return_url: params.returnUrl,
-      },
-      description: params.description,
-      metadata: params.metadata,
-      payment_orders: [],
-      receipt: {
-        customer: {
-          email: params.metadata.userEmail || 'customer@metalvector.ru'
+      items: [{
+        description: params.description,
+        quantity: '1',
+        amount: {
+          value: params.amount.toFixed(2),
+          currency: 'RUB'
         },
-        items: [{
-          description: params.description,
-          quantity: '1',
-          amount: {
-            value: params.amount.toFixed(2),
-            currency: 'RUB'
-          },
-          vat_code: 1,
-          payment_mode: 'full_payment',
-          payment_subject: 'service',
-          measure: 'piece'
-        }]
-      }
-    }),
-  });
+        vat_code: 6,
+        payment_mode: 'full_payment',
+        payment_subject: 'service'
+      }]
+    }
+  };
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(`YooKassa API error: ${JSON.stringify(error)}`);
+  try {
+    console.log('Sending payment request to YooKassa:', JSON.stringify(requestBody, null, 2));
+
+    const response = await fetch(`${YUKASSA_API_URL}/payments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Idempotence-Key': idempotenceKey,
+        'Authorization': `Basic ${Buffer.from(`${YUKASSA_SHOP_ID}:${YUKASSA_SECRET_KEY}`).toString('base64')}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('YooKassa API error response:', error);
+      throw new Error(`YooKassa API error: ${JSON.stringify(error)}`);
+    }
+
+    return await response.json();
+
+  } catch (error) {
+    console.error('Failed to create payment:', error);
+    throw error;
   }
-
-  return await response.json();
 }
 
 // Проверка статуса платежа
@@ -101,8 +110,5 @@ export function verifyWebhookSignature(body: string, signature: string): boolean
     .createHmac('sha256', YUKASSA_SECRET_KEY)
     .update(body)
     .digest('hex');
-  
   return hash === signature;
 }
-
-
