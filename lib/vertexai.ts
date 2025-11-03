@@ -45,52 +45,66 @@ export async function callVertexAI(
       tools: tools,
     } as any;
 
-    const response = await generativeModel.generateContent(request);
-    
-    const candidate = response.response.candidates?.[0];
-    const finishReason = candidate?.finishReason;
-    const safetyRatings = candidate?.safetyRatings;
-    
-    // Логирование блокировок
-    if (finishReason === 'SAFETY') {
-      console.error('🚫 [VertexAI] Response was BLOCKED by safety filters!');
-      console.error('Safety Ratings:', JSON.stringify(safetyRatings, null, 2));
-    } else if (finishReason) {
-      console.log(`[VertexAI] Finish reason: ${finishReason}`);
-    }
-    
-    if (safetyRatings && safetyRatings.length > 0) {
-      console.log('[VertexAI] Safety ratings:', JSON.stringify(safetyRatings, null, 2));
-    }
-    
-    const generatedText = response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    const groundingMetadata = response.response.candidates?.[0]?.groundingMetadata;
-    let citations: { uri: string; title: string }[] = [];
-    
-    if (groundingMetadata?.groundingChunks) {
-      citations = groundingMetadata.groundingChunks
-        .filter((chunk: any) => chunk.web)
-        .map((chunk: any) => ({
-          uri: chunk.web.uri,
-          title: chunk.web.title || chunk.web.uri,
-        }));
-    }
+    // Добавляем timeout 5 минут
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 минут
 
-    console.log(`[VertexAI] Successfully received response. Text length: ${generatedText.length}`);
-    
-    // Verify Google Search was used
-    if (groundingMetadata?.webSearchQueries?.length) {
-      console.log(`✅ Google Search was used! Queries: ${groundingMetadata.webSearchQueries.length}`);
-      console.log(`📚 Sources found: ${groundingMetadata.groundingChunks?.length || 0}`);
-    } else {
-      console.log('⚠️ Google Search was NOT used for this prompt');
+    try {
+      const response = await generativeModel.generateContent(request);
+      clearTimeout(timeoutId);
+      
+      const candidate = response.response.candidates?.[0];
+      const finishReason = candidate?.finishReason;
+      const safetyRatings = candidate?.safetyRatings;
+      
+      // Логирование блокировок
+      if (finishReason === 'SAFETY') {
+        console.error('🚫 [VertexAI] Response was BLOCKED by safety filters!');
+        console.error('Safety Ratings:', JSON.stringify(safetyRatings, null, 2));
+      } else if (finishReason) {
+        console.log(`[VertexAI] Finish reason: ${finishReason}`);
+      }
+      
+      if (safetyRatings && safetyRatings.length > 0) {
+        console.log('[VertexAI] Safety ratings:', JSON.stringify(safetyRatings, null, 2));
+      }
+      
+      const generatedText = response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      const groundingMetadata = response.response.candidates?.[0]?.groundingMetadata;
+      let citations: { uri: string; title: string }[] = [];
+      
+      if (groundingMetadata?.groundingChunks) {
+        citations = groundingMetadata.groundingChunks
+          .filter((chunk: any) => chunk.web)
+          .map((chunk: any) => ({
+            uri: chunk.web.uri,
+            title: chunk.web.title || chunk.web.uri,
+          }));
+      }
+
+      console.log(`[VertexAI] Successfully received response. Text length: ${generatedText.length}`);
+      
+      // Verify Google Search was used
+      if (groundingMetadata?.webSearchQueries?.length) {
+        console.log(`✅ Google Search was used! Queries: ${groundingMetadata.webSearchQueries.length}`);
+        console.log(`📚 Sources found: ${groundingMetadata.groundingChunks?.length || 0}`);
+      } else {
+        console.log('⚠️ Google Search was NOT used for this prompt');
+      }
+      
+      return {
+        text: generatedText,
+        citations: citations,
+      };
+      
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Vertex AI request timeout after 5 minutes');
+      }
+      throw error;
     }
-    
-    return {
-      text: generatedText,
-      citations: citations,
-    };
     
   } catch (error) {
     console.error('[VertexAI] Error calling Vertex AI API:', error);
