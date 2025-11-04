@@ -54,7 +54,6 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showFirstContact, setShowFirstContact] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const { showToast } = useToast();
@@ -304,42 +303,6 @@ export default function ReportPage() {
           }}>
             {/* Table of Contents */}
             <ReportTOC items={navigationItems} />
-            
-            {/* First Contact Example Button - Only show for target clients */}
-            {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && report.firstContactExample && (
-              <button
-                onClick={() => setShowFirstContact(!showFirstContact)}
-                style={{
-                  width: '100%',
-                  padding: '16px 20px',
-                  background: '#1d1d1f',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 'var(--radius-lg)',
-                  fontSize: '15px',
-                  fontWeight: '500',
-                  letterSpacing: '-0.011em',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: 'var(--shadow-md)',
-                  transition: 'all var(--transition-base)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#424245';
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#1d1d1f';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                }}
-              >
-                {showFirstContact ? 'Скрыть' : 'Показать'} пример первого контакта
-              </button>
-            )}
           </div>
           
           {/* Report Card */}
@@ -741,20 +704,10 @@ export default function ReportPage() {
             </div>
 
             {/* First Contact Example - Only show for target clients */}
-            {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && showFirstContact && report.firstContactExample && (
-              <>
-                <div style={{ 
-                  borderTop: '1px solid var(--border-color)', 
-                  margin: '32px 0' 
-                }} />
-                <div 
-                  className="markdown-content"
-                  style={{
-                    fontSize: '17px',
-                    lineHeight: '1.8',
-                    color: 'var(--text-primary)'
-                  }}
-                >
+            {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && report.firstContactExample && (
+              <div style={{ marginTop: '32px', borderTop: '1px solid var(--border-color)', paddingTop: '32px' }}>
+                <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '16px', color: 'var(--text-primary)' }}>Пример первого контакта</h2>
+                <div className="markdown-content" style={{ fontSize: '17px', lineHeight: '1.8', color: 'var(--text-primary)' }}>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
@@ -851,7 +804,7 @@ export default function ReportPage() {
                     {report.firstContactExample}
                   </ReactMarkdown>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
