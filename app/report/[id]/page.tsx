@@ -338,7 +338,7 @@ export default function ReportPage() {
                   e.currentTarget.style.boxShadow = 'var(--shadow-md)';
                 }}
               >
-                Показать скрипт первого касания
+                {showFirstContact ? 'Показать основной отчёт' : 'Показать скрипт первого касания'}
               </button>
             )}
           </div>
