@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
                 companyName: true,
                 companyInn: true,
                 reportText: true,
-                targetProposal: true,
+                // targetProposal: true, // Removed - using firstContactExample instead
                 createdAt: true,
             }
         });
