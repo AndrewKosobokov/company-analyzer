@@ -356,7 +356,8 @@ export async function POST(request: Request) {
 
     // 10. RETURN RESPONSE
     return NextResponse.json({
-      analysisId: analysis.id,
+  id: analysis.id,           // <--- НА ЭТО
+  analysisId: analysis.id,   // Оставляем для обратной совместимости
       hasFirstContact: !!firstContactExample,
       message: isNonTargetClient ? 'Анализ завершён (нецелевой клиент)' : 'Анализ завершён',
       analysesRemaining: updatedAnalysesRemaining,
