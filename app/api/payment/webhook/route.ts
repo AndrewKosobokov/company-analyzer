@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       status: payment.status,
     });
 
-    if (event.type === 'payment.succeeded' && payment.status === 'succeeded') {
+    if (payment.status === 'succeeded') {
       const dbPayment = await prisma.payment.findUnique({ where: { paymentId: payment.id } });
 
       if (!dbPayment) {
