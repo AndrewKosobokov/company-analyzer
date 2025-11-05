@@ -244,7 +244,45 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        {/* Section 2: Subscription */}
+        {/* Warning: Low balance */}
+        {profile.analysesRemaining <= 5 && profile.plan !== 'trial' && (
+          <div className="card" style={{
+            backgroundColor: '#FEF3C7',
+            border: '1px solid #FDE047',
+            marginBottom: 'var(--space-xl)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <span style={{ fontSize: '24px' }}>⚠️</span>
+              <div>
+                <h3 style={{ 
+                  fontSize: '17px', 
+                  fontWeight: 600,
+                  marginBottom: '8px',
+                  color: '#92400E'
+                }}>
+                  У вас заканчиваются отчёты
+                </h3>
+                <p style={{ 
+                  fontSize: '15px', 
+                  color: '#78350F',
+                  marginBottom: 'var(--space-md)'
+                }}>
+                  Осталось всего {profile.analysesRemaining} {profile.analysesRemaining === 1 ? 'анализ' : 'анализа'}. 
+                  Пополните баланс, чтобы не потерять доступ к генерации отчётов в важный момент.
+                </p>
+                <Link 
+                  href="/pricing" 
+                  className="button-primary"
+                  style={{ display: 'inline-block' }}
+                >
+                  Пополнить сейчас
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Section 2: My Tariff */}
         <div className="profile-section">
           <h2 style={{ 
             fontSize: '28px', 
@@ -252,47 +290,96 @@ export default function ProfilePage() {
             paddingBottom: 'var(--space-md)',
             borderBottom: '1px solid var(--border-color)'
           }}>
-            Подписка
+            Мой тариф
           </h2>
           
-          <div className="profile-grid">
-            <div className="profile-field">
-              <label style={{ fontSize: '15px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                Текущий тариф
-              </label>
-              <p style={{ fontSize: '17px', color: 'var(--text-primary)', marginTop: 'var(--space-xs)' }}>
-                {getPlanName(profile.plan)}
-              </p>
-            </div>
-            
-            <div className="profile-field">
-              <label style={{ fontSize: '15px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                Осталось анализов
-              </label>
-              <p style={{ fontSize: '17px', color: 'var(--text-primary)', marginTop: 'var(--space-xs)' }}>
+          <div className="card">
+            {/* Large counter */}
+            <div style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
+              <div style={{ 
+                fontSize: '72px', 
+                fontWeight: 700, 
+                color: 'var(--text-primary)',
+                lineHeight: 1 
+              }}>
                 {profile.analysesRemaining}
-              </p>
+              </div>
+              <div style={{ 
+                fontSize: '15px', 
+                color: 'var(--text-secondary)', 
+                marginTop: '8px' 
+              }}>
+                отчётов осталось
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            {(() => {
+              const initialLimits: Record<string, number> = { 
+                trial: 10, 
+                start: 40, 
+                optimal: 80, 
+                profi: 200 
+              };
+              const initialLimit = initialLimits[profile.plan as keyof typeof initialLimits] || 0;
+              const used = Math.max(0, initialLimit - profile.analysesRemaining);
+              const percentage = initialLimit > 0 ? (used / initialLimit) * 100 : 0;
+
+              return (
+                <div style={{ marginBottom: 'var(--space-lg)' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between',
+                    fontSize: '13px',
+                    color: 'var(--text-secondary)',
+                    marginBottom: '8px'
+                  }}>
+                    <span>Использовано: {used} из {initialLimit}</span>
+                    <span>{percentage.toFixed(1)}%</span>
+                  </div>
+                  <div style={{ 
+                    height: '8px', 
+                    backgroundColor: 'var(--surface-secondary)',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      height: '100%',
+                      width: `${percentage}%`,
+                      backgroundColor: 'var(--brand-primary)',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Plan info */}
+            <div style={{ 
+              marginBottom: 'var(--space-lg)',
+              padding: 'var(--space-md)',
+              backgroundColor: 'var(--surface-secondary)',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '15px',
+              color: 'var(--text-secondary)'
+            }}>
+              Текущий тариф: <strong style={{ color: 'var(--text-primary)' }}>{getPlanName(profile.plan)}</strong>
             </div>
             
-            <div className="profile-field">
-              <label style={{ fontSize: '15px', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                Дата регистрации
-              </label>
-              <p style={{ fontSize: '17px', color: 'var(--text-primary)', marginTop: 'var(--space-xs)' }}>
-                {profile.planStartDate && profile.planStartDate !== '0' && new Date(profile.planStartDate).getTime() > 0
-                  ? new Date(profile.planStartDate).toLocaleDateString('ru-RU')
-                  : 'Не указана'}
-              </p>
-            </div>
+            {/* Button */}
+            <Link 
+              href="/pricing" 
+              className="button-primary"
+              style={{ 
+                display: 'block',
+                textAlign: 'center',
+                padding: '12px 24px',
+                marginTop: 'var(--space-lg)'
+              }}
+            >
+              Пополнить отчёты
+            </Link>
           </div>
-          
-          <Link 
-            href="/pricing"
-            className="button-primary"
-            style={{ marginTop: 'var(--space-lg)' }}
-          >
-            Изменить тариф
-          </Link>
         </div>
         
         {/* Section 3: Security */}
@@ -393,98 +480,50 @@ export default function ProfilePage() {
             История платежей
           </h2>
           
-          {payments.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)', fontSize: '17px' }}>
-              История платежей пуста
-            </p>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table className="payments-table" style={{ 
-                width: '100%', 
-                borderCollapse: 'collapse',
-                marginTop: 'var(--space-lg)'
-              }}>
-                <thead>
-                  <tr>
-                    <th style={{ 
-                      padding: 'var(--space-md)',
-                      textAlign: 'left',
-                      borderBottom: '1px solid var(--border-color)',
-                      fontWeight: 600,
-                      color: 'var(--text-secondary)',
-                      fontSize: '15px'
-                    }}>
-                      Дата
-                    </th>
-                    <th style={{ 
-                      padding: 'var(--space-md)',
-                      textAlign: 'left',
-                      borderBottom: '1px solid var(--border-color)',
-                      fontWeight: 600,
-                      color: 'var(--text-secondary)',
-                      fontSize: '15px'
-                    }}>
-                      Тариф
-                    </th>
-                    <th style={{ 
-                      padding: 'var(--space-md)',
-                      textAlign: 'left',
-                      borderBottom: '1px solid var(--border-color)',
-                      fontWeight: 600,
-                      color: 'var(--text-secondary)',
-                      fontSize: '15px'
-                    }}>
-                      Сумма
-                    </th>
-                    <th style={{ 
-                      padding: 'var(--space-md)',
-                      textAlign: 'left',
-                      borderBottom: '1px solid var(--border-color)',
-                      fontWeight: 600,
-                      color: 'var(--text-secondary)',
-                      fontSize: '15px'
-                    }}>
-                      Статус
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {payments.map((payment) => (
-                    <tr key={payment.id}>
-                      <td style={{ 
-                        padding: 'var(--space-md)',
-                        borderBottom: '1px solid var(--border-color)',
-                        fontSize: '17px'
-                      }}>
-                        {new Date(payment.date).toLocaleDateString('ru-RU')}
-                      </td>
-                      <td style={{ 
-                        padding: 'var(--space-md)',
-                        borderBottom: '1px solid var(--border-color)',
-                        fontSize: '17px'
-                      }}>
-                        {getPlanName(payment.plan)}
-                      </td>
-                      <td style={{ 
-                        padding: 'var(--space-md)',
-                        borderBottom: '1px solid var(--border-color)',
-                        fontSize: '17px'
-                      }}>
-                        {payment.amount}
-                      </td>
-                      <td style={{ 
-                        padding: 'var(--space-md)',
-                        borderBottom: '1px solid var(--border-color)',
-                        fontSize: '17px'
-                      }}>
-                        {payment.status}
-                      </td>
+          <div className="card">
+            {payments.length === 0 ? (
+              <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
+                У вас пока нет платежей
+              </p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', fontSize: '15px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600 }}>Дата</th>
+                      <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600 }}>Описание</th>
+                      <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600 }}>Сумма</th>
+                      <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600 }}>Чек</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                  </thead>
+                  <tbody>
+                    {payments.map((payment) => (
+                      <tr key={payment.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                        <td style={{ padding: '12px' }}>
+                          {new Date(payment.date).toLocaleDateString('ru-RU')}
+                        </td>
+                        <td style={{ padding: '12px' }}>
+                          Тариф {getPlanName(payment.plan)}
+                        </td>
+                        <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600 }}>
+                          {payment.amount} ₽
+                        </td>
+                        <td style={{ padding: '12px', textAlign: 'center' }}>
+                          {payment.status === 'succeeded' ? (
+                            <button className="button-secondary" style={{ padding: '6px 12px', fontSize: '13px' }}>
+                              Скачать
+                            </button>
+                          ) : (
+                            <span style={{ color: 'var(--text-secondary)' }}>—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Logout Button */}
