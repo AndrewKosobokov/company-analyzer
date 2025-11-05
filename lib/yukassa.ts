@@ -63,7 +63,7 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
 
   try {
     console.log('Sending payment request to YooKassa:', JSON.stringify(requestBody, null, 2));
-
+    
     const response = await fetch(`${YUKASSA_API_URL}/payments`, {
       method: 'POST',
       headers: {
@@ -81,7 +81,6 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
     }
 
     return await response.json();
-
   } catch (error) {
     console.error('Failed to create payment:', error);
     throw error;
@@ -110,5 +109,6 @@ export function verifyWebhookSignature(body: string, signature: string): boolean
     .createHmac('sha256', YUKASSA_SECRET_KEY)
     .update(body)
     .digest('hex');
+  
   return hash === signature;
 }
