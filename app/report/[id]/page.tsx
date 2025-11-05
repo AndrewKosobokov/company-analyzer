@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { exportToPDF, exportToWord, shareToTelegram, shareToWhatsApp, copyToClipboard } from '@/utils/exportReport';
 import ScrollToTop from '@/components/ScrollToTop';
 import ReportTOC from '@/app/components/ReportTOC';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -382,6 +381,7 @@ export default function ReportPage() {
             <button 
               onClick={async () => {
                 try {
+                  const { exportToPDF } = await import('@/utils/exportReport');
                   const { companyName, inn } = extractCompanyInfo(report.reportText);
                   await exportToPDF(
                     companyName || report.companyName, 
@@ -404,6 +404,7 @@ export default function ReportPage() {
             <button 
               onClick={async () => {
                 try {
+                  const { exportToWord } = await import('@/utils/exportReport');
                   const { companyName, inn } = extractCompanyInfo(report.reportText);
                   await exportToWord(
                     companyName || report.companyName, 
@@ -427,6 +428,7 @@ export default function ReportPage() {
             {/* Copy Button */}
             <button 
               onClick={async () => {
+                const { copyToClipboard } = await import('@/utils/exportReport');
                 const success = await copyToClipboard(report.reportText);
                 if (success) {
                   setCopySuccess(true);
@@ -466,7 +468,8 @@ export default function ReportPage() {
             
             {/* Messenger buttons */}
             <button
-              onClick={() => {
+              onClick={async () => {
+                const { shareToTelegram } = await import('@/utils/exportReport');
                 const { companyName, inn } = extractCompanyInfo(report.reportText);
                 shareToTelegram(
                   companyName || report.companyName,
@@ -484,7 +487,8 @@ export default function ReportPage() {
             </button>
             
             <button
-              onClick={() => {
+              onClick={async () => {
+                const { shareToWhatsApp } = await import('@/utils/exportReport');
                 const { companyName, inn } = extractCompanyInfo(report.reportText);
                 shareToWhatsApp(
                   companyName || report.companyName,
@@ -792,6 +796,7 @@ export default function ReportPage() {
                   <button 
                     onClick={async () => {
                       try {
+                        const { exportToPDF } = await import('@/utils/exportReport');
                         const { companyName, inn } = extractCompanyInfo(report.reportText);
                         await exportToPDF(
                           `Скрипт первого касания - ${companyName || report.companyName}`, 
@@ -814,6 +819,7 @@ export default function ReportPage() {
                   {/* Copy Button */}
                   <button 
                     onClick={async () => {
+                      const { copyToClipboard } = await import('@/utils/exportReport');
                       const success = await copyToClipboard(report.firstContactExample || '');
                       if (success) {
                         setCopySuccess(true);
@@ -853,7 +859,8 @@ export default function ReportPage() {
                   
                   {/* Messenger buttons */}
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      const { shareToTelegram } = await import('@/utils/exportReport');
                       const { companyName, inn } = extractCompanyInfo(report.reportText);
                       shareToTelegram(
                         `Скрипт первого касания - ${companyName || report.companyName}`,
@@ -871,7 +878,8 @@ export default function ReportPage() {
                   </button>
                   
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      const { shareToWhatsApp } = await import('@/utils/exportReport');
                       const { companyName, inn } = extractCompanyInfo(report.reportText);
                       shareToWhatsApp(
                         `Скрипт первого касания - ${companyName || report.companyName}`,
