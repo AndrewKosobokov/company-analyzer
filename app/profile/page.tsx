@@ -193,7 +193,21 @@ export default function ProfilePage() {
               Профиль
             </Link>
             {isAdmin && (
-              <Link href="/admin" className="nav-link">Админ-панель</Link>
+              <>
+                <Link 
+                  href="/admin/dashboard" 
+                  className="nav-link"
+                  style={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>📊</span>
+                  <span>Аналитика</span>
+                </Link>
+                <Link href="/admin" className="nav-link">Админ-панель</Link>
+              </>
             )}
             <button 
               onClick={handleLogout}
