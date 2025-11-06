@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const router = useRouter();
+  const pathname = usePathname();
   const { showToast } = useToast();
 
   const handleLogout = () => {
@@ -217,6 +218,38 @@ export default function AdminDashboard() {
 
       <main className="container" style={{ maxWidth: '1200px', paddingTop: '120px' }}>
         <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Админ-панель</h1>
+
+        <div style={{ marginTop: '16px', marginBottom: '32px' }}>
+          <Link 
+            href="/admin/dashboard" 
+            className={pathname === '/admin/dashboard' ? 'active' : ''}
+            style={{ 
+              display: 'block',
+              padding: '8px 12px',
+              color: pathname === '/admin/dashboard' ? '#007AFF' : '#1D1D1F',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              backgroundColor: pathname === '/admin/dashboard' ? '#F5F5F7' : 'transparent',
+              marginBottom: '4px'
+            }}
+          >
+            📊 Аналитика
+          </Link>
+          <Link 
+            href="/admin"
+            className={pathname === '/admin' ? 'active' : ''}
+            style={{ 
+              display: 'block',
+              padding: '8px 12px',
+              color: pathname === '/admin' ? '#007AFF' : '#1D1D1F',
+              textDecoration: 'none',
+              borderRadius: '8px',
+              backgroundColor: pathname === '/admin' ? '#F5F5F7' : 'transparent'
+            }}
+          >
+            👥 Пользователи
+          </Link>
+        </div>
 
         {stats && (
           <div style={{ 

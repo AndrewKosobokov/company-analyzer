@@ -31,184 +31,139 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const period = parseInt(searchParams.get('period') || '30');
     
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - period);
-    
-    const previousStartDate = new Date();
-    previousStartDate.setDate(previousStartDate.getDate() - (period * 2));
-    
     // 1. Доход (Revenue) - текущий период
-    const revenueResult = await prisma.payment.aggregate({
-      where: {
-        createdAt: { gte: startDate },
-        status: 'completed'
-      },
-      _sum: { amount: true },
-      _count: true
-    });
+    const revenueResult = await prisma.$queryRaw<Array<{ sum: number | null }>>`
+      SELECT SUM(amount) as sum
+      FROM "Payment"
+      WHERE status = 'succeeded' AND "createdAt" >= NOW() - INTERVAL '${period} days'
+    `;
     
-    const totalRevenue = revenueResult._sum.amount || 0;
-    const paymentsCount = revenueResult._count || 0;
+    const totalRevenue = Number(revenueResult[0]?.sum || 0);
     
     // Доход за предыдущий период
-    const previousRevenueResult = await prisma.payment.aggregate({
-      where: {
-        createdAt: { gte: previousStartDate, lt: startDate },
-        status: 'completed'
-      },
-      _sum: { amount: true }
-    });
+    const previousRevenueResult = await prisma.$queryRaw<Array<{ sum: number | null }>>`
+      SELECT SUM(amount) as sum
+      FROM "Payment"
+      WHERE status = 'succeeded' 
+        AND "createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND "createdAt" < NOW() - INTERVAL '${period} days'
+    `;
     
-    const previousRevenue = previousRevenueResult._sum.amount || 0;
+    const previousRevenue = Number(previousRevenueResult[0]?.sum || 0);
     const revenueChange = previousRevenue > 0 
       ? ((totalRevenue - previousRevenue) / previousRevenue) * 100 
       : (totalRevenue > 0 ? 100 : 0);
     
     // 2. Средний чек (Average Order Value) - текущий период
-    const payments = await prisma.payment.findMany({
-      where: {
-        createdAt: { gte: startDate },
-        status: 'completed'
-      },
-      select: { amount: true }
-    });
+    const avgOrderResult = await prisma.$queryRaw<Array<{ avg: number | null }>>`
+      SELECT AVG(amount) as avg
+      FROM "Payment"
+      WHERE status = 'succeeded' AND "createdAt" >= NOW() - INTERVAL '${period} days'
+    `;
     
-    const avgOrderValue = payments.length > 0
-      ? payments.reduce((sum, p) => sum + p.amount, 0) / payments.length
-      : 0;
+    const avgOrderValue = Number(avgOrderResult[0]?.avg || 0);
     
     // Средний чек за предыдущий период
-    const previousPayments = await prisma.payment.findMany({
-      where: {
-        createdAt: { gte: previousStartDate, lt: startDate },
-        status: 'completed'
-      },
-      select: { amount: true }
-    });
+    const previousAvgOrderResult = await prisma.$queryRaw<Array<{ avg: number | null }>>`
+      SELECT AVG(amount) as avg
+      FROM "Payment"
+      WHERE status = 'succeeded'
+        AND "createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND "createdAt" < NOW() - INTERVAL '${period} days'
+    `;
     
-    const previousAvgOrderValue = previousPayments.length > 0
-      ? previousPayments.reduce((sum, p) => sum + p.amount, 0) / previousPayments.length
-      : 0;
-    
+    const previousAvgOrderValue = Number(previousAvgOrderResult[0]?.avg || 0);
     const avgOrderValueChange = previousAvgOrderValue > 0
       ? ((avgOrderValue - previousAvgOrderValue) / previousAvgOrderValue) * 100
       : (avgOrderValue > 0 ? 100 : 0);
     
     // 3. Конверсия Trial → Paid
-    // Пользователи, зарегистрированные в текущем периоде с планом trial
-    const trialUsers = await prisma.user.count({
-      where: {
-        createdAt: { gte: startDate },
-        plan: 'trial'
-      }
-    });
+    const conversionResult = await prisma.$queryRaw<Array<{ 
+      converted: number;
+      total: bigint;
+    }>>`
+      SELECT 
+        COUNT(DISTINCT CASE WHEN p.status = 'succeeded' THEN p."userId" END)::float / NULLIF(COUNT(DISTINCT u.id), 0) * 100 as converted,
+        COUNT(DISTINCT u.id) as total
+      FROM "User" u
+      LEFT JOIN "Payment" p ON u.id = p."userId" 
+        AND p."createdAt" >= NOW() - INTERVAL '${period} days'
+      WHERE u."createdAt" >= NOW() - INTERVAL '${period} days'
+    `;
     
-    // Пользователи, которые зарегистрировались как trial и затем сделали покупку
-    const trialUsersWithPayments = await prisma.user.count({
-      where: {
-        createdAt: { gte: startDate },
-        plan: 'trial',
-        payments: {
-          some: {
-            status: 'completed',
-            createdAt: { gte: startDate }
-          }
-        }
-      }
-    });
-    
-    const conversionRate = trialUsers > 0
-      ? (trialUsersWithPayments / trialUsers) * 100
-      : 0;
+    const conversionRate = Number(conversionResult[0]?.converted || 0);
+    const totalUsers = Number(conversionResult[0]?.total || 0);
     
     // Конверсия за предыдущий период
-    const previousTrialUsers = await prisma.user.count({
-      where: {
-        createdAt: { gte: previousStartDate, lt: startDate },
-        plan: 'trial'
-      }
-    });
+    const previousConversionResult = await prisma.$queryRaw<Array<{ 
+      converted: number;
+      total: bigint;
+    }>>`
+      SELECT 
+        COUNT(DISTINCT CASE WHEN p.status = 'succeeded' THEN p."userId" END)::float / NULLIF(COUNT(DISTINCT u.id), 0) * 100 as converted,
+        COUNT(DISTINCT u.id) as total
+      FROM "User" u
+      LEFT JOIN "Payment" p ON u.id = p."userId" 
+        AND p."createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND p."createdAt" < NOW() - INTERVAL '${period} days'
+      WHERE u."createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND u."createdAt" < NOW() - INTERVAL '${period} days'
+    `;
     
-    const previousTrialUsersWithPayments = await prisma.user.count({
-      where: {
-        createdAt: { gte: previousStartDate, lt: startDate },
-        plan: 'trial',
-        payments: {
-          some: {
-            status: 'completed',
-            createdAt: { gte: previousStartDate, lt: startDate }
-          }
-        }
-      }
-    });
-    
-    const previousConversionRate = previousTrialUsers > 0
-      ? (previousTrialUsersWithPayments / previousTrialUsers) * 100
-      : 0;
+    const previousConversionRate = Number(previousConversionResult[0]?.converted || 0);
     
     const conversionRateChange = previousConversionRate > 0
       ? conversionRate - previousConversionRate
       : (conversionRate > 0 ? conversionRate : 0);
     
     // 4. Повторные покупки
-    // Пользователи с более чем одной покупкой
-    const usersWithMultiplePayments = await prisma.user.findMany({
-      where: {
-        payments: {
-          some: {
-            status: 'completed',
-            createdAt: { gte: startDate }
-          }
-        }
-      },
-      include: {
-        payments: {
-          where: {
-            status: 'completed',
-            createdAt: { gte: startDate }
-          }
-        }
-      }
-    });
+    const repeatUsersResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(DISTINCT "userId") as count
+      FROM "Payment"
+      WHERE status = 'succeeded' 
+        AND "createdAt" >= NOW() - INTERVAL '${period} days'
+      GROUP BY "userId"
+      HAVING COUNT(*) > 1
+    `;
     
-    const usersWithRepeatPurchases = usersWithMultiplePayments.filter(
-      user => user.payments.length > 1
-    ).length;
+    const repeatUsers = Number(repeatUsersResult[0]?.count || 0);
     
-    const totalPayingUsers = usersWithMultiplePayments.length;
+    const totalPayingUsersResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(DISTINCT "userId") as count
+      FROM "Payment"
+      WHERE status = 'succeeded'
+        AND "createdAt" >= NOW() - INTERVAL '${period} days'
+    `;
     
+    const totalPayingUsers = Number(totalPayingUsersResult[0]?.count || 0);
     const repeatPurchaseRate = totalPayingUsers > 0
-      ? (usersWithRepeatPurchases / totalPayingUsers) * 100
+      ? (repeatUsers / totalPayingUsers) * 100
       : 0;
     
     // Повторные покупки за предыдущий период
-    const previousUsersWithMultiplePayments = await prisma.user.findMany({
-      where: {
-        payments: {
-          some: {
-            status: 'completed',
-            createdAt: { gte: previousStartDate, lt: startDate }
-          }
-        }
-      },
-      include: {
-        payments: {
-          where: {
-            status: 'completed',
-            createdAt: { gte: previousStartDate, lt: startDate }
-          }
-        }
-      }
-    });
+    const previousRepeatUsersResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(DISTINCT "userId") as count
+      FROM "Payment"
+      WHERE status = 'succeeded'
+        AND "createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND "createdAt" < NOW() - INTERVAL '${period} days'
+      GROUP BY "userId"
+      HAVING COUNT(*) > 1
+    `;
     
-    const previousUsersWithRepeatPurchases = previousUsersWithMultiplePayments.filter(
-      user => user.payments.length > 1
-    ).length;
+    const previousRepeatUsers = Number(previousRepeatUsersResult[0]?.count || 0);
     
-    const previousTotalPayingUsers = previousUsersWithMultiplePayments.length;
+    const previousTotalPayingUsersResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(DISTINCT "userId") as count
+      FROM "Payment"
+      WHERE status = 'succeeded'
+        AND "createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND "createdAt" < NOW() - INTERVAL '${period} days'
+    `;
     
+    const previousTotalPayingUsers = Number(previousTotalPayingUsersResult[0]?.count || 0);
     const previousRepeatPurchaseRate = previousTotalPayingUsers > 0
-      ? (previousUsersWithRepeatPurchases / previousTotalPayingUsers) * 100
+      ? (previousRepeatUsers / previousTotalPayingUsers) * 100
       : 0;
     
     const repeatPurchaseRateChange = previousRepeatPurchaseRate > 0
@@ -216,18 +171,22 @@ export async function GET(request: Request) {
       : (repeatPurchaseRate > 0 ? repeatPurchaseRate : 0);
     
     // 5. Новые регистрации
-    const newRegistrations = await prisma.user.count({
-      where: {
-        createdAt: { gte: startDate }
-      }
-    });
+    const newRegistrationsResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(*) as count
+      FROM "User"
+      WHERE "createdAt" >= NOW() - INTERVAL '${period} days'
+    `;
     
-    const previousNewRegistrations = await prisma.user.count({
-      where: {
-        createdAt: { gte: previousStartDate, lt: startDate }
-      }
-    });
+    const newRegistrations = Number(newRegistrationsResult[0]?.count || 0);
     
+    const previousNewRegistrationsResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(*) as count
+      FROM "User"
+      WHERE "createdAt" >= NOW() - INTERVAL '${period * 2} days'
+        AND "createdAt" < NOW() - INTERVAL '${period} days'
+    `;
+    
+    const previousNewRegistrations = Number(previousNewRegistrationsResult[0]?.count || 0);
     const newRegistrationsChange = previousNewRegistrations > 0
       ? ((newRegistrations - previousNewRegistrations) / previousNewRegistrations) * 100
       : (newRegistrations > 0 ? 100 : 0);

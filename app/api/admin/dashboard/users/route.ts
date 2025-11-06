@@ -29,31 +29,17 @@ export async function GET(request: Request) {
     }
 
     // Группировка пользователей по тарифам
-    const distribution = await prisma.user.groupBy({
-      by: ['plan'],
-      _count: true
-    });
-
-    // Преобразуем в нужный формат
-    const result = {
-      trial: 0,
-      start: 0,
-      optimal: 0,
-      profi: 0
-    };
-
-    distribution.forEach(item => {
-      const plan = item.plan.toLowerCase();
-      if (plan in result) {
-        result[plan as keyof typeof result] = item._count;
-      }
-    });
-
-    const totalUsers = Object.values(result).reduce((sum, n) => sum + n, 0);
+    const result = await prisma.$queryRaw<Array<{ plan: string; count: bigint }>>`
+      SELECT plan, COUNT(*) as count
+      FROM "User"
+      GROUP BY plan
+    `;
 
     return NextResponse.json({
-      distribution: result,
-      totalUsers
+      Trial: Number(result.find(r => r.plan === 'trial')?.count || 0),
+      Start: Number(result.find(r => r.plan === 'start')?.count || 0),
+      Optimal: Number(result.find(r => r.plan === 'optimal')?.count || 0),
+      Profi: Number(result.find(r => r.plan === 'profi')?.count || 0),
     });
 
   } catch (error) {
