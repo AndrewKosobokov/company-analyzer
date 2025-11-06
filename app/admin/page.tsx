@@ -219,17 +219,26 @@ export default function AdminDashboard() {
       <main className="container" style={{ maxWidth: '1200px', paddingTop: '120px' }}>
         <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Админ-панель</h1>
 
-        <div style={{ marginTop: '16px', marginBottom: '32px' }}>
+{/* Навигация админки */}
+        <div style={{ 
+          marginTop: '24px', 
+          marginBottom: '32px',
+          padding: '16px',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          border: '1px solid #D2D2D7'
+        }}>
           <Link 
-            href="/admin/dashboard" 
-            className={pathname === '/admin/dashboard' ? 'active' : ''}
+            href="/admin/dashboard"
             style={{ 
               display: 'block',
-              padding: '8px 12px',
+              padding: '12px 16px',
               color: pathname === '/admin/dashboard' ? '#007AFF' : '#1D1D1F',
               textDecoration: 'none',
               borderRadius: '8px',
               backgroundColor: pathname === '/admin/dashboard' ? '#F5F5F7' : 'transparent',
+              fontWeight: pathname === '/admin/dashboard' ? 600 : 400,
+              transition: 'all 0.2s ease',
               marginBottom: '4px'
             }}
           >
@@ -237,16 +246,20 @@ export default function AdminDashboard() {
           </Link>
           <Link 
             href="/admin"
-            className={pathname === '/admin' ? 'active' : ''}
             style={{ 
               display: 'block',
-              padding: '8px 12px',
+              padding: '12px 16px',
               color: pathname === '/admin' ? '#007AFF' : '#1D1D1F',
               textDecoration: 'none',
               borderRadius: '8px',
-              backgroundColor: pathname === '/admin' ? '#F5F5F7' : 'transparent'
+              backgroundColor: pathname === '/admin' ? '#F5F5F7' : 'transparent',
+              fontWeight: pathname === '/admin' ? 600 : 400,
+              transition: 'all 0.2s ease'
             }}
           >
+            👥 Пользователи
+          </Link>
+        </div>
             👥 Пользователи
           </Link>
         </div>
