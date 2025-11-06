@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { verifyToken } from '../../../lib/auth';
+import prisma from '../../../lib/prisma';
 
 export async function GET(request: Request) {
   try {
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     `;
     const conversionRate = Number(conversionResult[0]?.rate || 0);
 
-    // Повторные покупки (процент пользователей с >1 покупкой)
+    // Повторные покупки
     const repeatResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
       SELECT COUNT(DISTINCT "userId") as count
       FROM "Payment"

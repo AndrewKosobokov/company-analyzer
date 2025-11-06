@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/headers';
 import { cookies } from 'next/headers';
-import { verifyToken } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { verifyToken } from '../../../lib/auth';
+import prisma from '../../../lib/prisma';
 
 export async function GET() {
   try {
@@ -39,7 +39,6 @@ export async function GET() {
     const successRate = totalAnalyses > 0 ? 100 : 0;
     
     // Среднее время ответа: 42 секунды (примерное значение для Gemini 2.5 Pro)
-    // TODO: Добавить реальное измерение времени через updatedAt или отдельную таблицу логов
     const avgResponseTime = 42;
 
     return NextResponse.json({
