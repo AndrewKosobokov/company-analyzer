@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+import { DollarSign, CreditCard, TrendingUp, RefreshCw, Users, AlertCircle } from 'lucide-react';
 import { MetricCard } from './components/MetricCard';
 import { UserDistributionChart } from './components/UserDistributionChart';
 import { AIHealthStatus } from './components/AIHealthStatus';
@@ -185,7 +186,10 @@ export default function DashboardPage() {
             borderRadius: '12px',
             border: '1px solid #D2D2D7'
           }}>
-            <p style={{ marginBottom: '8px', fontWeight: 500 }}>⚠️ {error}</p>
+            <p style={{ marginBottom: '8px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertCircle size={20} color="#FF3B30" />
+              {error}
+            </p>
             <button
               onClick={() => window.location.reload()}
               style={{
@@ -235,20 +239,6 @@ export default function DashboardPage() {
             <Link href="/companies" className="nav-link">Отчеты</Link>
             <Link href="/pricing" className="nav-link">Тарифы</Link>
             <Link href="/profile" className="nav-link">Профиль</Link>
-            <Link 
-              href="/admin/dashboard" 
-              className="nav-link"
-              style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontWeight: 600,
-                color: 'var(--text-primary)'
-              }}
-            >
-              <span>📊</span>
-              <span>Аналитика</span>
-            </Link>
             <Link href="/admin" className="nav-link">Админ-панель</Link>
             <button 
               onClick={handleLogout}
@@ -333,7 +323,7 @@ export default function DashboardPage() {
             marginBottom: '32px'
           }}>
             <MetricCard
-              icon="💰"
+              icon={<DollarSign size={24} color="#1D1D1F" />}
               title="Доход"
               value={`${metrics.revenue.total.toLocaleString('ru-RU')} ₽`}
               subtitle={`за ${period} дней`}
@@ -341,14 +331,14 @@ export default function DashboardPage() {
             />
             
             <MetricCard
-              icon="💳"
+              icon={<CreditCard size={24} color="#1D1D1F" />}
               title="Средний чек"
               value={`${metrics.averageOrderValue.current.toLocaleString('ru-RU')} ₽`}
               change={metrics.averageOrderValue.change}
             />
             
             <MetricCard
-              icon="📈"
+              icon={<TrendingUp size={24} color="#1D1D1F" />}
               title="Конверсия"
               value={`${metrics.conversionRate.trialToPaid.toFixed(1)}%`}
               subtitle="Trial → Paid"
@@ -356,14 +346,14 @@ export default function DashboardPage() {
             />
             
             <MetricCard
-              icon="🔄"
+              icon={<RefreshCw size={24} color="#1D1D1F" />}
               title="Повторные покупки"
               value={`${metrics.repeatPurchases.rate.toFixed(1)}%`}
               change={metrics.repeatPurchases.change}
             />
 
             <MetricCard
-              icon="👥"
+              icon={<Users size={24} color="#1D1D1F" />}
               title="Новые регистрации"
               value={metrics.newRegistrations.count}
               subtitle={`за ${period} дней`}

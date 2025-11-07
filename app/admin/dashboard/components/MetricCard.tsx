@@ -1,9 +1,11 @@
+import { ReactNode } from 'react';
+
 interface MetricCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
   change?: number;
-  icon?: string;
+  icon?: ReactNode;
 }
 
 export function MetricCard({ title, value, subtitle, change, icon }: MetricCardProps) {
@@ -35,7 +37,7 @@ export function MetricCard({ title, value, subtitle, change, icon }: MetricCardP
         marginBottom: '16px'
       }}>
         {icon && (
-          <span style={{ fontSize: '24px', lineHeight: 1 }}>{icon}</span>
+          <div style={{ display: 'flex', alignItems: 'center', lineHeight: 1 }}>{icon}</div>
         )}
         <h3 style={{ 
           fontSize: '13px', 

@@ -4,7 +4,6 @@ import { NotificationProvider } from '@/components/NotificationProvider';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/components/StructuredData';
 import Footer from '@/components/Footer';
-import ImpersonationBanner from './components/ImpersonationBanner';
 import './globals.css';
 
 export const metadata = {
@@ -70,7 +69,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={tildaSans.className}>
-        <ImpersonationBanner />
         <OrganizationSchema />
         <SoftwareApplicationSchema />
         <WebSiteSchema />

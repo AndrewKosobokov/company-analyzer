@@ -76,19 +76,6 @@ export default function UsersPage() {
             <Link href="/companies" className="nav-link">Отчеты</Link>
             <Link href="/pricing" className="nav-link">Тарифы</Link>
             <Link href="/profile" className="nav-link">Профиль</Link>
-            <Link 
-              href="/admin/dashboard" 
-              className="nav-link"
-              style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                fontWeight: 500
-              }}
-            >
-              <span>📊</span>
-              <span>Аналитика</span>
-            </Link>
             <Link href="/admin" className="nav-link" style={{ fontWeight: 600 }}>Админ-панель</Link>
             <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Выйти</button>
           </nav>

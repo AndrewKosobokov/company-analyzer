@@ -1,6 +1,4 @@
 'use client';
-import { useState } from 'react';
-import { getToken } from '@/app/lib/auth';
 
 interface User {
   id: string;
@@ -19,8 +17,6 @@ interface UserRowProps {
 }
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
-  const [impersonating, setImpersonating] = useState(false);
-
   // Прогресс-бар (предполагаем максимум по тарифу)
   const maxAnalyses = {
     'trial': 3,
@@ -52,47 +48,6 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     if (days < 30) return `${Math.floor(days / 7)} нед назад`;
     if (days < 365) return `${Math.floor(days / 30)} мес назад`;
     return `${Math.floor(days / 365)} г назад`;
-  };
-
-  // Имперсонализация
-  const handleImpersonate = async () => {
-    if (!confirm(`Войти в аккаунт ${user.email}?`)) return;
-    
-    setImpersonating(true);
-    try {
-      const token = getToken();
-      const res = await fetch(`/api/admin/users/${user.id}/impersonate`, {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'Impersonation failed' }));
-        throw new Error(errorData.error || 'Impersonation failed');
-      }
-      
-      const data = await res.json();
-      
-      if (typeof window !== 'undefined') {
-        if (token) {
-          localStorage.setItem('admin_return_token', token);
-        }
-        localStorage.setItem('impersonating', 'true');
-        localStorage.setItem('impersonated_user_email', data?.user?.email || user.email || '');
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('auth_token', data.token);
-      }
-      
-      window.location.href = '/';
-    } catch (error: any) {
-      console.error('Impersonation error:', error);
-      alert(error.message || 'Ошибка входа в аккаунт пользователя');
-    } finally {
-      setImpersonating(false);
-    }
   };
 
   return (
@@ -161,57 +116,27 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
         </span>
       </td>
       <td style={cellStyle}>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={onEdit}
-            style={{
-              padding: '6px 12px',
-              border: '1px solid #D2D2D7',
-              borderRadius: '6px',
-              background: '#FFFFFF',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: 500,
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#F5F5F7';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#FFFFFF';
-            }}
-          >
-            Редактировать
-          </button>
-          <button
-            onClick={handleImpersonate}
-            disabled={impersonating}
-            style={{
-              padding: '6px 12px',
-              border: '1px solid #FF9500',
-              borderRadius: '6px',
-              background: '#FFF8E1',
-              color: '#FF9500',
-              cursor: impersonating ? 'not-allowed' : 'pointer',
-              fontSize: '13px',
-              fontWeight: 500,
-              transition: 'all 0.2s ease',
-              opacity: impersonating ? 0.6 : 1
-            }}
-            onMouseEnter={(e) => {
-              if (!impersonating) {
-                e.currentTarget.style.backgroundColor = '#FFE082';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!impersonating) {
-                e.currentTarget.style.backgroundColor = '#FFF8E1';
-              }
-            }}
-          >
-            {impersonating ? '...' : '🎭 Войти'}
-          </button>
-        </div>
+        <button
+          onClick={onEdit}
+          style={{
+            padding: '6px 12px',
+            border: '1px solid #D2D2D7',
+            borderRadius: '6px',
+            background: '#FFFFFF',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 500,
+            transition: 'all 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#F5F5F7';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = '#FFFFFF';
+          }}
+        >
+          Редактировать
+        </button>
       </td>
     </tr>
   );
