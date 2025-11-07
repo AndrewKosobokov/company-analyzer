@@ -9,6 +9,7 @@ import SearchBar from '../components/SearchBar';
 import SuccessToast from '../components/SuccessToast';
 import CardSkeleton from '@/components/CardSkeleton';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface Company {
   id: string;
@@ -30,6 +31,7 @@ export default function CompaniesPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const { logout } = useAuth();
   
   useEffect(() => {
     const checkAdmin = async () => {
@@ -180,8 +182,7 @@ export default function CompaniesPage() {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
 
   if (loading) {

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface Stats {
   totalUsers: number;
@@ -40,10 +41,10 @@ export default function AdminDashboard() {
   const router = useRouter();
   const pathname = usePathname();
   const { showToast } = useToast();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
 
   useEffect(() => {

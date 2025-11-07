@@ -9,6 +9,7 @@ import ScrollToTop from '@/components/ScrollToTop';
 import ReportTOC from '@/app/components/ReportTOC';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface ReportData {
   id: string;
@@ -57,6 +58,7 @@ export default function ReportPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showFirstContact, setShowFirstContact] = useState(false);
   const { showToast } = useToast();
+  const { logout } = useAuth();
   
   /**
    * Utility to safely and recursively extract clean text content from React children.
@@ -165,8 +167,7 @@ export default function ReportPage() {
   };
   
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
   
   // Loading State

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SuccessToast from '../components/SuccessToast';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface UserProfile {
   name: string;
@@ -36,6 +37,7 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const { logout } = useAuth();
   
   useEffect(() => {
     const checkAdmin = async () => {
@@ -126,8 +128,7 @@ export default function ProfilePage() {
   };
   
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
   
   const getPlanName = (plan: string) => {

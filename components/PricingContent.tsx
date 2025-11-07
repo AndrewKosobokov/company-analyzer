@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 export default function PricingContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const { logout } = useAuth();
   
   useEffect(() => {
     const token = getToken();
@@ -36,8 +38,7 @@ export default function PricingContent() {
   }, []);
   
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
 
   const handleSelectPlan = async (planId: string) => {

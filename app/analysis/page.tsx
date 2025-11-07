@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ProgressBar from '@/components/ProgressBar';
 import { useNotification } from '@/components/NotificationProvider';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 export default function AnalysisPage() {
   const [url, setUrl] = useState('');
@@ -23,6 +24,7 @@ export default function AnalysisPage() {
   const innInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const { showNotification } = useNotification();
+  const { logout } = useAuth();
   
   const handleInnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
@@ -122,8 +124,7 @@ export default function AnalysisPage() {
   };
   
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 import { MetricCard } from './components/MetricCard';
 import { UserDistributionChart } from './components/UserDistributionChart';
 import { AIHealthStatus } from './components/AIHealthStatus';
@@ -61,6 +62,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { logout } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
@@ -119,8 +121,7 @@ export default function DashboardPage() {
   }, [period, router]);
 
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
 
   if (loading) {

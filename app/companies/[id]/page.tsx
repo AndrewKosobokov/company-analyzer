@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 interface CompanyDetail {
   id: string;
@@ -18,6 +19,7 @@ export default function CompanyDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { showToast } = useToast();
+  const { logout } = useAuth();
   const [company, setCompany] = useState<CompanyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -73,8 +75,7 @@ export default function CompanyDetailPage() {
   };
   
   const handleLogout = () => {
-    localStorage.clear();
-    router.push('/');
+    logout();
   };
 
   const shareToTelegram = () => {
