@@ -245,7 +245,7 @@ export default function AdminDashboard() {
             📊 Аналитика
           </Link>
           <Link 
-            href="/admin"
+            href="/admin/users"
             style={{ 
               display: 'block',
               padding: '12px 16px',
