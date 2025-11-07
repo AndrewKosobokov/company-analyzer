@@ -31,6 +31,7 @@ export async function GET(request: Request) {
         plan: true,
         analysesRemaining: true,
         createdAt: true,
+        updatedAt: true,
         _count: {
           select: { analyses: true }
         }
