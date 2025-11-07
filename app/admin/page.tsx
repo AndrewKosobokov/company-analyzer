@@ -1,24 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { TrendingUp, Users } from 'lucide-react';
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  const pathname = usePathname();
   const { logout } = useAuth();
 
   const handleLogout = () => {
     logout();
   };
-
-  useEffect(() => {
-    // Редирект на /admin/dashboard по умолчанию
-    router.push('/admin/dashboard');
-  }, [router]);
 
   return (
     <div>
@@ -40,53 +31,103 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container" style={{ maxWidth: '1200px', paddingTop: '120px' }}>
-        <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Админ-панель</h1>
+        <h1 style={{ fontSize: '36px', marginBottom: '48px', fontWeight: 600, color: '#1D1D1F' }}>Админ-панель</h1>
 
-        {/* Навигация админки */}
+        {/* Навигация админки - большие карточки */}
         <div style={{ 
-          marginTop: '24px', 
-          marginBottom: '32px',
-          padding: '16px',
-          backgroundColor: '#FFFFFF',
-          borderRadius: '12px',
-          border: '1px solid #D2D2D7'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '24px',
+          marginTop: '24px'
         }}>
           <Link 
             href="/admin/dashboard"
             style={{ 
               display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              color: pathname === '/admin/dashboard' ? '#007AFF' : '#1D1D1F',
+              flexDirection: 'column',
+              gap: '16px',
+              padding: '32px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E5E5E7',
+              borderRadius: '12px',
               textDecoration: 'none',
-              borderRadius: '8px',
-              backgroundColor: pathname === '/admin/dashboard' ? '#F5F5F7' : 'transparent',
-              fontWeight: pathname === '/admin/dashboard' ? 600 : 400,
-              transition: 'all 0.2s ease',
-              marginBottom: '4px'
+              color: '#1D1D1F',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <TrendingUp size={20} color={pathname === '/admin/dashboard' ? '#007AFF' : '#1D1D1F'} />
-            Аналитика
+            <TrendingUp size={32} color="#1D1D1F" />
+            <div>
+              <h2 style={{ 
+                fontSize: '20px', 
+                fontWeight: 600, 
+                margin: 0,
+                marginBottom: '8px',
+                color: '#1D1D1F'
+              }}>
+                Аналитика
+              </h2>
+              <p style={{ 
+                fontSize: '14px', 
+                color: '#86868B',
+                margin: 0
+              }}>
+                Метрики и статистика
+              </p>
+            </div>
           </Link>
+
           <Link 
             href="/admin/users"
             style={{ 
               display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              color: pathname === '/admin/users' ? '#007AFF' : '#1D1D1F',
+              flexDirection: 'column',
+              gap: '16px',
+              padding: '32px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E5E5E7',
+              borderRadius: '12px',
               textDecoration: 'none',
-              borderRadius: '8px',
-              backgroundColor: pathname === '/admin/users' ? '#F5F5F7' : 'transparent',
-              fontWeight: pathname === '/admin/users' ? 600 : 400,
-              transition: 'all 0.2s ease'
+              color: '#1D1D1F',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.08)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <Users size={20} color={pathname === '/admin/users' ? '#007AFF' : '#1D1D1F'} />
-            Пользователи
+            <Users size={32} color="#1D1D1F" />
+            <div>
+              <h2 style={{ 
+                fontSize: '20px', 
+                fontWeight: 600, 
+                margin: 0,
+                marginBottom: '8px',
+                color: '#1D1D1F'
+              }}>
+                Пользователи
+              </h2>
+              <p style={{ 
+                fontSize: '14px', 
+                color: '#86868B',
+                margin: 0
+              }}>
+                Управление
+              </p>
+            </div>
           </Link>
         </div>
       </main>
