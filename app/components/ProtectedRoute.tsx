@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, hydrated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -18,6 +18,24 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       router.push('/login');
     }
   }, [isAuthenticated, loading, router]);
+
+  // Сначала проверяем hydrated (клиент готов?)
+  if (!hydrated) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#FFFFFF'
+      }}>
+        <div style={{
+          fontSize: '14px',
+          color: '#86868B'
+        }}>Загрузка...</div>
+      </div>
+    );
+  }
 
   // Показываем loader пока идёт проверка
   if (loading) {

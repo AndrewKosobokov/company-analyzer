@@ -11,6 +11,7 @@ interface AuthContextType {
     organization: string;
   } | null;
   loading: boolean;
+  hydrated: boolean;
   login: (token: string, userData: any) => void;
   logout: () => void;
 }
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return null;
   });
   const [loading, setLoading] = useState(true);
+  const [hydrated, setHydrated] = useState(false);
   const [user, setUser] = useState<{
     name: string;
     email: string;
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsAuthenticated(true);
     }
     setLoading(false);
+    setHydrated(true);
   }, []);
 
   const login = (token: string, userData: any) => {
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, user, loading, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, user, loading, hydrated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
