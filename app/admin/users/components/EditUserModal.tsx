@@ -176,9 +176,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  border: analysesMode === 'set' ? '2px solid #007AFF' : '1px solid #D2D2D7',
+                  border: analysesMode === 'set' ? '2px solid #1D1D1F' : '1px solid #E5E5E7',
                   borderRadius: '8px',
-                  background: analysesMode === 'set' ? '#E3F2FD' : '#FFFFFF',
+                  background: analysesMode === 'set' ? '#1D1D1F' : '#FFFFFF',
+                  color: analysesMode === 'set' ? '#FFFFFF' : '#1D1D1F',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -192,9 +193,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  border: analysesMode === 'add' ? '2px solid #007AFF' : '1px solid #D2D2D7',
+                  border: analysesMode === 'add' ? '2px solid #1D1D1F' : '1px solid #E5E5E7',
                   borderRadius: '8px',
-                  background: analysesMode === 'add' ? '#E3F2FD' : '#FFFFFF',
+                  background: analysesMode === 'add' ? '#1D1D1F' : '#FFFFFF',
+                  color: analysesMode === 'add' ? '#FFFFFF' : '#1D1D1F',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -208,9 +210,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  border: analysesMode === 'subtract' ? '2px solid #007AFF' : '1px solid #D2D2D7',
+                  border: analysesMode === 'subtract' ? '2px solid #1D1D1F' : '1px solid #E5E5E7',
                   borderRadius: '8px',
-                  background: analysesMode === 'subtract' ? '#E3F2FD' : '#FFFFFF',
+                  background: analysesMode === 'subtract' ? '#1D1D1F' : '#FFFFFF',
+                  color: analysesMode === 'subtract' ? '#FFFFFF' : '#1D1D1F',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -282,12 +285,22 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 padding: '12px 24px',
                 border: 'none',
                 borderRadius: '8px',
-                background: saving ? '#86868B' : '#007AFF',
+                background: saving ? '#86868B' : '#1D1D1F',
                 color: '#FFFFFF',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 fontSize: '15px',
                 fontWeight: 600,
                 transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (!saving) {
+                  e.currentTarget.style.background = '#2D2D2F';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!saving) {
+                  e.currentTarget.style.background = '#1D1D1F';
+                }
               }}
             >
               {saving ? 'Сохранение...' : 'Сохранить'}

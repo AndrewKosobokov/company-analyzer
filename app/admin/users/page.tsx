@@ -83,6 +83,33 @@ export default function UsersPage() {
       </header>
 
       <main className="container" style={{ maxWidth: '1400px', paddingTop: '120px' }}>
+        <Link 
+          href="/admin"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: '#FFFFFF',
+            border: '1px solid #E5E5E7',
+            borderRadius: '8px',
+            color: '#1D1D1F',
+            fontSize: '14px',
+            fontWeight: '500',
+            textDecoration: 'none',
+            transition: 'all 0.2s',
+            cursor: 'pointer',
+            marginBottom: '24px'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#F5F5F7';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#FFFFFF';
+          }}
+        >
+          ← Назад
+        </Link>
         <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Управление пользователями</h1>
         <UsersTable />
       </main>
