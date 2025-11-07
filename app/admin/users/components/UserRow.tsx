@@ -24,10 +24,10 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
   // Прогресс-бар (предполагаем максимум по тарифу)
   const maxAnalyses = {
     'trial': 3,
-    'start': 10,
-    'optimal': 50,
-    'profi': 9999
-  }[user.plan] || 10;
+    'start': 40,
+    'optimal': 80,
+    'profi': 200
+  }[user.plan] || 3;
 
   const percentage = Math.min(100, (user.analysesRemaining / maxAnalyses) * 100);
   
