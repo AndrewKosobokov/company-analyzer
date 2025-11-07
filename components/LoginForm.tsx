@@ -6,7 +6,7 @@ import Link from 'next/link';
 import PasswordInput from '@/app/components/PasswordInput';
 import { getErrorMessage, translateError } from '@/utils/errorMessages';
 import { useNotification } from '@/components/NotificationProvider';
-import { login as saveToken } from '@/app/lib/auth';
+import { useAuth } from '@/app/context/AuthContext';
 
 export default function LoginForm() {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
@@ -16,6 +16,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const verified = searchParams.get('verified') === 'true';
   const { showNotification } = useNotification();
+  const { login } = useAuth();
   
   // Form fields state
   const [email, setEmail] = useState('');
@@ -41,7 +42,13 @@ export default function LoginForm() {
         throw new Error(data.error || data.message || 'Invalid credentials');
       }
       
-      saveToken(data.token);
+      // Используем login из AuthContext для сохранения токена и данных пользователя
+      const userData = {
+        name: data.user.name || '',
+        email: data.user.email || '',
+        organization: data.user.organizationName || '',
+      };
+      login(data.token, userData);
       router.push('/analysis');
     } catch (err) {
       const errorMessage = getErrorMessage(err);
