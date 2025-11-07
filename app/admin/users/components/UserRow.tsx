@@ -70,20 +70,22 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       });
       
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'Ошибка входа' }));
+        const errorData = await res.json().catch(() => ({ error: 'Impersonation failed' }));
         throw new Error(errorData.error || 'Impersonation failed');
       }
       
       const data = await res.json();
       
-      // Сохраняем новый токен
       if (typeof window !== 'undefined') {
-        localStorage.setItem('authToken', data.token);
+        if (token) {
+          localStorage.setItem('admin_return_token', token);
+        }
         localStorage.setItem('impersonating', 'true');
-        localStorage.setItem('admin_return_token', token || '');
+        localStorage.setItem('impersonated_user_email', data?.user?.email || user.email || '');
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('auth_token', data.token);
       }
       
-      // Перезагружаем страницу
       window.location.href = '/';
     } catch (error: any) {
       console.error('Impersonation error:', error);
