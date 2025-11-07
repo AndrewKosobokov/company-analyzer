@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { getToken } from '@/app/lib/auth';
 import UserRow from './UserRow';
+import EditUserModal from './EditUserModal';
 
 interface User {
   id: string;
@@ -187,40 +188,16 @@ export default function UsersTable() {
         </div>
       )}
 
-      {/* Модальное окно редактирования - будет создано позже */}
+      {/* Модальное окно редактирования */}
       {editingUser && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 50
-        }}>
-          <div style={{
-            backgroundColor: '#FFFFFF',
-            borderRadius: '12px',
-            padding: '24px',
-            maxWidth: '500px',
-            width: '90%'
-          }}>
-            <p style={{ marginBottom: '16px' }}>Редактирование пользователя (будет реализовано позже)</p>
-            <button
-              onClick={() => setEditingUser(null)}
-              style={{
-                padding: '8px 16px',
-                border: '1px solid #D2D2D7',
-                borderRadius: '8px',
-                background: '#FFFFFF',
-                cursor: 'pointer',
-                fontSize: '15px'
-              }}
-            >
-              Закрыть
-            </button>
-          </div>
-        </div>
+        <EditUserModal
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSuccess={() => {
+            setEditingUser(null);
+            fetchUsers();
+          }}
+        />
       )}
     </div>
   );
