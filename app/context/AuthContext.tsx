@@ -47,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (token: string, userData: any) => {
     if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', token);
       localStorage.setItem('authToken', token);
       localStorage.setItem('userData', JSON.stringify(userData));
     }
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
       localStorage.removeItem('authToken');
       localStorage.removeItem('userData');
     }
