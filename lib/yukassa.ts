@@ -56,7 +56,13 @@ export async function createPayment(params: CreatePaymentParams): Promise<Paymen
         },
         vat_code: 6,
         payment_mode: 'full_payment',
-        payment_subject: 'service'
+        payment_subject: 'service',
+payment_orders: [{
+  amount: {
+    value: params.amount.toFixed(2),
+    currency: 'RUB'
+  }
+}]
       }]
     }
   };
