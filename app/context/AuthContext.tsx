@@ -59,16 +59,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(true);
   };
 
-  const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('userData');
-    }
-    setToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+const logout = () => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    
+    // Редирект на страницу логина
+    window.location.href = '/login';
+  }
+  setToken(null);
+  setUser(null);
+  setIsAuthenticated(false);
+};
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, token, user, loading, hydrated, login, logout }}>
