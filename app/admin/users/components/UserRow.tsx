@@ -25,8 +25,10 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     'profi': 200
   }[user.plan] || 3;
 
-  const used = maxAnalyses - user.analysesRemaining;
-  const percentage = Math.min(100, (used / maxAnalyses) * 100);
+  // Если админ добавил больше — используем текущий баланс как максимум
+  const actualMax = Math.max(maxAnalyses, user.analysesRemaining);
+  const used = actualMax - user.analysesRemaining;
+  const percentage = actualMax > 0 ? Math.min(100, (used / actualMax) * 100) : 0;
   
   const progressColor = 
     percentage > 50 ? '#34C759' : 

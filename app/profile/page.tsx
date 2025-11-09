@@ -322,9 +322,12 @@ export default function ProfilePage() {
                 optimal: 80, 
                 profi: 200 
               };
-              const initialLimit = initialLimits[profile.plan as keyof typeof initialLimits] || 0;
-              const used = Math.max(0, initialLimit - profile.analysesRemaining);
-              const percentage = initialLimit > 0 ? (used / initialLimit) * 100 : 0;
+              const planLimit = initialLimits[profile.plan as keyof typeof initialLimits] || 0;
+
+              // Если админ добавил больше — используем текущий баланс как максимум
+              const actualMax = Math.max(planLimit, profile.analysesRemaining);
+              const used = actualMax - profile.analysesRemaining;
+              const percentage = actualMax > 0 ? Math.min(100, (used / actualMax) * 100) : 0;
 
               return (
                 <div style={{ marginBottom: 'var(--space-lg)' }}>
@@ -335,7 +338,7 @@ export default function ProfilePage() {
                     color: 'var(--text-secondary)',
                     marginBottom: '8px'
                   }}>
-                    <span>Использовано: {used} из {initialLimit}</span>
+                    <span>Использовано: {used} из {actualMax}</span>
                     <span>{percentage.toFixed(1)}%</span>
                   </div>
                   <div style={{ 
