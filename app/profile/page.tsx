@@ -89,6 +89,15 @@ export default function ProfilePage() {
     };
     
     fetchData();
+    
+    // ← ДОБАВИТЬ: Автообновление если вернулись с оплаты
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('from') === 'payment') {
+      // Обновить ещё раз через 2 секунды
+      setTimeout(() => {
+        fetchData();
+      }, 2000);
+    }
   }, []);
 
   // Считаем сколько анализов уже сделано

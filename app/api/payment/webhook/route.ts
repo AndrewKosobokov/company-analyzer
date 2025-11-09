@@ -36,10 +36,15 @@ export async function POST(req: NextRequest) {
           analysesRemaining: {
             increment: dbPayment.analysesCount,
           },
+          plan: dbPayment.planName, // ← Добавить это!
         },
       });
 
-      console.log('✅ Payment processed:', { userId: dbPayment.userId, analyses: dbPayment.analysesCount });
+      console.log('✅ Payment processed:', { 
+        userId: dbPayment.userId, 
+        analyses: dbPayment.analysesCount,
+        newPlan: dbPayment.planName // ← Добавить в лог
+      });
     }
 
     return NextResponse.json({ success: true });

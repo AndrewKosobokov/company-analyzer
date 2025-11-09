@@ -78,12 +78,20 @@ export default function PaymentSuccessPage() {
             <p className="text-gray-700 mb-8">
               Анализы зачислены на ваш счёт.
             </p>
-            <button
-              onClick={() => router.push('/analysis')}
-              className="bg-black text-white py-3 px-8 rounded-xl font-medium hover:bg-gray-800 transition-colors"
-            >
-              Перейти к анализу
-            </button>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => router.push('/profile?from=payment')}
+                className="bg-black text-white py-3 px-8 rounded-xl font-medium hover:bg-gray-800 transition-colors"
+              >
+                Перейти в профиль
+              </button>
+              <button
+                onClick={() => router.push('/analysis')}
+                className="bg-gray-200 text-black py-3 px-8 rounded-xl font-medium hover:bg-gray-300 transition-colors"
+              >
+                Перейти к анализу
+              </button>
+            </div>
           </>
         ) : (
           <>
