@@ -303,7 +303,7 @@ export default function ReportPage() {
             alignSelf: 'flex-start'
           }}>
             {/* Table of Contents */}
-            <ReportTOC items={navigationItems} />
+            {!showFirstContact && <ReportTOC items={navigationItems} />}
             
             {/* First Contact Example Button */}
             {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && report.firstContactExample && (
