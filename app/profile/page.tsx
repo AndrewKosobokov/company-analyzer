@@ -136,7 +136,7 @@ export default function ProfilePage() {
       start: 'Start',
       optimal: 'Optimal',
       profi: 'Profi',
-      trial: 'Пробный'
+      trial: 'Trial'
     };
     return plans[plan] || plan;
   };
@@ -317,7 +317,7 @@ export default function ProfilePage() {
             {/* Progress bar */}
             {(() => {
               const initialLimits: Record<string, number> = { 
-                trial: 10, 
+                trial: 3, 
                 start: 40, 
                 optimal: 80, 
                 profi: 200 
