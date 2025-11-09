@@ -312,6 +312,35 @@ export default function ProfilePage() {
               }}>
                 отчётов осталось
               </div>
+              {(() => {
+                const initialLimits: Record<string, number> = { 
+                  trial: 3, 
+                  start: 40, 
+                  optimal: 80, 
+                  profi: 200 
+                };
+                const planLimit = initialLimits[profile.plan as keyof typeof initialLimits] || 0;
+                const actualMax = Math.max(planLimit, profile.analysesRemaining);
+                const used = actualMax - profile.analysesRemaining;
+                const percentage = actualMax > 0 ? Math.min(100, (used / actualMax) * 100) : 0;
+
+                return (
+                  <>
+                    <div style={{ marginTop: '16px', fontSize: '15px', color: '#86868B' }}>
+                      Использовано: {used} из {actualMax}
+                    </div>
+                    <div style={{ marginTop: '12px', width: '100%', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ 
+                        width: `${percentage}%`, 
+                        height: '100%', 
+                        background: percentage > 80 ? '#FF3B30' : '#34C759', 
+                        borderRadius: '4px',
+                        transition: 'width 0.3s ease'
+                      }} />
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Progress bar */}

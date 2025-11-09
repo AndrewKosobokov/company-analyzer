@@ -81,23 +81,18 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       </td>
       <td style={cellStyle}>
         <div style={{ minWidth: '150px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '13px' }}>
-            <span>{user.analysesRemaining}</span>
-            <span style={{ color: '#86868B' }}>{Math.round(percentage)}%</span>
-          </div>
-          <div style={{ 
-            width: '100%', 
-            height: '6px', 
-            backgroundColor: '#F5F5F7', 
-            borderRadius: '3px',
-            overflow: 'hidden'
-          }}>
-            <div style={{ 
-              width: `${percentage}%`, 
-              height: '100%', 
-              backgroundColor: progressColor,
-              transition: 'width 0.3s ease'
-            }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 500 }}>{user.analysesRemaining}</div>
+            <div style={{ width: '100px', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ 
+                width: `${percentage}%`, 
+                height: '100%', 
+                background: '#34C759', 
+                borderRadius: '4px',
+                transition: 'width 0.3s ease'
+              }} />
+            </div>
+            <span style={{ color: '#86868B', fontSize: '13px' }}>{Math.round(percentage)}%</span>
           </div>
         </div>
       </td>
