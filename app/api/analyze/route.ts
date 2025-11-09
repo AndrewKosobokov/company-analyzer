@@ -328,7 +328,7 @@ export async function POST(request: Request) {
       ? `Компания ${finalUrl}`
       : `Компания ИНН ${finalCompanyInn || 'Не указан'}`;
 
-    const creditsUsed = isNonTargetClient ? 0 : 1;
+    const creditsUsed = 1; // Всегда списывать, неважно целевой или нет
 
     const analysis = await prisma.analysis.create({
       data: {
@@ -342,18 +342,14 @@ export async function POST(request: Request) {
       },
     });
 
-    // 9. UPDATE USER ANALYSES COUNT (ONLY for target clients)
-    let updatedAnalysesRemaining = user.analysesRemaining;
-    if (!isNonTargetClient) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: { analysesRemaining: { decrement: 1 } }
-      });
-      updatedAnalysesRemaining = user.analysesRemaining - 1;
-      console.log(`✅ Analysis count decremented for target client. Remaining: ${updatedAnalysesRemaining}`);
-    } else {
-      console.log(`ℹ️ Analysis count NOT decremented for non-target client. Remaining: ${updatedAnalysesRemaining}`);
-    }
+    // 9. UPDATE USER ANALYSES COUNT
+    // Всегда списывать анализ
+    await prisma.user.update({
+      where: { id: userId },
+      data: { analysesRemaining: { decrement: 1 } }
+    });
+    const updatedAnalysesRemaining = user.analysesRemaining - 1;
+    console.log(`✅ Analysis count decremented. Remaining: ${updatedAnalysesRemaining}. Non-target client: ${isNonTargetClient}`);
 
     console.log(`✅ Analysis saved. ID: ${analysis.id}, User remaining: ${updatedAnalysesRemaining}`);
 
