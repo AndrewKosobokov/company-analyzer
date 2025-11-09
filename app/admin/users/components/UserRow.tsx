@@ -1,5 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { getToken } from '@/app/lib/auth';
+
 interface User {
   id: string;
   email: string;
@@ -17,18 +20,26 @@ interface UserRowProps {
 }
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
-  // Прогресс-бар (предполагаем максимум по тарифу)
-  const maxAnalyses = {
-    'trial': 3,
-    'start': 40,
-    'optimal': 80,
-    'profi': 200
-  }[user.plan] || 3;
+  const [analysesCount, setAnalysesCount] = useState(0);
 
-  // Если админ добавил больше — используем текущий баланс как максимум
-  const actualMax = Math.max(maxAnalyses, user.analysesRemaining);
-  const used = actualMax - user.analysesRemaining;
-  const percentage = actualMax > 0 ? Math.min(100, (used / actualMax) * 100) : 0;
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const res = await fetch(`/api/admin/users/analyses-count?userId=${user.id}`, {
+          headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+        const data = await res.json();
+        setAnalysesCount(data.count || 0);
+      } catch (error) {
+        console.error('Error fetching count:', error);
+      }
+    };
+    fetchCount();
+  }, [user.id]);
+
+  const totalBalance = user.analysesRemaining + analysesCount;
+  const used = analysesCount;
+  const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
   
   const progressColor = 
     percentage > 50 ? '#34C759' : 

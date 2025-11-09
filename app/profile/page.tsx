@@ -36,6 +36,7 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [totalAnalyses, setTotalAnalyses] = useState(0);
   const router = useRouter();
   const { logout } = useAuth();
   
@@ -89,6 +90,18 @@ export default function ProfilePage() {
     
     fetchData();
   }, []);
+
+  // Считаем сколько анализов уже сделано
+  useEffect(() => {
+    const fetchAnalysesCount = async () => {
+      const res = await fetch('/api/user/analyses-count', {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      const data = await res.json();
+      setTotalAnalyses(data.count || 0);
+    };
+    if (profile) fetchAnalysesCount();
+  }, [profile]);
   
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -313,21 +326,15 @@ export default function ProfilePage() {
                 отчётов осталось
               </div>
               {(() => {
-                const initialLimits: Record<string, number> = { 
-                  trial: 3, 
-                  start: 40, 
-                  optimal: 80, 
-                  profi: 200 
-                };
-                const planLimit = initialLimits[profile.plan as keyof typeof initialLimits] || 0;
-                const actualMax = Math.max(planLimit, profile.analysesRemaining);
-                const used = actualMax - profile.analysesRemaining;
-                const percentage = actualMax > 0 ? Math.min(100, (used / actualMax) * 100) : 0;
+                // Расчёт
+                const totalBalance = profile.analysesRemaining + totalAnalyses;
+                const used = totalAnalyses;
+                const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
 
                 return (
                   <>
                     <div style={{ marginTop: '16px', fontSize: '15px', color: '#86868B' }}>
-                      Использовано: {used} из {actualMax}
+                      Использовано: {used} из {totalBalance}
                     </div>
                     <div style={{ marginTop: '12px', width: '100%', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ 
@@ -345,18 +352,10 @@ export default function ProfilePage() {
 
             {/* Progress bar */}
             {(() => {
-              const initialLimits: Record<string, number> = { 
-                trial: 3, 
-                start: 40, 
-                optimal: 80, 
-                profi: 200 
-              };
-              const planLimit = initialLimits[profile.plan as keyof typeof initialLimits] || 0;
-
-              // Если админ добавил больше — используем текущий баланс как максимум
-              const actualMax = Math.max(planLimit, profile.analysesRemaining);
-              const used = actualMax - profile.analysesRemaining;
-              const percentage = actualMax > 0 ? Math.min(100, (used / actualMax) * 100) : 0;
+              // Расчёт
+              const totalBalance = profile.analysesRemaining + totalAnalyses;
+              const used = totalAnalyses;
+              const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
 
               return (
                 <div style={{ marginBottom: 'var(--space-lg)' }}>
@@ -367,7 +366,7 @@ export default function ProfilePage() {
                     color: 'var(--text-secondary)',
                     marginBottom: '8px'
                   }}>
-                    <span>Использовано: {used} из {actualMax}</span>
+                    <span>Использовано: {used} из {totalBalance}</span>
                     <span>{percentage.toFixed(1)}%</span>
                   </div>
                   <div style={{ 
