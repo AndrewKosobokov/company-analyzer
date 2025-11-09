@@ -304,7 +304,7 @@ export default function ProfilePage() {
             paddingBottom: 'var(--space-md)',
             borderBottom: '1px solid var(--border-color)'
           }}>
-            Мой тариф
+            Мой тариф: {getPlanName(profile.plan)}
           </h2>
           
           <div className="card">
@@ -386,18 +386,6 @@ export default function ProfilePage() {
               );
             })()}
 
-            {/* Plan info */}
-            <div style={{ 
-              marginBottom: 'var(--space-lg)',
-              padding: 'var(--space-md)',
-              backgroundColor: 'var(--surface-secondary)',
-              borderRadius: 'var(--radius-md)',
-              fontSize: '15px',
-              color: 'var(--text-secondary)'
-            }}>
-              Текущий тариф: <strong style={{ color: 'var(--text-primary)' }}>{getPlanName(profile.plan)}</strong>
-            </div>
-            
             {/* Button */}
             <Link 
               href="/pricing" 
