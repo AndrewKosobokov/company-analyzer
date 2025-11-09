@@ -41,7 +41,7 @@ export async function GET(request: Request) {
     const revenueResult = await prisma.payment.aggregate({
       where: {
         createdAt: { gte: startDate },
-        status: 'completed'
+        status: 'succeeded' // ← ИСПРАВЛЕНО!
       },
       _sum: { amount: true },
       _count: true
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
     const previousRevenueResult = await prisma.payment.aggregate({
       where: {
         createdAt: { gte: previousStartDate, lt: startDate },
-        status: 'completed'
+        status: 'succeeded' // ← ИСПРАВЛЕНО!
       },
       _sum: { amount: true }
     });
@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     const payments = await prisma.payment.findMany({
       where: {
         createdAt: { gte: startDate },
-        status: 'completed'
+        status: 'succeeded' // ← ИСПРАВЛЕНО!
       },
       select: { amount: true }
     });
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
     const previousPayments = await prisma.payment.findMany({
       where: {
         createdAt: { gte: previousStartDate, lt: startDate },
-        status: 'completed'
+        status: 'succeeded' // ← ИСПРАВЛЕНО!
       },
       select: { amount: true }
     });
@@ -110,7 +110,7 @@ export async function GET(request: Request) {
         plan: 'trial',
         payments: {
           some: {
-            status: 'completed',
+            status: 'succeeded', // ← ИСПРАВЛЕНО!
             createdAt: { gte: startDate }
           }
         }
@@ -135,7 +135,7 @@ export async function GET(request: Request) {
         plan: 'trial',
         payments: {
           some: {
-            status: 'completed',
+            status: 'succeeded', // ← ИСПРАВЛЕНО!
             createdAt: { gte: previousStartDate, lt: startDate }
           }
         }
@@ -156,7 +156,7 @@ export async function GET(request: Request) {
       where: {
         payments: {
           some: {
-            status: 'completed',
+            status: 'succeeded', // ← ИСПРАВЛЕНО!
             createdAt: { gte: startDate }
           }
         }
@@ -164,7 +164,7 @@ export async function GET(request: Request) {
       include: {
         payments: {
           where: {
-            status: 'completed',
+            status: 'succeeded', // ← ИСПРАВЛЕНО!
             createdAt: { gte: startDate }
           }
         }
@@ -186,7 +186,7 @@ export async function GET(request: Request) {
       where: {
         payments: {
           some: {
-            status: 'completed',
+            status: 'succeeded', // ← ИСПРАВЛЕНО!
             createdAt: { gte: previousStartDate, lt: startDate }
           }
         }
@@ -194,7 +194,7 @@ export async function GET(request: Request) {
       include: {
         payments: {
           where: {
-            status: 'completed',
+            status: 'succeeded', // ← ИСПРАВЛЕНО!
             createdAt: { gte: previousStartDate, lt: startDate }
           }
         }
@@ -268,4 +268,3 @@ export async function GET(request: Request) {
     await prisma.$disconnect();
   }
 }
-
