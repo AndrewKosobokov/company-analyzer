@@ -3,3 +3,6 @@ node_modules/
 .env.local
 *.db
 *.loggcp-service-account.json
+gcp-service-account.json
+build.log
+main
