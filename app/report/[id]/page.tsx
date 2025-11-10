@@ -276,7 +276,7 @@ export default function ReportPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container" style={{ maxWidth: '1400px', paddingTop: '96px', paddingBottom: '64px' }}>
+      <main className="container" style={{ maxWidth: '1400px', paddingTop: '0', paddingBottom: '64px' }}>
         {/* Back Link */}
         <Link
           href="/companies"
@@ -625,7 +625,7 @@ export default function ReportPage() {
                         style={{
                           fontSize: '32px',
                           fontWeight: '700',
-                          marginTop: '48px',
+                          marginTop: '0',
                           marginBottom: '24px',
                           color: 'var(--text-primary)',
                           paddingBottom: '12px',
@@ -644,7 +644,7 @@ export default function ReportPage() {
                     <h3 style={{
                       fontSize: '24px',
                       fontWeight: '700',
-                      marginTop: '32px',
+                      marginTop: '0',
                       marginBottom: '16px',
                       color: 'var(--text-primary)'
                     }} {...props} />
@@ -669,7 +669,7 @@ export default function ReportPage() {
                   // Paragraphs
                   p: ({node, ...props}) => (
                     <p style={{
-                      marginTop: '16px',
+                      marginTop: '0',
                       marginBottom: '16px',
                       lineHeight: '1.7',
                       color: 'var(--text-primary)'
@@ -681,7 +681,7 @@ export default function ReportPage() {
                     <ul style={{
                       listStyleType: 'disc',
                       paddingLeft: '32px',
-                      marginTop: '16px',
+                      marginTop: '0',
                       marginBottom: '16px'
                     }} {...props} />
                   ),
@@ -690,7 +690,7 @@ export default function ReportPage() {
                     <ol style={{
                       listStyleType: 'decimal',
                       paddingLeft: '32px',
-                      marginTop: '16px',
+                      marginTop: '0',
                       marginBottom: '16px'
                     }} {...props} />
                   ),
@@ -705,7 +705,7 @@ export default function ReportPage() {
                   
                   // Tables
                   table: ({node, ...props}) => (
-                    <div style={{ overflowX: 'auto', marginTop: '24px', marginBottom: '24px' }}>
+                    <div style={{ overflowX: 'auto', marginTop: '0', marginBottom: '24px' }}>
                       <table style={{
                         width: '100%',
                         borderCollapse: 'collapse',
@@ -738,7 +738,7 @@ export default function ReportPage() {
                     <hr style={{
                       border: 'none',
                       borderTop: '2px solid var(--border-color)',
-                      marginTop: '32px',
+                      marginTop: '0',
                       marginBottom: '32px'
                     }} {...props} />
                   ),
@@ -922,7 +922,7 @@ export default function ReportPage() {
                         <h2 style={{
                           fontSize: '28px',
                           fontWeight: '700',
-                          marginTop: '32px',
+                          marginTop: '0',
                           marginBottom: '20px',
                           color: 'var(--text-primary)',
                           paddingBottom: '12px',
@@ -935,7 +935,7 @@ export default function ReportPage() {
                         <h3 style={{
                           fontSize: '22px',
                           fontWeight: '700',
-                          marginTop: '24px',
+                          marginTop: '0',
                           marginBottom: '16px',
                           color: 'var(--text-primary)'
                         }} {...props} />
@@ -960,7 +960,7 @@ export default function ReportPage() {
                       // Paragraphs
                       p: ({node, ...props}) => (
                         <p style={{
-                          marginTop: '16px',
+                          marginTop: '0',
                           marginBottom: '16px',
                           lineHeight: '1.7',
                           color: 'var(--text-primary)'
@@ -972,7 +972,7 @@ export default function ReportPage() {
                         <ul style={{
                           listStyleType: 'disc',
                           paddingLeft: '32px',
-                          marginTop: '16px',
+                          marginTop: '0',
                           marginBottom: '16px'
                         }} {...props} />
                       ),
@@ -982,7 +982,7 @@ export default function ReportPage() {
                         <ol style={{
                           listStyleType: 'decimal',
                           paddingLeft: '32px',
-                          marginTop: '16px',
+                          marginTop: '0',
                           marginBottom: '16px'
                         }} {...props} />
                       ),
@@ -998,7 +998,7 @@ export default function ReportPage() {
                       
                       // Tables
                       table: ({node, ...props}) => (
-                        <div style={{ overflowX: 'auto', marginTop: '24px', marginBottom: '24px' }}>
+                        <div style={{ overflowX: 'auto', marginTop: '0', marginBottom: '24px' }}>
                           <table style={{
                             width: '100%',
                             borderCollapse: 'collapse',
@@ -1031,7 +1031,7 @@ export default function ReportPage() {
                         <hr style={{
                           border: 'none',
                           borderTop: '2px solid var(--border-color)',
-                          marginTop: '32px',
+                          marginTop: '0',
                           marginBottom: '32px'
                         }} {...props} />
                       ),
