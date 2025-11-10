@@ -10,6 +10,7 @@ import SuccessToast from '../components/SuccessToast';
 import CardSkeleton from '@/components/CardSkeleton';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+import Footer from '@/app/components/Footer';
 
 interface Company {
   id: string;
@@ -523,6 +524,7 @@ export default function CompaniesPage() {
           onClose={() => setSuccessMessage('')} 
         />
       )}
+      <Footer />
     </>
   );
 }

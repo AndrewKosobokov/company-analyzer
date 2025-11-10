@@ -7,6 +7,7 @@ import ProgressBar from '@/components/ProgressBar';
 import { useNotification } from '@/components/NotificationProvider';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+import Footer from '@/app/components/Footer';
 
 export default function AnalysisPage() {
   const [url, setUrl] = useState('');
@@ -415,6 +416,7 @@ export default function AnalysisPage() {
           </div>
         </div>
       )}
+      <Footer />
     </>
   );
 }

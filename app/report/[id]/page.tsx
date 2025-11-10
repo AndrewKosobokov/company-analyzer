@@ -10,6 +10,7 @@ import ReportTOC from '@/app/components/ReportTOC';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+import Footer from '@/app/components/Footer';
 
 interface ReportData {
   id: string;
@@ -275,7 +276,7 @@ export default function ReportPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container" style={{ maxWidth: '1400px', paddingTop: '64px', paddingBottom: '64px' }}>
+      <main className="container" style={{ maxWidth: '1400px', paddingTop: '96px', paddingBottom: '64px' }}>
         {/* Back Link */}
         <Link
           href="/companies"
@@ -1142,6 +1143,7 @@ export default function ReportPage() {
           }
         }
       `}</style>
+      <Footer />
     </>
   );
 }
