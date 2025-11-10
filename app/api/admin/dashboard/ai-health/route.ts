@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     const yesterday = new Date();
     yesterday.setHours(yesterday.getHours() - 24);
-    
+
     // Все анализы за последние 24 часа
     const allAnalyses = await prisma.analysis.findMany({
       where: {
@@ -43,32 +43,26 @@ export async function GET(request: Request) {
       }
     });
 
-    // Успешные генерации = анализы с непустым reportText и не помеченные как нецелевые
-    // Ошибки = можно определить как анализы с пустым reportText или с isNonTargetClient = true
-    // Но в реальности, если анализ создан, значит он успешен
-    // Ошибки логируются на уровне API, поэтому считаем что все созданные анализы - успешные
-    
-    // Для оценки ошибок используем логику:
-    // Если reportText пустой или слишком короткий (< 100 символов), считаем ошибкой
-    const errors = allAnalyses.filter(a => 
-      !a.reportText || 
-      a.reportText.trim().length < 100 ||
-      a.isNonTargetClient
+    // ИСПРАВЛЕНО: Ошибки = только анализы с пустым или коротким reportText
+    // Нецелевые клиенты (isNonTargetClient) — это УСПЕШНЫЕ анализы!
+    const errors = allAnalyses.filter(a =>
+      !a.reportText ||
+      a.reportText.trim().length < 100
+      // ← Убрали || a.isNonTargetClient
     ).length;
-    
+
     const totalAnalyses = allAnalyses.length;
-    
+
     // Success rate
     const successRate = totalAnalyses > 0
       ? ((totalAnalyses - errors) / totalAnalyses) * 100
       : 100;
-    
+
     // Среднее время генерации - в текущей схеме БД не хранится
     // Можно добавить позже поле generationTime в модель Analysis
-    // Пока возвращаем 0 или среднее значение из кэша (если есть)
-    // Для MVP используем заглушку: среднее время ~40 секунд
+    // Пока возвращаем заглушку: среднее время ~40 секунд
     const averageGenerationTime = 42; // TODO: добавить поле generationTime в модель Analysis
-    
+
     return NextResponse.json({
       errors24h: errors,
       averageGenerationTime,
@@ -82,4 +76,3 @@ export async function GET(request: Request) {
     await prisma.$disconnect();
   }
 }
-
