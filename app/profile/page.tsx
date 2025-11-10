@@ -6,7 +6,6 @@ import Link from 'next/link';
 import SuccessToast from '../components/SuccessToast';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
-import Footer from '@/app/components/Footer';
 
 interface UserProfile {
   name: string;
@@ -570,7 +569,6 @@ export default function ProfilePage() {
           onClose={() => setSuccessMessage('')} 
         />
       )}
-      <Footer />
     </>
   );
 }

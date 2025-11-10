@@ -3,7 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from '@/components/NotificationProvider';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/components/StructuredData';
-import Footer from '@/components/Footer';
+import Footer from './components/Footer';
 import './globals.css';
 
 export const metadata = {

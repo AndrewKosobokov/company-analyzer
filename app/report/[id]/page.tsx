@@ -10,7 +10,6 @@ import ReportTOC from '@/app/components/ReportTOC';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
-import Footer from '@/app/components/Footer';
 
 interface ReportData {
   id: string;
@@ -1143,7 +1142,6 @@ export default function ReportPage() {
           }
         }
       `}</style>
-      <Footer />
     </>
   );
 }
