@@ -22,18 +22,21 @@ interface Props {
 }
 
 export function UserDistributionChart({ data }: Props) {
+  const total = data.trial + data.start + data.optimal + data.profi;
+  
   const chartData = {
     labels: ['Trial', 'Start', 'Optimal', 'Profi'],
     datasets: [
       {
         data: [data.trial, data.start, data.optimal, data.profi],
         backgroundColor: [
-          '#E8E8ED',
-          '#D2D2D7',
-          '#86868B',
+          '#34C759',
+          '#007AFF',
+          '#FF9500',
           '#1D1D1F',
         ],
-        borderWidth: 0,
+        borderWidth: 2,
+        borderColor: '#FFFFFF',
       },
     ],
   };
@@ -98,8 +101,32 @@ export function UserDistributionChart({ data }: Props) {
       }}>
         Распределение пользователей
       </h3>
-      <div style={{ height: '256px', position: 'relative' }}>
-        <Pie data={chartData} options={options} />
+      {total === 0 ? (
+        <div style={{ 
+          height: '256px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          color: '#86868B',
+          fontSize: '15px'
+        }}>
+          Нет пользователей
+        </div>
+      ) : (
+        <div style={{ height: '256px', position: 'relative' }}>
+          <Pie data={chartData} options={options} />
+        </div>
+      )}
+      
+      {/* Статистика под диаграммой */}
+      <div style={{ 
+        marginTop: '24px', 
+        paddingTop: '16px', 
+        borderTop: '1px solid #E5E5E7',
+        fontSize: '13px',
+        color: '#86868B'
+      }}>
+        Всего пользователей: <span style={{ fontWeight: 600, color: '#1D1D1F' }}>{total}</span>
       </div>
     </div>
   );
