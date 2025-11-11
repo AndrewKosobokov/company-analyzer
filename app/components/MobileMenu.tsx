@@ -146,7 +146,7 @@ export default function MobileMenu() {
             Профиль
           </button>
 
-          {user.role === 'admin' && (
+          {(user as any).role === 'admin' && (
             <button
               onClick={() => handleNavigation('/admin/dashboard')}
               style={{
