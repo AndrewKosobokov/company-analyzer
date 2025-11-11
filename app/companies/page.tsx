@@ -108,8 +108,8 @@ export default function CompaniesPage() {
       const displayInn = innMatch ? innMatch[1] : company.companyInn;
       
       return (
-        displayName.toLowerCase().includes(query) ||
-        displayInn.includes(query) ||
+        (displayName?.toLowerCase().includes(query) || false) ||
+        (displayInn?.includes(query) || false) ||
         (company.companyName?.toLowerCase().includes(query) || false) ||
         (company.companyInn?.includes(query) || false)
       );
