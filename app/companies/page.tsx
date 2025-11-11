@@ -110,8 +110,8 @@ export default function CompaniesPage() {
       return (
         displayName.toLowerCase().includes(query) ||
         displayInn.includes(query) ||
-        company.companyName.toLowerCase().includes(query) ||
-        company.companyInn.includes(query)
+        (company.companyName?.toLowerCase().includes(query) || false) ||
+        (company.companyInn?.includes(query) || false)
       );
     });
   }, [companies, searchQuery]);
