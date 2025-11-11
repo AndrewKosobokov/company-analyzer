@@ -113,7 +113,8 @@ button, input, textarea, select {
 .button-primary {
   background: var(--button-primary);
   color: white;
-  padding: 14px 32px;
+  min-height: 44px;
+  padding: 16px 32px;
   border-radius: var(--radius-lg);
   border: none;
   font-size: 17px;
@@ -148,7 +149,8 @@ button, input, textarea, select {
 .button-secondary {
   background: transparent;
   color: var(--text-primary);
-  padding: 14px 32px;
+  min-height: 44px;
+  padding: 16px 32px;
   border-radius: var(--radius-lg);
   border: 2px solid var(--border-color);
   font-size: 17px;

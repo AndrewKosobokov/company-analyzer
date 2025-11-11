@@ -4,6 +4,7 @@ import { NotificationProvider } from '@/components/NotificationProvider';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/components/StructuredData';
 import Footer from './components/Footer';
+import MobileMenu from './components/MobileMenu';
 import './globals.css';
 
 export const metadata = {
@@ -84,6 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </ToastProvider>
           </NotificationProvider>
         </AuthProvider>
+        <MobileMenu />
       </body>
     </html>
   );

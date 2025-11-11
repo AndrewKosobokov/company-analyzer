@@ -1128,8 +1128,29 @@ export default function ReportPage() {
         }
         
         @media (max-width: 768px) {
+          .report-content {
+            font-size: 16px;
+            line-height: 1.6;
+            padding: 16px;
+          }
+          
+          .card {
+            padding: 20px;
+          }
+          
+          main.container {
+            padding: 16px;
+          }
+          
           .report-actions {
             flex-direction: column !important;
+          }
+          
+          .report-actions button,
+          button.button-secondary,
+          button.button-primary {
+            min-height: 44px !important;
+            padding: 16px 24px !important;
           }
           
           .report-actions button {

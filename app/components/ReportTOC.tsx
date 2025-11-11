@@ -8,6 +8,7 @@ interface ReportTOCProps {
 
 export default function ReportTOC({ items }: ReportTOCProps) {
   const [activeId, setActiveId] = useState<string>('');
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     // STEP 4: Verify IDs are assigned in DOM
@@ -95,6 +96,9 @@ export default function ReportTOC({ items }: ReportTOCProps) {
         block: 'start' 
       });
       
+      // Закрываем drawer на мобильных после клика
+      setIsOpen(false);
+      
       console.log('[TOC] Scroll initiated\n');
     } else {
       console.error(`[TOC] ❌ Element NOT found for ID: "${id}"`);
@@ -112,31 +116,186 @@ export default function ReportTOC({ items }: ReportTOCProps) {
   };
 
   return (
-    <nav className="report-toc-container">
-      <h3 style={{
-        fontSize: '14px',
-        fontWeight: '600',
-        color: 'var(--text-secondary)',
-        marginBottom: '16px',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em'
-      }}>
-        Содержание
-      </h3>
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {items.map(({ id, title }) => (
-          <li key={id}>
-            <button
-              onClick={() => scrollToId(id)}
-              className={`toc-link ${activeId === id ? 'active' : ''}`}
-              type="button"
-            >
-              {title}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <>
+      {/* Кнопка "Показать содержание" внизу экрана (только на мобильных) */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="toc-mobile-toggle"
+        style={{
+          display: 'none',
+          position: 'fixed',
+          bottom: '20px',
+          left: '20px',
+          right: '20px',
+          zIndex: 998,
+          background: '#1D1D1F',
+          color: '#FFF',
+          border: 'none',
+          borderRadius: '12px',
+          padding: '16px',
+          fontSize: '16px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          minHeight: '44px',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+        }}
+      >
+        Показать содержание
+      </button>
+
+      {/* Overlay для мобильных */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="toc-overlay"
+          style={{
+            display: 'none',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 999
+          }}
+        />
+      )}
+
+      {/* Desktop TOC (как было) */}
+      <nav className="report-toc-container report-toc-desktop">
+        <h3 style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: 'var(--text-secondary)',
+          marginBottom: '16px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          Содержание
+        </h3>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {items.map(({ id, title }) => (
+            <li key={id}>
+              <button
+                onClick={() => scrollToId(id)}
+                className={`toc-link ${activeId === id ? 'active' : ''}`}
+                type="button"
+              >
+                {title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* Mobile Drawer TOC */}
+      <nav
+        className="report-toc-container report-toc-mobile"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: isOpen ? 0 : '-280px',
+          width: '280px',
+          height: '100vh',
+          background: '#FFFFFF',
+          zIndex: 1000,
+          transition: 'left 0.3s ease',
+          boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
+          padding: '80px 24px 24px',
+          overflowY: 'auto',
+          display: 'none'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h3 style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            margin: 0
+          }}>
+            Содержание
+          </h3>
+          <button
+            onClick={() => setIsOpen(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              color: '#1D1D1F',
+              cursor: 'pointer',
+              padding: '0',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: '44px'
+            }}
+          >
+            ×
+          </button>
+        </div>
+        <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          {items.map(({ id, title }) => (
+            <li key={id}>
+              <button
+                onClick={() => scrollToId(id)}
+                className={`toc-link ${activeId === id ? 'active' : ''}`}
+                type="button"
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  padding: '16px',
+                  minHeight: '44px'
+                }}
+              >
+                {title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .toc-mobile-toggle {
+            display: block !important;
+          }
+          
+          .toc-overlay {
+            display: block !important;
+          }
+          
+          .report-toc-mobile {
+            display: block !important;
+          }
+          
+          .report-toc-desktop {
+            display: none !important;
+          }
+        }
+        
+        @media (min-width: 769px) {
+          .toc-mobile-toggle {
+            display: none !important;
+          }
+          
+          .toc-overlay {
+            display: none !important;
+          }
+          
+          .report-toc-mobile {
+            display: none !important;
+          }
+          
+          .report-toc-desktop {
+            display: block !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }
 
