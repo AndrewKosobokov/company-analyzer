@@ -185,93 +185,6 @@ export default function CompaniesPage() {
     logout();
   };
 
-  const generatePDF = async (companyName: string, inn: string, reportText: string): Promise<Blob> => {
-    const html2pdf = (await import('html2pdf.js')).default;
-    
-    const element = document.createElement('div');
-    const htmlContent = reportText
-      .replace(/## (.+)/g, '<h2 style="font-size: 16pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #1a1a1a;">$1</h2>')
-      .replace(/### (.+)/g, '<h3 style="font-size: 13pt; font-weight: bold; margin-top: 15px; margin-bottom: 8px; color: #333;">$1</h3>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/^\s*[-*+]\s+(.+)$/gm, '<li style="margin-left: 20px; margin-bottom: 5px;">$1</li>')
-      .replace(/\n\n/g, '</p><p style="margin: 8px 0; line-height: 1.5;">')
-      .replace(/\n/g, '<br/>');
-    
-    element.innerHTML = `
-      <div style="font-family: 'DejaVu Sans', Arial, sans-serif; padding: 20px; color: #1a1a1a; line-height: 1.6;">
-        <h1 style="font-size: 20pt; font-weight: bold; margin-bottom: 20px; text-align: center; color: #000;">АНАЛИТИЧЕСКИЙ ОТЧЕТ</h1>
-        <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-          <p style="margin: 5px 0;"><strong>Компания:</strong> ${companyName}</p>
-          <p style="margin: 5px 0;"><strong>ИНН:</strong> ${inn}</p>
-          <p style="margin: 5px 0;"><strong>Дата:</strong> ${new Date().toLocaleDateString('ru-RU')}</p>
-        </div>
-        <hr style="border: none; border-top: 2px solid #ddd; margin: 20px 0;" />
-        <div style="font-size: 10pt; line-height: 1.6;">
-          <p style="margin: 8px 0; line-height: 1.5;">${htmlContent}</p>
-        </div>
-      </div>
-    `;
-    
-    const opt = {
-      margin: [10, 15, 10, 15] as [number, number, number, number],
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        letterRendering: true
-      },
-      jsPDF: { 
-        unit: 'mm' as const, 
-        format: 'a4' as const, 
-        orientation: 'portrait' as const,
-        compress: true
-      }
-    };
-    
-    const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-    return pdfBlob as Blob;
-  };
-
-  const handleShare = async (company: Company, type: 'telegram' | 'whatsapp' | 'share') => {
-    try {
-      if (!company.reportText) {
-        setSuccessMessage('Отчёт недоступен');
-        return;
-      }
-
-      const companyMatch = company.reportText.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
-      const innMatch = company.reportText.match(/\*\*ИНН:\*\*\s*(\d+)/);
-      const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
-      const displayInn = innMatch ? innMatch[1] : company.companyInn;
-      
-      // Генерируем PDF
-      const pdfBlob = await generatePDF(displayName, displayInn, company.reportText);
-      const file = new File([pdfBlob], `${displayName}_report.pdf`, { type: 'application/pdf' });
-      
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Отчёт: ${displayName}`,
-          text: `Анализ компании ${displayName}`
-        });
-      } else {
-        // Fallback — скачать файл
-        const url = URL.createObjectURL(pdfBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${displayName}_report.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-      }
-      
-      setShareOpen(null);
-    } catch (error) {
-      console.error('Error sharing:', error);
-      setSuccessMessage('Ошибка при отправке');
-    }
-  };
-
   if (loading) {
     return (
       <>
@@ -545,7 +458,12 @@ export default function CompaniesPage() {
                             onClick={(e) => { 
                               e.preventDefault(); 
                               e.stopPropagation(); 
-                              handleShare(company, 'telegram');
+                              const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
+                              const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
+                              const shareUrl = `https://metalvector.ru/report/${company.id}`;
+                              const text = `Отчёт: ${displayName}`;
+                              window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, '_blank');
+                              setShareOpen(null);
                             }}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -558,7 +476,12 @@ export default function CompaniesPage() {
                             onClick={(e) => { 
                               e.preventDefault(); 
                               e.stopPropagation(); 
-                              handleShare(company, 'whatsapp');
+                              const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
+                              const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
+                              const shareUrl = `https://metalvector.ru/report/${company.id}`;
+                              const text = `Отчёт: ${displayName}`;
+                              window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`, '_blank');
+                              setShareOpen(null);
                             }}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
