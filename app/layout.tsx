@@ -82,10 +82,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </div>
                 <Footer />
               </div>
+              <MobileMenu />
             </ToastProvider>
           </NotificationProvider>
         </AuthProvider>
-        <MobileMenu />
       </body>
     </html>
   );
