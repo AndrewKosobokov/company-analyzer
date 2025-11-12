@@ -331,17 +331,16 @@ export default function AnalysisPage() {
             </div>
             
             {/* Dynamic hint text */}
-            <p className="form-hint" style={{
-              fontSize: '15px', 
-              color: 'var(--text-secondary)',
-              lineHeight: 1.5,
-              marginBottom: 'var(--space-lg)'
-            }}>
-              {noWebsite 
-                ? 'Введите ИНН компании для анализа по открытым источникам'
-                : 'Сервис анализирует компании по их сайту и открытым источникам. Если сайт недоступен, отметьте "Сайт отсутствует"'
-              }
-            </p>
+            {!noWebsite && (
+              <p className="form-hint" style={{
+                fontSize: '15px', 
+                color: 'var(--text-secondary)',
+                lineHeight: 1.5,
+                marginBottom: 'var(--space-lg)'
+              }}>
+                Если сайт недоступен, отметьте "Сайт отсутствует"
+              </p>
+            )}
             
             <button 
               type="submit" 
