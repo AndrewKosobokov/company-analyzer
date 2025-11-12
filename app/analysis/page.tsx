@@ -21,6 +21,8 @@ export default function AnalysisPage() {
   const [analysesRemaining, setAnalysesRemaining] = useState<number | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showUrlErrorModal, setShowUrlErrorModal] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const innInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
   const { showNotification } = useNotification();
@@ -54,6 +56,8 @@ export default function AnalysisPage() {
     setLoading(true);
     setProgress(0);
     setProgressMessage('Инициализация анализа...');
+    // Show progress bar with fade in
+    setTimeout(() => setShowProgress(true), 100);
     
     // Simulate progress with realistic stages
     const progressInterval = setInterval(() => {
@@ -120,6 +124,7 @@ export default function AnalysisPage() {
       setLoading(false);
       setProgress(0);
       setProgressMessage('');
+      setShowProgress(false);
     }
   };
   
@@ -147,6 +152,8 @@ export default function AnalysisPage() {
     };
     
     checkStatus();
+    // Trigger fade in animation after component mounts
+    setTimeout(() => setIsMounted(true), 50);
   }, []);
 
   // Progress bar animation
@@ -217,11 +224,17 @@ export default function AnalysisPage() {
       </header>
       
       {/* Main Content */}
-      <main className="page-container" style={{ 
-        maxWidth: '800px', 
-        margin: '0 auto', 
-        padding: 'var(--space-4xl) var(--space-lg)' 
-      }}>
+      <main 
+        className="page-container" 
+        style={{ 
+          maxWidth: '800px', 
+          margin: '0 auto', 
+          padding: 'var(--space-4xl) var(--space-lg)',
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+        }}
+      >
         <h1 style={{ 
           fontSize: '36px', 
           textAlign: 'center', 
@@ -232,7 +245,15 @@ export default function AnalysisPage() {
           Анализ компании
         </h1>
         
-        <div className="card">
+        <div 
+          className="card"
+          style={{
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
+            transitionDelay: '0.1s'
+          }}
+        >
           <form onSubmit={handleSubmit}>
             {/* Error Message */}
             {error && (
@@ -243,7 +264,9 @@ export default function AnalysisPage() {
                 borderRadius: 'var(--radius-md)',
                 marginBottom: 'var(--space-lg)',
                 fontSize: '15px',
-                textAlign: 'center'
+                textAlign: 'center',
+                opacity: 0,
+                animation: 'fadeIn 0.3s ease-out forwards'
               }}>
                 {error}
               </div>
@@ -355,14 +378,24 @@ export default function AnalysisPage() {
                 justifyContent: 'center',
                 background: loading ? '#6e6e73' : '#000000',
                 cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'all 0.15s ease'
+                transition: 'all 0.3s ease',
+                opacity: loading ? 0.6 : 1,
+                transform: loading ? 'scale(0.98)' : 'scale(1)'
               }}
             >
               {loading ? 'Анализ...' : 'Анализировать компанию'}
             </button>
             
             {loading && (
-              <div style={{ marginTop: '32px', textAlign: 'center' }}>
+              <div 
+                style={{ 
+                  marginTop: '32px', 
+                  textAlign: 'center',
+                  opacity: showProgress ? 1 : 0,
+                  transform: showProgress ? 'translateY(0)' : 'translateY(-10px)',
+                  transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+                }}
+              >
                 <ProgressBar 
                   progress={progress} 
                   message={progressMessage}
@@ -375,8 +408,22 @@ export default function AnalysisPage() {
       
       {/* Limit reached modal */}
       {showLimitModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowLimitModal(false)}>
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 px-10 py-8" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" 
+          onClick={() => setShowLimitModal(false)}
+          style={{
+            opacity: 0,
+            animation: 'fadeIn 0.2s ease-out forwards'
+          }}
+        >
+          <div 
+            className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 px-10 py-8" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              transform: 'scale(0.95)',
+              animation: 'modalSlideIn 0.3s ease-out forwards'
+            }}
+          >
             <button onClick={() => setShowLimitModal(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black" aria-label="Закрыть">×</button>
             <h2 className="text-2xl font-semibold text-black mb-4">Лимит анализов исчерпан</h2>
             <p className="text-base text-[#1d1d1f] leading-relaxed mb-8">Для дальнейшего использования ознакомьтесь с тарифами</p>
@@ -390,8 +437,22 @@ export default function AnalysisPage() {
 
       {/* URL analysis error modal */}
       {showUrlErrorModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowUrlErrorModal(false)}>
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 px-10 py-8" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" 
+          onClick={() => setShowUrlErrorModal(false)}
+          style={{
+            opacity: 0,
+            animation: 'fadeIn 0.2s ease-out forwards'
+          }}
+        >
+          <div 
+            className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 px-10 py-8" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              transform: 'scale(0.95)',
+              animation: 'modalSlideIn 0.3s ease-out forwards'
+            }}
+          >
             <button onClick={() => setShowUrlErrorModal(false)} className="absolute top-6 right-6 text-gray-400 hover:text-black" aria-label="Закрыть">×</button>
             <h2 className="text-2xl font-semibold text-black mb-4">Ошибка анализа</h2>
             <p className="text-base text-[#1d1d1f] leading-relaxed mb-8">Попробуйте ввести ИНН организации</p>
@@ -414,6 +475,29 @@ export default function AnalysisPage() {
           </div>
         </div>
       )}
+
+      {/* Animation styles */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes modalSlideIn {
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </>
   );
 }

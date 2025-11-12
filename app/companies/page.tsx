@@ -30,6 +30,8 @@ export default function CompaniesPage() {
   const [shareOpen, setShareOpen] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const router = useRouter();
   const { logout } = useAuth();
   
@@ -87,6 +89,8 @@ export default function CompaniesPage() {
         setError(err instanceof Error ? err.message : 'Не удалось загрузить список компаний');
       } finally {
         setLoading(false);
+        // Trigger fade in animation after content is loaded
+        setTimeout(() => setIsMounted(true), 50);
       }
     };
     
@@ -154,6 +158,7 @@ export default function CompaniesPage() {
   }, [searchQuery]);
 
   const handleDelete = async (id: string) => {
+    setDeletingId(id);
     try {
       const response = await fetch('/api/analysis/manage', {
         method: 'PATCH',
@@ -168,13 +173,19 @@ export default function CompaniesPage() {
       });
       
       if (response.ok) {
-        setCompanies((prev) => prev.filter(c => c.id !== id));
-        setSuccessMessage('Отчёт удалён');
+        // Wait for fade out animation before removing
+        setTimeout(() => {
+          setCompanies((prev) => prev.filter(c => c.id !== id));
+          setSuccessMessage('Отчёт удалён');
+          setDeletingId(null);
+        }, 300);
       } else {
         setError('Ошибка удаления');
+        setDeletingId(null);
       }
     } catch (err) {
       setError('Ошибка удаления');
+      setDeletingId(null);
     } finally {
       setShowDeleteModal(false);
       setDeleteTarget(null);
@@ -272,7 +283,17 @@ export default function CompaniesPage() {
         </div>
       </header>
       
-      <main className="container page-container" style={{ maxWidth: '1000px', paddingTop: '64px', paddingBottom: '64px' }}>
+      <main 
+        className="container page-container" 
+        style={{ 
+          maxWidth: '1000px', 
+          paddingTop: '64px', 
+          paddingBottom: '64px',
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+        }}
+      >
         <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
         
         {/* Search Bar - Show if there are companies or if searching */}
@@ -339,14 +360,37 @@ export default function CompaniesPage() {
         {/* Companies List */}
         {!error && !loading && filteredCompanies.length > 0 && (
           <div className="companies-list">
-            {filteredCompanies.map((company) => {
+            {filteredCompanies.map((company, index) => {
               const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
               const innMatch = company.reportText?.match(/\*\*ИНН:\*\*\s*(\d+)/);
               const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
               const displayInn = innMatch ? innMatch[1] : company.companyInn;
+              const isDeleting = deletingId === company.id;
 
               return (
-                <div key={company.id} className={`company-item card-hover ${shareOpen === company.id ? 'menu-open' : ''}`}>
+                <div 
+                  key={company.id} 
+                  className={`company-item card-hover ${shareOpen === company.id ? 'menu-open' : ''}`}
+                  style={{
+                    opacity: isDeleting ? 0 : (isMounted ? 1 : 0),
+                    transform: isDeleting ? 'translateX(-20px)' : (isMounted ? 'translateY(0)' : 'translateY(10px)'),
+                    transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                    transitionDelay: `${index * 50}ms`,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isDeleting) {
+                      e.currentTarget.style.transform = 'translateY(-4px)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isDeleting) {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                    }
+                  }}
+                >
                   <div className="company-info">
                     <Link href={`/report/${company.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                       <h3 className="company-name">
@@ -507,8 +551,34 @@ export default function CompaniesPage() {
       <ScrollToTop />
 
       {showDeleteModal && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '32px', maxWidth: '400px', width: '90%', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+        <div 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 1000,
+            opacity: 0,
+            animation: 'fadeIn 0.2s ease-out forwards'
+          }}
+        >
+          <div 
+            style={{ 
+              backgroundColor: 'white', 
+              borderRadius: '12px', 
+              padding: '32px', 
+              maxWidth: '400px', 
+              width: '90%', 
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              transform: 'scale(0.95)',
+              animation: 'modalSlideIn 0.3s ease-out forwards'
+            }}
+          >
             <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Удалить отчёт?</h3>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
               Это действие нельзя отменить. Отчёт будет удалён навсегда.
@@ -531,6 +601,29 @@ export default function CompaniesPage() {
           onClose={() => setSuccessMessage('')} 
         />
       )}
+
+      {/* Animation styles */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes modalSlideIn {
+          from {
+            transform: scale(0.95);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </>
   );
 }

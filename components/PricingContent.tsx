@@ -9,6 +9,7 @@ import { useAuth } from '@/app/context/AuthContext';
 export default function PricingContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const { logout } = useAuth();
@@ -16,6 +17,8 @@ export default function PricingContent() {
   useEffect(() => {
     const token = getToken();
     setIsLoggedIn(!!token);
+    // Trigger fade in animation after component mounts
+    setTimeout(() => setIsMounted(true), 50);
   }, []);
 
   useEffect(() => {
@@ -152,7 +155,16 @@ export default function PricingContent() {
       </header>
       
       {/* Main Content */}
-      <main className="container" style={{ paddingTop: '96px', paddingBottom: '96px' }}>
+      <main 
+        className="container" 
+        style={{ 
+          paddingTop: '96px', 
+          paddingBottom: '96px',
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+        }}
+      >
         <h1 style={{ fontSize: '48px', textAlign: 'center', marginBottom: '48px' }}>
           Тарифы
         </h1>
@@ -160,7 +172,23 @@ export default function PricingContent() {
         {/* Pricing Grid */}
         <div className="pricing-grid">
           {/* Card 1 - Start */}
-          <div className="pricing-card">
+          <div 
+            className="pricing-card"
+            style={{
+              opacity: isMounted ? 1 : 0,
+              transform: isMounted ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
+              transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+              transitionDelay: '0.1s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1.02)';
+              e.currentTarget.style.borderColor = 'var(--button-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.borderColor = '';
+            }}
+          >
             <h3 style={{ fontSize: '28px', marginBottom: '8px' }}>
               Start
             </h3>
@@ -200,7 +228,25 @@ export default function PricingContent() {
               onClick={() => handleSelectPlan('start')}
               disabled={loading === 'start'}
               className="button-primary"
-              style={{ width: '100%', marginTop: 'var(--space-lg)' }}
+              style={{ 
+                width: '100%', 
+                marginTop: 'var(--space-lg)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (loading !== 'start') {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
             >
               {loading === 'start' ? 'Загрузка...' : 'Выбрать Start'}
             </button>
@@ -218,7 +264,24 @@ export default function PricingContent() {
           </div>
           
           {/* Card 2 - Optimal (Recommended) */}
-          <div className="pricing-card recommended" style={{ position: 'relative' }}>
+          <div 
+            className="pricing-card recommended" 
+            style={{ 
+              position: 'relative',
+              opacity: isMounted ? 1 : 0,
+              transform: isMounted ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
+              transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+              transitionDelay: '0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1.02)';
+              e.currentTarget.style.borderColor = 'var(--button-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.borderColor = '';
+            }}
+          >
             {/* Recommended Badge */}
             <div style={{
               position: 'absolute',
@@ -275,7 +338,25 @@ export default function PricingContent() {
               onClick={() => handleSelectPlan('optimal')}
               disabled={loading === 'optimal'}
               className="button-primary"
-              style={{ width: '100%', marginTop: 'var(--space-lg)' }}
+              style={{ 
+                width: '100%', 
+                marginTop: 'var(--space-lg)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (loading !== 'optimal') {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
             >
               {loading === 'optimal' ? 'Загрузка...' : 'Выбрать Optimal'}
             </button>
@@ -293,7 +374,23 @@ export default function PricingContent() {
           </div>
           
           {/* Card 3 - Profi */}
-          <div className="pricing-card">
+          <div 
+            className="pricing-card"
+            style={{
+              opacity: isMounted ? 1 : 0,
+              transform: isMounted ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.95)',
+              transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+              transitionDelay: '0.3s'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1.02)';
+              e.currentTarget.style.borderColor = 'var(--button-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0) scale(1)';
+              e.currentTarget.style.borderColor = '';
+            }}
+          >
             <h3 style={{ fontSize: '28px', marginBottom: '8px' }}>
               Profi
             </h3>
@@ -333,7 +430,25 @@ export default function PricingContent() {
               onClick={() => handleSelectPlan('profi')}
               disabled={loading === 'profi'}
               className="button-primary"
-              style={{ width: '100%', marginTop: 'var(--space-lg)' }}
+              style={{ 
+                width: '100%', 
+                marginTop: 'var(--space-lg)',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (loading !== 'profi') {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
             >
               {loading === 'profi' ? 'Загрузка...' : 'Выбрать Profi'}
             </button>

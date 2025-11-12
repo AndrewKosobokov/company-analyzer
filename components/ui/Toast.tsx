@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 
 type ToastVariant = 'info' | 'success' | 'error' | 'warning';
 
@@ -12,7 +12,14 @@ type ToastProps = {
 };
 
 export default function Toast({ id, message, variant = 'info', onClose }: ToastProps) {
-  const baseClasses = 'pointer-events-auto w-full max-w-[400px] rounded-2xl shadow-lg ring-1 transition-all duration-300 ease-in-out';
+  const [isClosing, setIsClosing] = useState(false);
+  
+  const handleClose = () => {
+    setIsClosing(true);
+    setTimeout(() => onClose(id), 300);
+  };
+  
+  const baseClasses = `pointer-events-auto w-full max-w-[400px] rounded-2xl shadow-lg ring-1 transition-all duration-300 ease-in-out ${isClosing ? 'opacity-0 translate-x-full' : 'opacity-100 translate-x-0'}`;
 
   const variantClasses =
     variant === 'error'
@@ -53,7 +60,7 @@ export default function Toast({ id, message, variant = 'info', onClose }: ToastP
         </div>
         <button
           aria-label="Закрыть"
-          onClick={() => onClose(id)}
+          onClick={handleClose}
           className="shrink-0 rounded-full p-1 text-[#86868B] hover:text-black transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
