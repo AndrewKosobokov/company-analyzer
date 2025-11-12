@@ -10,6 +10,7 @@ import UsersTable from './components/UsersTable';
 export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const { logout } = useAuth();
 
@@ -38,6 +39,8 @@ export default function UsersPage() {
         }
         
         setLoading(false);
+        // Trigger fade in animation after content is loaded
+        setTimeout(() => setIsMounted(true), 50);
       } catch {
         setError('Ошибка проверки авторизации');
         setLoading(false);
@@ -82,7 +85,16 @@ export default function UsersPage() {
         </div>
       </header>
 
-      <main className="container" style={{ maxWidth: '1400px', paddingTop: '120px' }}>
+      <main 
+        className="container" 
+        style={{ 
+          maxWidth: '1400px', 
+          paddingTop: '120px',
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+        }}
+      >
         <Link 
           href="/admin"
           style={{
@@ -111,7 +123,16 @@ export default function UsersPage() {
           ← Назад
         </Link>
         <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Управление пользователями</h1>
-        <UsersTable />
+        <div
+          style={{
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+            transitionDelay: '0.1s'
+          }}
+        >
+          <UsersTable />
+        </div>
       </main>
     </div>
   );

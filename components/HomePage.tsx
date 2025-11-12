@@ -3,16 +3,19 @@
 import Link from 'next/link';
 import { useAuth } from '../app/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function HomePage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
       router.push('/analysis');
     }
+    // Trigger fade in animation after component mounts
+    setTimeout(() => setIsMounted(true), 50);
   }, [user, loading, router]);
 
   if (loading) {
@@ -38,7 +41,14 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section */}
-      <section className="hero">
+      <section 
+        className="hero"
+        style={{
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? 'translateY(0)' : 'translateY(-20px)',
+          transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
+        }}
+      >
         <h1>Металл Вектор</h1>
         <p className="subtitle">Аналитика. Фокус. Результат.</p>
         <p>
@@ -47,8 +57,36 @@ export default function HomePage() {
 Мы выявляем скрытые потребности в редких и сертифицированных позициях, превращая холодные звонки в экспертные переговоры с <strong>готовым скриптом</strong>.
         </p>
         <div className="hero-buttons">
-          <Link href="/login" className="button-primary">Начать бесплатно</Link>
-          <Link href="/pricing" className="button-secondary">Посмотреть тарифы</Link>
+          <Link 
+            href="/login" 
+            className="button-primary"
+            style={{ transition: 'all 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
+          >
+            Начать бесплатно
+          </Link>
+          <Link 
+            href="/pricing" 
+            className="button-secondary"
+            style={{ transition: 'all 0.3s ease' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '';
+            }}
+          >
+            Посмотреть тарифы
+          </Link>
         </div>
       </section>
 
@@ -65,29 +103,35 @@ export default function HomePage() {
             gap: 'var(--space-xl)',
             marginTop: 'var(--space-2xl)'
           }}>
-            <div className="card">
-              <h3 style={{ fontSize: '24px', marginBottom: 'var(--space-md)' }}>Аналитика</h3>
-              <p style={{ color: 'var(--text-tertiary)' }}>
-                Подробные отчеты для оценки финансового положения компании
-			и выявления ее реальных потребностей в снабжении.
-              </p>
-            </div>
-
-            <div className="card">
-              <h3 style={{ fontSize: '24px', marginBottom: 'var(--space-md)' }}>Фокус</h3>
-              <p style={{ color: 'var(--text-tertiary)' }}>
-                Полное представление о структуре, приоритетах и "болях" клиента. 
-			Вы точно понимаете задачи организации и предлагаете идеальные решения.
-              </p>
-            </div>
-
-            <div className="card">
-              <h3 style={{ fontSize: '24px', marginBottom: 'var(--space-md)' }}>Результат</h3>
-              <p style={{ color: 'var(--text-tertiary)' }}>
-                Выгодные контракты по сложным и высокомаржинальным позициям. 
-			Вы зарабатываете там, где конкуренты теряются.
-              </p>
-            </div>
+            {[
+              { title: 'Аналитика', text: 'Подробные отчеты для оценки финансового положения компании\n\t\t\tи выявления ее реальных потребностей в снабжении.' },
+              { title: 'Фокус', text: 'Полное представление о структуре, приоритетах и "болях" клиента. \n\t\t\tВы точно понимаете задачи организации и предлагаете идеальные решения.' },
+              { title: 'Результат', text: 'Выгодные контракты по сложным и высокомаржинальным позициям. \n\t\t\tВы зарабатываете там, где конкуренты теряются.' }
+            ].map((card, index) => (
+              <div 
+                key={index}
+                className="card"
+                style={{
+                  opacity: isMounted ? 1 : 0,
+                  transform: isMounted ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+                  transitionDelay: `${(index * 0.15) + 0.3}s`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '';
+                }}
+              >
+                <h3 style={{ fontSize: '24px', marginBottom: 'var(--space-md)' }}>{card.title}</h3>
+                <p style={{ color: 'var(--text-tertiary)' }}>
+                  {card.text}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

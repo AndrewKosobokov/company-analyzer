@@ -62,6 +62,7 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState(30);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const { logout } = useAuth();
 
@@ -115,6 +116,8 @@ export default function DashboardPage() {
         setError('Не удалось загрузить данные. Проверьте подключение к серверу.');
       } finally {
         setLoading(false);
+        // Trigger fade in animation after content is loaded
+        setTimeout(() => setIsMounted(true), 50);
       }
     }
     
@@ -300,11 +303,16 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '32px 24px'
-        }}>
+        <div 
+          style={{
+            maxWidth: '1280px',
+            margin: '0 auto',
+            padding: '32px 24px',
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
+            transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+          }}
+        >
           {/* Переключатель периода */}
           <div style={{
             display: 'flex',
@@ -349,43 +357,31 @@ export default function DashboardPage() {
             gap: '16px',
             marginBottom: '32px'
           }}>
-            <MetricCard
-              icon={<DollarSign size={24} color="#1D1D1F" />}
-              title="Доход"
-              value={`${metrics.revenue.total.toLocaleString('ru-RU')} ₽`}
-              subtitle={`за ${period} дней`}
-              change={metrics.revenue.change}
-            />
-            
-            <MetricCard
-              icon={<CreditCard size={24} color="#1D1D1F" />}
-              title="Средний чек"
-              value={`${metrics.averageOrderValue.current.toLocaleString('ru-RU')} ₽`}
-              change={metrics.averageOrderValue.change}
-            />
-            
-            <MetricCard
-              icon={<TrendingUp size={24} color="#1D1D1F" />}
-              title="Конверсия"
-              value={`${metrics.conversionRate.trialToPaid.toFixed(1)}%`}
-              subtitle="Trial → Paid"
-              change={metrics.conversionRate.change}
-            />
-            
-            <MetricCard
-              icon={<RefreshCw size={24} color="#1D1D1F" />}
-              title="Повторные покупки"
-              value={`${metrics.repeatPurchases.rate.toFixed(1)}%`}
-              change={metrics.repeatPurchases.change}
-            />
-
-            <MetricCard
-              icon={<Users size={24} color="#1D1D1F" />}
-              title="Новые регистрации"
-              value={metrics.newRegistrations.count}
-              subtitle={`за ${period} дней`}
-              change={metrics.newRegistrations.change}
-            />
+            {[
+              { icon: <DollarSign size={24} color="#1D1D1F" />, title: "Доход", value: `${metrics.revenue.total.toLocaleString('ru-RU')} ₽`, subtitle: `за ${period} дней`, change: metrics.revenue.change },
+              { icon: <CreditCard size={24} color="#1D1D1F" />, title: "Средний чек", value: `${metrics.averageOrderValue.current.toLocaleString('ru-RU')} ₽`, change: metrics.averageOrderValue.change },
+              { icon: <TrendingUp size={24} color="#1D1D1F" />, title: "Конверсия", value: `${metrics.conversionRate.trialToPaid.toFixed(1)}%`, subtitle: "Trial → Paid", change: metrics.conversionRate.change },
+              { icon: <RefreshCw size={24} color="#1D1D1F" />, title: "Повторные покупки", value: `${metrics.repeatPurchases.rate.toFixed(1)}%`, change: metrics.repeatPurchases.change },
+              { icon: <Users size={24} color="#1D1D1F" />, title: "Новые регистрации", value: metrics.newRegistrations.count, subtitle: `за ${period} дней`, change: metrics.newRegistrations.change }
+            ].map((card, index) => (
+              <div
+                key={index}
+                style={{
+                  opacity: isMounted ? 1 : 0,
+                  transform: isMounted ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+                  transitionDelay: `${(index * 0.1) + 0.2}s`
+                }}
+              >
+                <MetricCard
+                  icon={card.icon}
+                  title={card.title}
+                  value={card.value}
+                  subtitle={card.subtitle}
+                  change={card.change}
+                />
+              </div>
+            ))}
           </div>
 
           {/* Нижний блок: график + AI здоровье */}

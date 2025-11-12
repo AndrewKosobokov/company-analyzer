@@ -37,6 +37,8 @@ export default function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [totalAnalyses, setTotalAnalyses] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+  const [progressWidth, setProgressWidth] = useState(0);
   const router = useRouter();
   const { logout } = useAuth();
   
@@ -85,6 +87,8 @@ export default function ProfilePage() {
         setError('Ошибка загрузки данных профиля');
       } finally {
         setLoading(false);
+        // Trigger fade in animation after content is loaded
+        setTimeout(() => setIsMounted(true), 50);
       }
     };
     
@@ -109,8 +113,17 @@ export default function ProfilePage() {
       const data = await res.json();
       setTotalAnalyses(data.count || 0);
     };
-    if (profile) fetchAnalysesCount();
-  }, [profile]);
+    if (profile) {
+      fetchAnalysesCount();
+      // Animate progress bar after data is loaded
+      setTimeout(() => {
+        const totalBalance = (profile.analysesRemaining + (totalAnalyses || 0)) || 1;
+        const used = totalAnalyses || 0;
+        const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
+        setProgressWidth(percentage);
+      }, 300);
+    }
+  }, [profile, totalAnalyses]);
   
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,13 +243,31 @@ export default function ProfilePage() {
       </header>
       
       {/* Main Content */}
-      <main className="container" style={{ maxWidth: '900px', paddingTop: '64px', paddingBottom: '64px' }}>
+      <main 
+        className="container" 
+        style={{ 
+          maxWidth: '900px', 
+          paddingTop: '64px', 
+          paddingBottom: '64px',
+          opacity: isMounted ? 1 : 0,
+          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
+          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+        }}
+      >
         <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>
           Профиль
         </h1>
         
         {/* Section 1: Personal Info */}
-        <div className="profile-section">
+        <div 
+          className="profile-section"
+          style={{
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+            transitionDelay: '0.1s'
+          }}
+        >
           <h2 style={{ 
             fontSize: '28px', 
             marginBottom: 'var(--space-lg)',
@@ -306,7 +337,15 @@ export default function ProfilePage() {
         )}
 
         {/* Section 2: My Tariff */}
-        <div className="profile-section">
+        <div 
+          className="profile-section"
+          style={{
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+            transitionDelay: '0.2s'
+          }}
+        >
           <h2 style={{ 
             fontSize: '28px', 
             marginBottom: 'var(--space-lg)',
@@ -347,11 +386,11 @@ export default function ProfilePage() {
                     </div>
                     <div style={{ marginTop: '12px', width: '100%', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ 
-                        width: `${percentage}%`, 
+                        width: `${progressWidth || percentage}%`, 
                         height: '100%', 
                         background: percentage > 80 ? '#FF3B30' : '#34C759', 
                         borderRadius: '4px',
-                        transition: 'width 0.3s ease'
+                        transition: 'width 0.5s ease-out'
                       }} />
                     </div>
                   </>
@@ -386,9 +425,9 @@ export default function ProfilePage() {
                   }}>
                     <div style={{
                       height: '100%',
-                      width: `${percentage}%`,
+                      width: `${progressWidth || percentage}%`,
                       backgroundColor: 'var(--brand-primary)',
-                      transition: 'width 0.3s ease'
+                      transition: 'width 0.5s ease-out'
                     }} />
                   </div>
                 </div>
@@ -412,7 +451,15 @@ export default function ProfilePage() {
         </div>
         
         {/* Section 3: Security */}
-        <div className="profile-section">
+        <div 
+          className="profile-section"
+          style={{
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+            transitionDelay: '0.3s'
+          }}
+        >
           <h2 style={{ 
             fontSize: '28px', 
             marginBottom: 'var(--space-lg)',
@@ -499,7 +546,15 @@ export default function ProfilePage() {
         </div>
         
         {/* Section 4: Payment History */}
-        <div className="profile-section">
+        <div 
+          className="profile-section"
+          style={{
+            opacity: isMounted ? 1 : 0,
+            transform: isMounted ? 'translateY(0)' : 'translateY(10px)',
+            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+            transitionDelay: '0.4s'
+          }}
+        >
           <h2 style={{ 
             fontSize: '28px', 
             marginBottom: 'var(--space-lg)',
