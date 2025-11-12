@@ -9,19 +9,22 @@ export default function Footer() {
       backgroundColor: '#FFFFFF',
       textAlign: 'center'
     }}>
-      <a
-        href="mailto:support@metalvector.ru"
-        style={{
-          color: '#1D1D1F',
-          textDecoration: 'none',
-          fontSize: '15px',
-          transition: 'color 0.2s'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.color = '#86868B'}
-        onMouseLeave={(e) => e.currentTarget.style.color = '#1D1D1F'}
-      >
-        support@metalvector.ru
-      </a>
+      <span style={{ fontSize: '15px', color: '#1D1D1F' }}>
+        Служба поддержки:{' '}
+        <a
+          href="mailto:support@metalvector.ru"
+          style={{
+            color: '#1D1D1F',
+            textDecoration: 'none',
+            fontSize: '15px',
+            transition: 'color 0.2s'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = '#86868B'}
+          onMouseLeave={(e) => e.currentTarget.style.color = '#1D1D1F'}
+        >
+          support@metalvector.ru
+        </a>
+      </span>
     </footer>
   );
 }
