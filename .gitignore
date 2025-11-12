@@ -6,3 +6,5 @@ node_modules/
 gcp-service-account.json
 build.log
 main
+gen-lang-client-0523149055-26537c6d784b.json
+.env
