@@ -57,6 +57,8 @@ export default function ReportPage() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showFirstContact, setShowFirstContact] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { showToast } = useToast();
   const { logout } = useAuth();
   
@@ -112,6 +114,8 @@ export default function ReportPage() {
         setError(err instanceof Error ? err.message : 'Не удалось загрузить отчет');
       } finally {
         setLoading(false);
+        // Trigger fade in animation after content is loaded
+        setTimeout(() => setIsMounted(true), 50);
       }
     };
     
@@ -308,7 +312,23 @@ export default function ReportPage() {
             {/* First Contact Example Button */}
             {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && report.firstContactExample && (
               <button
-                onClick={() => setShowFirstContact(!showFirstContact)}
+                onClick={() => {
+                  // Start transition
+                  setIsTransitioning(true);
+                  
+                  // Fade out, then change content and fade in
+                  setTimeout(() => {
+                    setShowFirstContact(!showFirstContact);
+                    // Scroll to top smoothly
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Fade in after React has rendered the new content
+                    requestAnimationFrame(() => {
+                      setTimeout(() => {
+                        setIsTransitioning(false);
+                      }, 50);
+                    });
+                  }, 300); // Half of transition duration
+                }}
                 style={{
                   width: '100%',
                   padding: '16px 20px',
@@ -345,7 +365,14 @@ export default function ReportPage() {
           
           {/* Report Card - Only show when NOT viewing script */}
           {!showFirstContact && (
-          <div className="card">
+          <div 
+            className="card"
+            style={{
+              opacity: isMounted && !isTransitioning ? 1 : 0,
+              transform: isMounted && !isTransitioning ? 'translateY(0)' : 'translateY(-10px)',
+              transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+            }}
+          >
           {/* Header Section */}
           <div>
             {(() => {
@@ -807,7 +834,14 @@ export default function ReportPage() {
             const displayName = companyName || report.companyName;
             
             return (
-              <div className="card">
+              <div 
+                className="card"
+                style={{
+                  opacity: isMounted && !isTransitioning ? 1 : 0,
+                  transform: isMounted && !isTransitioning ? 'translateY(0)' : 'translateY(-10px)',
+                  transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+                }}
+              >
                 {/* Header Section */}
                 <div>
                   <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '8px' }}>
