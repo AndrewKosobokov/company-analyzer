@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
-import Footer from '@/app/components/Footer';
 
 export default function PricingContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -351,20 +350,7 @@ export default function PricingContent() {
             </p>
           </div>
         </div>
-        
-        {/* Bottom Text */}
-        <p style={{ 
-          maxWidth: '900px', 
-          margin: '64px auto 0', 
-          textAlign: 'center', 
-          fontSize: '17px', 
-          color: 'var(--text-tertiary)',
-          lineHeight: '1.6'
-        }}>
-          Получите максимум возможностей с любым тарифом: полный анализ компаний, сохранение и экспорт отчетов в PDF и Word. При этом, использование «Целевого предложения» внутри отчета не уменьшает количество доступных вам анализов.
-        </p>
       </main>
-      <Footer />
     </div>
   );
 }
