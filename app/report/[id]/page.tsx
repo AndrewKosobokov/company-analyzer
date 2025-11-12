@@ -382,6 +382,29 @@ export default function ReportPage() {
             <button 
               onClick={async () => {
                 try {
+                  const { exportToWord } = await import('@/utils/exportReport');
+                  const { companyName, inn } = extractCompanyInfo(report.reportText);
+                  await exportToWord(
+                    companyName || report.companyName, 
+                    inn || report.companyInn, 
+                    report.reportText
+                  );
+                } catch (error) {
+                  showToast('Ошибка экспорта в Word', { variant: 'error' });
+                }
+              }} 
+              className="button-secondary"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
+                <path d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm220.1-208c-5.7 0-10.6 4-11.7 9.5-20.6 97.7-20.4 95.4-21 103.5-.2-1.2-.4-2.6-.7-4.3-.8-5.1.3.2-23.6-99.5-1.3-5.4-6.1-9.2-11.7-9.2h-13.3c-5.5 0-10.3 3.8-11.7 9.1-24.4 99-24 96.2-24.8 103.7-.1-1.1-.2-2.5-.5-4.2-.7-5.2-14.1-73.3-19.1-99-1.1-5.6-6-9.7-11.8-9.7h-16.8c-7.8 0-13.5 7.3-11.7 14.8 8 32.6 26.7 109.5 33.2 136 1.3 5.4 6.1 9.1 11.7 9.1h25.2c5.5 0 10.3-3.7 11.6-9.1l17.9-71.4c1.5-6.2 2.5-12 3-17.3l2.9 17.3c.1.4 12.6 50.5 17.9 71.4 1.3 5.3 6.1 9.1 11.6 9.1h24.7c5.5 0 10.3-3.7 11.6-9.1 20.8-81.9 30.2-119 34.5-136 1.9-7.6-3.8-14.9-11.6-14.9h-15.8z"/>
+              </svg>
+              Word
+            </button>
+            
+            <button 
+              onClick={async () => {
+                try {
                   const { exportToPDF } = await import('@/utils/exportReport');
                   const { companyName, inn } = extractCompanyInfo(report.reportText);
                   
@@ -457,29 +480,22 @@ export default function ReportPage() {
               PDF
             </button>
             
+            {/* Print Button */}
             <button 
-              onClick={async () => {
-                try {
-                  const { exportToWord } = await import('@/utils/exportReport');
-                  const { companyName, inn } = extractCompanyInfo(report.reportText);
-                  await exportToWord(
-                    companyName || report.companyName, 
-                    inn || report.companyInn, 
-                    report.reportText
-                  );
-                } catch (error) {
-                  showToast('Ошибка экспорта в Word', { variant: 'error' });
-                }
+              onClick={() => {
+                window.print();
               }} 
               className="button-secondary"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              title="Печать отчёта"
             >
-              <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
-                <path d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm220.1-208c-5.7 0-10.6 4-11.7 9.5-20.6 97.7-20.4 95.4-21 103.5-.2-1.2-.4-2.6-.7-4.3-.8-5.1.3.2-23.6-99.5-1.3-5.4-6.1-9.2-11.7-9.2h-13.3c-5.5 0-10.3 3.8-11.7 9.1-24.4 99-24 96.2-24.8 103.7-.1-1.1-.2-2.5-.5-4.2-.7-5.2-14.1-73.3-19.1-99-1.1-5.6-6-9.7-11.8-9.7h-16.8c-7.8 0-13.5 7.3-11.7 14.8 8 32.6 26.7 109.5 33.2 136 1.3 5.4 6.1 9.1 11.7 9.1h25.2c5.5 0 10.3-3.7 11.6-9.1l17.9-71.4c1.5-6.2 2.5-12 3-17.3l2.9 17.3c.1.4 12.6 50.5 17.9 71.4 1.3 5.3 6.1 9.1 11.6 9.1h24.7c5.5 0 10.3-3.7 11.6-9.1 20.8-81.9 30.2-119 34.5-136 1.9-7.6-3.8-14.9-11.6-14.9h-15.8z"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 6 2 18 2 18 9"/>
+                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                <rect x="6" y="14" width="12" height="8"/>
               </svg>
-              Word
+              Печать
             </button>
-
 
             {/* Copy Button */}
             <button 
@@ -928,6 +944,23 @@ export default function ReportPage() {
                     Word
                   </button>
 
+                  {/* Print Button */}
+                  <button 
+                    onClick={() => {
+                      window.print();
+                    }} 
+                    className="button-secondary"
+                    style={{ padding: '16px 24px', minHeight: '44px', display: 'flex', alignItems: 'center', gap: '8px' }}
+                    title="Печать скрипта"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="6 9 6 2 18 2 18 9"/>
+                      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                      <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    Печать
+                  </button>
+
                   {/* Copy Button */}
                   <button 
                     onClick={async () => {
@@ -1267,6 +1300,141 @@ export default function ReportPage() {
           .report-layout > div:first-child {
             position: relative !important;
             top: 0 !important;
+          }
+        }
+        
+        @media print {
+          /* СКРЫВАЕМ ВСЁ ЛИШНЕЕ */
+          header,
+          footer,
+          nav,
+          button,
+          aside,
+          .print-button,
+          .report-actions,
+          .report-layout > div:first-child,
+          a[href^="/"] {
+            display: none !important;
+          }
+
+          /* СБРОС body */
+          body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            width: 100% !important;
+          }
+
+          /* КОНТЕНТ НА ВСЮ ШИРИНУ - АГРЕССИВНО */
+          body * {
+            max-width: none !important;
+          }
+
+          main,
+          .container,
+          .page-container,
+          .report-content,
+          .card,
+          div[style*="max-width"],
+          div[style*="maxWidth"] {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+
+          /* Поля страницы */
+          @page {
+            margin: 2cm;
+            size: A4 portrait;
+          }
+
+          /* Контент с правильными отступами */
+          main > *,
+          .report-content > * {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+          }
+
+          .report-layout {
+            display: block !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+
+          /* Текст читаемый */
+          body, p, div, span {
+            font-size: 12pt !important;
+            line-height: 1.5 !important;
+            color: #000 !important;
+          }
+
+          /* Заголовки */
+          h1 { 
+            font-size: 24pt !important; 
+            page-break-after: avoid !important;
+            color: #000 !important;
+          }
+          h2 { 
+            font-size: 18pt !important; 
+            page-break-after: avoid !important;
+            color: #000 !important;
+          }
+          h3 { 
+            font-size: 14pt !important; 
+            page-break-after: avoid !important;
+            color: #000 !important;
+          }
+
+          /* Избегаем разрывов */
+          p {
+            orphans: 3 !important;
+            widows: 3 !important;
+            color: #000 !important;
+          }
+
+          .markdown-content {
+            color: #000 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+
+          .markdown-content p,
+          .markdown-content li {
+            color: #000 !important;
+          }
+
+          /* КРИТИЧНО: убираем все inline стили которые ограничивают ширину */
+          [style*="maxWidth"],
+          [style*="max-width"],
+          [style*="maxWidth"],
+          [style*="MaxWidth"] {
+            max-width: none !important;
+            width: 100% !important;
+          }
+
+          [style*="margin: 0 auto"],
+          [style*="margin:0 auto"],
+          [style*="margin: 0px auto"],
+          [style*="margin:0px auto"],
+          [style*="marginLeft"],
+          [style*="marginRight"] {
+            margin: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+          }
+
+          /* Перебиваем inline стили main и container */
+          main.container,
+          main[class*="container"],
+          main[style*="maxWidth"],
+          main[style*="max-width"] {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
         }
       `}</style>
