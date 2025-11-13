@@ -1,15 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { exportToPDF, exportToWord, copyToClipboard } from '@/utils/exportReport';
-import ScrollToTop from '@/components/ScrollToTop';
-import SearchBar from '../components/SearchBar';
-import SuccessToast from '../components/SuccessToast';
-import CardSkeleton from '@/components/CardSkeleton';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+
+const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), { ssr: false });
+const SearchBar = dynamic(() => import('../components/SearchBar'), { ssr: false });
+const SuccessToast = dynamic(() => import('../components/SuccessToast'), { ssr: false });
+const CardSkeleton = dynamic(() => import('@/components/CardSkeleton'), { ssr: false });
 
 interface Company {
   id: string;
@@ -357,14 +358,11 @@ export default function CompaniesPage() {
       </header>
       
       <main 
-        className="container page-container" 
+        className="container page-container companies-container" 
         style={{ 
           maxWidth: '1000px', 
           paddingTop: '64px', 
-          paddingBottom: '64px',
-          opacity: isMounted ? 1 : 0,
-          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
-          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+          paddingBottom: '64px'
         }}
       >
         <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
@@ -395,7 +393,7 @@ export default function CompaniesPage() {
             <p style={{ fontSize: '17px', marginBottom: '32px' }}>
               Создайте первый анализ компании
             </p>
-            <Link href="/analysis" className="button-primary" style={{ display: 'inline-block', padding: '12px 32px' }}>
+            <Link href="/analysis" className="button-primary" style={{ display: 'inline-block', padding: '12px 32px', transition: 'all 0.2s ease' }}>
               Создать первый анализ
             </Link>
           </div>
@@ -406,8 +404,7 @@ export default function CompaniesPage() {
           <div style={{ 
             textAlign: 'center', 
             padding: '64px 24px',
-            color: 'var(--text-secondary)',
-            animation: 'fadeIn 0.3s ease'
+            color: 'var(--text-secondary)'
           }}>
             <p style={{ fontSize: '20px', fontWeight: 500, marginBottom: '12px', color: 'var(--text-primary)' }}>
               Ничего не найдено
@@ -445,10 +442,9 @@ export default function CompaniesPage() {
                   key={company.id} 
                   className={`company-item card-hover ${shareOpen === company.id ? 'menu-open' : ''}`}
                   style={{
-                    opacity: isDeleting ? 0 : (isMounted ? 1 : 0),
-                    transform: isDeleting ? 'translateX(-20px)' : (isMounted ? 'translateY(0)' : 'translateY(10px)'),
-                    transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                    transitionDelay: `${index * 50}ms`,
+                    opacity: isDeleting ? 0 : 1,
+                    transform: isDeleting ? 'translateX(-20px)' : 'translateY(0)',
+                    transition: isDeleting ? 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out' : 'all 0.3s ease',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                   }}
                   onMouseEnter={(e) => {
@@ -476,7 +472,7 @@ export default function CompaniesPage() {
                   </div>
                   
                   <div className="company-actions">
-                    <Link href={`/report/${company.id}`} className="button-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
+                    <Link href={`/report/${company.id}`} className="button-primary" style={{ fontSize: '14px', padding: '6px 12px', transition: 'all 0.2s ease' }}>
                       Открыть
                     </Link>
                     
@@ -488,7 +484,7 @@ export default function CompaniesPage() {
                           setShareOpen(shareOpen === company.id ? null : company.id); 
                         }} 
                         className="button-secondary" 
-                        style={{ fontSize: '14px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        style={{ fontSize: '14px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease' }}
                       >
                         Поделиться
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: shareOpen === company.id ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
@@ -505,6 +501,7 @@ export default function CompaniesPage() {
                               e.preventDefault(); 
                               e.stopPropagation(); 
                               try { 
+                                const { exportToPDF } = await import('@/utils/exportReport');
                                 await exportToPDF(displayName, displayInn, company.reportText || ''); 
                                 setShareOpen(null);
                               } catch (error) { 
@@ -524,6 +521,7 @@ export default function CompaniesPage() {
                               e.preventDefault(); 
                               e.stopPropagation(); 
                               try { 
+                                const { exportToWord } = await import('@/utils/exportReport');
                                 await exportToWord(displayName, displayInn, company.reportText || ''); 
                                 setShareOpen(null);
                               } catch (error) { 
@@ -543,12 +541,17 @@ export default function CompaniesPage() {
                             onClick={async (e) => { 
                               e.preventDefault(); 
                               e.stopPropagation(); 
-                              const success = await copyToClipboard(company.reportText || ''); 
-                              if (success) { 
-                                setCopySuccess(company.id); 
-                                setTimeout(() => setCopySuccess(null), 2000); 
-                                setShareOpen(null);
-                              } else { 
+                              try {
+                                const { copyToClipboard } = await import('@/utils/exportReport');
+                                const success = await copyToClipboard(company.reportText || ''); 
+                                if (success) { 
+                                  setCopySuccess(company.id); 
+                                  setTimeout(() => setCopySuccess(null), 2000); 
+                                  setShareOpen(null);
+                                } else { 
+                                  setError('Ошибка копирования');
+                                }
+                              } catch (error) {
                                 setError('Ошибка копирования');
                               }
                             }}
@@ -610,7 +613,7 @@ export default function CompaniesPage() {
                       )}
                     </div>
                     
-                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(company.id); setShowDeleteModal(true); }} className="button-secondary" style={{ fontSize: '14px', padding: '6px 12px', color: 'var(--text-primary)', fontWeight: '600' }} title="Удалить">
+                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(company.id); setShowDeleteModal(true); }} className="button-secondary" style={{ fontSize: '14px', padding: '6px 12px', color: 'var(--text-primary)', fontWeight: '600', transition: 'all 0.2s ease' }} title="Удалить">
                       Удалить
                     </button>
                   </div>
@@ -635,9 +638,7 @@ export default function CompaniesPage() {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            zIndex: 1000,
-            opacity: 0,
-            animation: 'fadeIn 0.2s ease-out forwards'
+            zIndex: 1000
           }}
         >
           <div 
@@ -648,8 +649,7 @@ export default function CompaniesPage() {
               maxWidth: '400px', 
               width: '90%', 
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              transform: 'scale(0.95)',
-              animation: 'modalSlideIn 0.3s ease-out forwards'
+              animation: 'modalSlideIn 0.3s ease-out'
             }}
           >
             <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Удалить отчёт?</h3>
@@ -657,10 +657,10 @@ export default function CompaniesPage() {
               Это действие нельзя отменить. Отчёт будет удалён навсегда.
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }} className="button-secondary" style={{ flex: 1 }}>
+              <button onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }} className="button-secondary" style={{ flex: 1, transition: 'all 0.2s ease' }}>
                 Отмена
               </button>
-              <button onClick={() => handleDelete(deleteTarget!)} className="button-primary" style={{ flex: 1 }}>
+              <button onClick={() => handleDelete(deleteTarget!)} className="button-primary" style={{ flex: 1, transition: 'all 0.2s ease' }}>
                 Удалить
               </button>
             </div>
@@ -677,18 +677,9 @@ export default function CompaniesPage() {
 
       {/* Animation styles */}
       <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
         @keyframes modalSlideIn {
           from {
-            transform: scale(0.95);
+            transform: scale(0.9);
             opacity: 0;
           }
           to {
@@ -696,6 +687,50 @@ export default function CompaniesPage() {
             opacity: 1;
           }
         }
+
+        .company-item {
+          transition: all 0.3s ease;
+        }
+
+        .company-item:hover {
+          transform: translateY(-4px) !important;
+        }
+
+        .button-primary,
+        .button-secondary {
+          transition: all 0.2s ease;
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .companies-container {
+          animation: fadeInUp 0.6s ease-out;
+        }
+
+        .company-item {
+          animation: fadeInUp 0.5s ease-out;
+          animation-fill-mode: both;
+        }
+
+        .company-item:nth-child(1) { animation-delay: 0.05s; }
+        .company-item:nth-child(2) { animation-delay: 0.1s; }
+        .company-item:nth-child(3) { animation-delay: 0.15s; }
+        .company-item:nth-child(4) { animation-delay: 0.2s; }
+        .company-item:nth-child(5) { animation-delay: 0.25s; }
+        .company-item:nth-child(6) { animation-delay: 0.3s; }
+        .company-item:nth-child(7) { animation-delay: 0.35s; }
+        .company-item:nth-child(8) { animation-delay: 0.4s; }
+        .company-item:nth-child(9) { animation-delay: 0.45s; }
+        .company-item:nth-child(10) { animation-delay: 0.5s; }
       `}</style>
     </>
   );
