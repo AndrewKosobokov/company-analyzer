@@ -362,9 +362,7 @@ export default function CompaniesPage() {
           maxWidth: '1000px', 
           paddingTop: '64px', 
           paddingBottom: '64px',
-          opacity: isMounted ? 1 : 0,
-          transform: isMounted ? 'translateY(0)' : 'translateY(-10px)',
-          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
+          animation: 'fadeIn 0.6s ease-out'
         }}
       >
         <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
@@ -395,7 +393,7 @@ export default function CompaniesPage() {
             <p style={{ fontSize: '17px', marginBottom: '32px' }}>
               Создайте первый анализ компании
             </p>
-            <Link href="/analysis" className="button-primary" style={{ display: 'inline-block', padding: '12px 32px' }}>
+            <Link href="/analysis" className="button-primary" style={{ display: 'inline-block', padding: '12px 32px', transition: 'all 0.2s ease' }}>
               Создать первый анализ
             </Link>
           </div>
@@ -445,10 +443,12 @@ export default function CompaniesPage() {
                   key={company.id} 
                   className={`company-item card-hover ${shareOpen === company.id ? 'menu-open' : ''}`}
                   style={{
-                    opacity: isDeleting ? 0 : (isMounted ? 1 : 0),
-                    transform: isDeleting ? 'translateX(-20px)' : (isMounted ? 'translateY(0)' : 'translateY(10px)'),
-                    transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                    transitionDelay: `${index * 50}ms`,
+                    opacity: isDeleting ? 0 : 1,
+                    transform: isDeleting ? 'translateX(-20px)' : 'translateY(0)',
+                    transition: isDeleting ? 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out' : 'all 0.3s ease',
+                    animation: isDeleting ? 'none' : 'fadeIn 0.5s ease-out',
+                    animationFillMode: 'both',
+                    animationDelay: `${index * 0.05}s`,
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                   }}
                   onMouseEnter={(e) => {
@@ -464,19 +464,22 @@ export default function CompaniesPage() {
                     }
                   }}
                 >
-                  <div className="company-info">
-                    <Link href={`/report/${company.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <h3 className="company-name">
-                        {formatCompanyNameForList(displayName)}
-                      </h3>
-                    </Link>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                      ИНН: {displayInn} • {new Date(company.createdAt).toLocaleDateString('ru-RU')}
-                    </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                    {/* Название компании */}
+                    <div className="company-info" style={{ flex: 1 }}>
+                      <Link href={`/report/${company.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <h3 className="company-name">
+                          {formatCompanyNameForList(displayName)}
+                        </h3>
+                      </Link>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                        ИНН: {displayInn} • {new Date(company.createdAt).toLocaleDateString('ru-RU')}
+                      </p>
+                    </div>
                   </div>
                   
                   <div className="company-actions">
-                    <Link href={`/report/${company.id}`} className="button-primary" style={{ fontSize: '14px', padding: '6px 12px' }}>
+                    <Link href={`/report/${company.id}`} className="button-primary" style={{ fontSize: '14px', padding: '6px 12px', transition: 'all 0.2s ease' }}>
                       Открыть
                     </Link>
                     
@@ -488,7 +491,7 @@ export default function CompaniesPage() {
                           setShareOpen(shareOpen === company.id ? null : company.id); 
                         }} 
                         className="button-secondary" 
-                        style={{ fontSize: '14px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        style={{ fontSize: '14px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '4px', transition: 'all 0.2s ease' }}
                       >
                         Поделиться
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: shareOpen === company.id ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}>
@@ -610,7 +613,7 @@ export default function CompaniesPage() {
                       )}
                     </div>
                     
-                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(company.id); setShowDeleteModal(true); }} className="button-secondary" style={{ fontSize: '14px', padding: '6px 12px', color: 'var(--text-primary)', fontWeight: '600' }} title="Удалить">
+                    <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setDeleteTarget(company.id); setShowDeleteModal(true); }} className="button-secondary" style={{ fontSize: '14px', padding: '6px 12px', color: 'var(--text-primary)', fontWeight: '600', transition: 'all 0.2s ease' }} title="Удалить">
                       Удалить
                     </button>
                   </div>
@@ -636,8 +639,7 @@ export default function CompaniesPage() {
             alignItems: 'center', 
             justifyContent: 'center', 
             zIndex: 1000,
-            opacity: 0,
-            animation: 'fadeIn 0.2s ease-out forwards'
+            animation: 'fadeIn 0.3s ease-out'
           }}
         >
           <div 
@@ -648,8 +650,7 @@ export default function CompaniesPage() {
               maxWidth: '400px', 
               width: '90%', 
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              transform: 'scale(0.95)',
-              animation: 'modalSlideIn 0.3s ease-out forwards'
+              animation: 'modalSlideIn 0.3s ease-out'
             }}
           >
             <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '16px' }}>Удалить отчёт?</h3>
@@ -657,10 +658,10 @@ export default function CompaniesPage() {
               Это действие нельзя отменить. Отчёт будет удалён навсегда.
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }} className="button-secondary" style={{ flex: 1 }}>
+              <button onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }} className="button-secondary" style={{ flex: 1, transition: 'all 0.2s ease' }}>
                 Отмена
               </button>
-              <button onClick={() => handleDelete(deleteTarget!)} className="button-primary" style={{ flex: 1 }}>
+              <button onClick={() => handleDelete(deleteTarget!)} className="button-primary" style={{ flex: 1, transition: 'all 0.2s ease' }}>
                 Удалить
               </button>
             </div>
@@ -680,21 +681,40 @@ export default function CompaniesPage() {
         @keyframes fadeIn {
           from {
             opacity: 0;
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
+            transform: translateY(0);
           }
         }
 
         @keyframes modalSlideIn {
           from {
-            transform: scale(0.95);
+            transform: scale(0.9);
             opacity: 0;
           }
           to {
             transform: scale(1);
             opacity: 1;
           }
+        }
+
+        .company-item {
+          transition: all 0.3s ease;
+        }
+
+        .company-item:hover {
+          transform: translateY(-4px) !important;
+        }
+
+        .button-primary,
+        .button-secondary {
+          transition: all 0.2s ease;
+        }
+
+        .share-dropdown-menu {
+          animation: fadeIn 0.2s ease-out;
         }
       `}</style>
     </>
