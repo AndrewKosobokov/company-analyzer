@@ -78,6 +78,9 @@ model Analysis {
   // Credits used for this analysis
   creditsUsed Int      @default(1)
   
+  // Color label for reports
+  label       String?  @default("gray")
+  
   createdAt   DateTime @default(now())
   
   @@index([userId])

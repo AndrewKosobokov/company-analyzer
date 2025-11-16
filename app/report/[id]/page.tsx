@@ -308,7 +308,10 @@ export default function ReportPage() {
             {/* First Contact Example Button */}
             {!report.reportText.includes('АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН') && report.firstContactExample && (
               <button
-                onClick={() => setShowFirstContact(!showFirstContact)}
+                onClick={() => {
+                  setShowFirstContact(!showFirstContact);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 style={{
                   width: '100%',
                   padding: '16px 20px',
@@ -826,9 +829,18 @@ export default function ReportPage() {
               <div className="card">
                 {/* Header Section */}
                 <div>
-                  <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '8px' }}>
-                    Скрипт первого касания для {displayName}
-                  </h1>
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ 
+                      fontSize: '17px', 
+                      color: '#86868B', 
+                      marginBottom: '8px' 
+                    }}>
+                      Скрипт первого касания для:
+                    </div>
+                    <h1 style={{ fontSize: '48px', fontWeight: 600, margin: 0 }}>
+                      {displayName}
+                    </h1>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}

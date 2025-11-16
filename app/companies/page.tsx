@@ -1,15 +1,16 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { exportToPDF, exportToWord, copyToClipboard } from '@/utils/exportReport';
-import ScrollToTop from '@/components/ScrollToTop';
-import SearchBar from '../components/SearchBar';
-import SuccessToast from '../components/SuccessToast';
-import CardSkeleton from '@/components/CardSkeleton';
 import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+
+const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), { ssr: false });
+const SearchBar = dynamic(() => import('../components/SearchBar'), { ssr: false });
+const SuccessToast = dynamic(() => import('../components/SuccessToast'), { ssr: false });
+const CardSkeleton = dynamic(() => import('@/components/CardSkeleton'), { ssr: false });
 
 interface Company {
   id: string;
@@ -357,12 +358,11 @@ export default function CompaniesPage() {
       </header>
       
       <main 
-        className="container page-container" 
+        className="container page-container companies-container" 
         style={{ 
           maxWidth: '1000px', 
           paddingTop: '64px', 
-          paddingBottom: '64px',
-          animation: 'fadeIn 0.6s ease-out'
+          paddingBottom: '64px'
         }}
       >
         <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
@@ -404,8 +404,7 @@ export default function CompaniesPage() {
           <div style={{ 
             textAlign: 'center', 
             padding: '64px 24px',
-            color: 'var(--text-secondary)',
-            animation: 'fadeIn 0.3s ease'
+            color: 'var(--text-secondary)'
           }}>
             <p style={{ fontSize: '20px', fontWeight: 500, marginBottom: '12px', color: 'var(--text-primary)' }}>
               Ничего не найдено
@@ -446,9 +445,6 @@ export default function CompaniesPage() {
                     opacity: isDeleting ? 0 : 1,
                     transform: isDeleting ? 'translateX(-20px)' : 'translateY(0)',
                     transition: isDeleting ? 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out' : 'all 0.3s ease',
-                    animation: isDeleting ? 'none' : 'fadeIn 0.5s ease-out',
-                    animationFillMode: 'both',
-                    animationDelay: `${index * 0.05}s`,
                     boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                   }}
                   onMouseEnter={(e) => {
@@ -464,18 +460,15 @@ export default function CompaniesPage() {
                     }
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    {/* Название компании */}
-                    <div className="company-info" style={{ flex: 1 }}>
-                      <Link href={`/report/${company.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <h3 className="company-name">
-                          {formatCompanyNameForList(displayName)}
-                        </h3>
-                      </Link>
-                      <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                        ИНН: {displayInn} • {new Date(company.createdAt).toLocaleDateString('ru-RU')}
-                      </p>
-                    </div>
+                  <div className="company-info">
+                    <Link href={`/report/${company.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <h3 className="company-name">
+                        {formatCompanyNameForList(displayName)}
+                      </h3>
+                    </Link>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                      ИНН: {displayInn} • {new Date(company.createdAt).toLocaleDateString('ru-RU')}
+                    </p>
                   </div>
                   
                   <div className="company-actions">
@@ -508,6 +501,7 @@ export default function CompaniesPage() {
                               e.preventDefault(); 
                               e.stopPropagation(); 
                               try { 
+                                const { exportToPDF } = await import('@/utils/exportReport');
                                 await exportToPDF(displayName, displayInn, company.reportText || ''); 
                                 setShareOpen(null);
                               } catch (error) { 
@@ -527,6 +521,7 @@ export default function CompaniesPage() {
                               e.preventDefault(); 
                               e.stopPropagation(); 
                               try { 
+                                const { exportToWord } = await import('@/utils/exportReport');
                                 await exportToWord(displayName, displayInn, company.reportText || ''); 
                                 setShareOpen(null);
                               } catch (error) { 
@@ -546,12 +541,17 @@ export default function CompaniesPage() {
                             onClick={async (e) => { 
                               e.preventDefault(); 
                               e.stopPropagation(); 
-                              const success = await copyToClipboard(company.reportText || ''); 
-                              if (success) { 
-                                setCopySuccess(company.id); 
-                                setTimeout(() => setCopySuccess(null), 2000); 
-                                setShareOpen(null);
-                              } else { 
+                              try {
+                                const { copyToClipboard } = await import('@/utils/exportReport');
+                                const success = await copyToClipboard(company.reportText || ''); 
+                                if (success) { 
+                                  setCopySuccess(company.id); 
+                                  setTimeout(() => setCopySuccess(null), 2000); 
+                                  setShareOpen(null);
+                                } else { 
+                                  setError('Ошибка копирования');
+                                }
+                              } catch (error) {
                                 setError('Ошибка копирования');
                               }
                             }}
@@ -638,8 +638,7 @@ export default function CompaniesPage() {
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            zIndex: 1000,
-            animation: 'fadeIn 0.3s ease-out'
+            zIndex: 1000
           }}
         >
           <div 
@@ -678,17 +677,6 @@ export default function CompaniesPage() {
 
       {/* Animation styles */}
       <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
         @keyframes modalSlideIn {
           from {
             transform: scale(0.9);
@@ -713,9 +701,36 @@ export default function CompaniesPage() {
           transition: all 0.2s ease;
         }
 
-        .share-dropdown-menu {
-          animation: fadeIn 0.2s ease-out;
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
+
+        .companies-container {
+          animation: fadeInUp 0.6s ease-out;
+        }
+
+        .company-item {
+          animation: fadeInUp 0.5s ease-out;
+          animation-fill-mode: both;
+        }
+
+        .company-item:nth-child(1) { animation-delay: 0.05s; }
+        .company-item:nth-child(2) { animation-delay: 0.1s; }
+        .company-item:nth-child(3) { animation-delay: 0.15s; }
+        .company-item:nth-child(4) { animation-delay: 0.2s; }
+        .company-item:nth-child(5) { animation-delay: 0.25s; }
+        .company-item:nth-child(6) { animation-delay: 0.3s; }
+        .company-item:nth-child(7) { animation-delay: 0.35s; }
+        .company-item:nth-child(8) { animation-delay: 0.4s; }
+        .company-item:nth-child(9) { animation-delay: 0.45s; }
+        .company-item:nth-child(10) { animation-delay: 0.5s; }
       `}</style>
     </>
   );
