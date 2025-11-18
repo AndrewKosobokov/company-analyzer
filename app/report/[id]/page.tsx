@@ -1016,14 +1016,12 @@ export default function ReportPage() {
                   
                   {/* Messenger buttons */}
                   <button
-                    onClick={async () => {
-                      const { shareToTelegram } = await import('@/utils/exportReport');
-                      const { companyName, inn } = extractCompanyInfo(report.reportText);
-                      shareToTelegram(
-                        `Скрипт первого касания - ${companyName || report.companyName}`,
-                        inn || report.companyInn,
-                        report.firstContactExample || ''
-                      );
+                    onClick={() => {
+                      const { companyName } = extractCompanyInfo(report.reportText);
+                      const displayName = companyName || report.companyName;
+                      const shareUrl = `https://metalvector.ru/report/${params.id}`;
+                      const text = `Отчёт: ${displayName}`;
+                      window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, '_blank');
                     }}
                     className="button-secondary"
                     style={{ padding: '8px 16px' }}
@@ -1035,14 +1033,12 @@ export default function ReportPage() {
                   </button>
                   
                   <button
-                    onClick={async () => {
-                      const { shareToWhatsApp } = await import('@/utils/exportReport');
-                      const { companyName, inn } = extractCompanyInfo(report.reportText);
-                      shareToWhatsApp(
-                        `Скрипт первого касания - ${companyName || report.companyName}`,
-                        inn || report.companyInn,
-                        report.firstContactExample || ''
-                      );
+                    onClick={() => {
+                      const { companyName } = extractCompanyInfo(report.reportText);
+                      const displayName = companyName || report.companyName;
+                      const shareUrl = `https://metalvector.ru/report/${params.id}`;
+                      const text = `Отчёт: ${displayName}`;
+                      window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`, '_blank');
                     }}
                     className="button-secondary"
                     style={{ padding: '8px 16px' }}
