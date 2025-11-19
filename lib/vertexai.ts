@@ -7,7 +7,7 @@ export async function callVertexAI(
   
   const projectId = process.env.GOOGLE_CLOUD_PROJECT || 'gen-lang-client-0523149055';
   const location = process.env.VERTEX_AI_LOCATION || 'us-central1';
-  const model = 'gemini-3.0-pro-001';
+  const model = 'gemini-2.5-pro';
 
   console.log(`[VertexAI] Initializing client for project: ${projectId}, location: ${location}`);
 
