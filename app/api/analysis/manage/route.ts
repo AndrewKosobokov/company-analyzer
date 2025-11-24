@@ -2,6 +2,7 @@
 
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
+import { Prisma } from '@prisma/client';
 import prisma from '@/app/lib/prisma';
 import { verifyAuth } from '@/app/lib/auth';
 
@@ -16,18 +17,27 @@ export async function GET(req: NextRequest) {
     const userId = authPayload.userId;
 
     try {
-        // Читаем параметр 'isDeleted' из URL-запроса (true для Корзины, false для Архива)
+        // Читаем параметр 'isDeleted' и фильтр по типу
         const url = new URL(req.url);
         const isDeletedParam = url.searchParams.get('isDeleted');
+        const type = url.searchParams.get('type'); // 'company' или 'product'
         
         // Преобразуем параметр в булево значение (по умолчанию: false, т.е. Архив)
         const isDeleted = isDeletedParam === 'true'; 
 
+        const where: Prisma.AnalysisWhereInput = {
+            userId: userId,
+            isDeleted: isDeleted,
+        };
+
+        if (type === 'company') {
+            where.reportText = { contains: 'ИНН:' };
+        } else if (type === 'product') {
+            where.reportText = { contains: 'АНАЛИЗ И СТРАТИФИКАЦИЯ' };
+        }
+
         const analyses = await prisma.analysis.findMany({
-            where: {
-                userId: userId,
-                isDeleted: isDeleted,
-            },
+            where,
             // Сортировка по дате создания, чтобы новые были первыми
             orderBy: {
                 createdAt: 'desc',

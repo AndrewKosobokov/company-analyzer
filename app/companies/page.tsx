@@ -133,7 +133,7 @@ export default function CompaniesPage() {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await fetch('/api/analysis/manage?isDeleted=false', {
+        const response = await fetch('/api/analysis/manage?isDeleted=false&type=company', {
           headers: {
             'Authorization': `Bearer ${getToken()}`
           }
@@ -572,7 +572,17 @@ export default function CompaniesPage() {
                         marginBottom: '4px'
                       }}
                     >
-                      <h3 className="company-name">
+                      <h3
+                        className="company-name"
+                        style={{
+                          margin: 0,
+                          overflow: 'hidden',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical' as const,
+                          whiteSpace: 'normal'
+                        }}
+                      >
                         {formatCompanyNameForList(displayName)}
                       </h3>
                     </Link>
