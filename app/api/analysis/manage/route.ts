@@ -31,9 +31,9 @@ export async function GET(req: NextRequest) {
         };
 
         if (type === 'company') {
-            where.reportText = { contains: 'ИНН:' };
+            where.companyInn = { not: null };
         } else if (type === 'product') {
-            where.reportText = { contains: 'АНАЛИЗ И СТРАТИФИКАЦИЯ' };
+            where.companyInn = null;
         }
 
         const analyses = await prisma.analysis.findMany({
