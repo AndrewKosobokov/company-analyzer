@@ -18,6 +18,7 @@ interface ReportData {
   reportText: string;
   firstContactExample?: string | null;
   createdAt: string;
+  analysisType?: string | null;
 }
 
 // Extract company info from report text
@@ -39,12 +40,18 @@ function extractCompanyInfo(reportText: string): { companyName: string | null; i
 }
 
 // Navigation items for Table of Contents
-const navigationItems = [
+const companyNavigationItems = [
   { id: 'financial-analysis', title: 'Финансовый Анализ' },
   { id: 'procurement', title: 'Закупки' },
   { id: 'high-margin', title: 'Маржинальные позиции' },
   { id: 'strategy', title: 'Стратегия Взаимодействия' },
   { id: 'recommendations', title: 'Ключевые Рекомендации' },
+];
+
+const productNavigationItems = [
+  { id: 'analysis', title: 'Анализ и Стратификация' },
+  { id: 'enterprises', title: 'Список целевых предприятий' },
+  { id: 'sales-strategy', title: 'Таблица стратегии продаж' },
 ];
 
 export default function ReportPage() {
@@ -59,6 +66,9 @@ export default function ReportPage() {
   const [showFirstContact, setShowFirstContact] = useState(false);
   const { showToast } = useToast();
   const { logout } = useAuth();
+  const isProductAnalysis = report?.analysisType === 'product';
+  const navigationItems = isProductAnalysis ? productNavigationItems : companyNavigationItems;
+  const reportText = report?.reportText || '';
   
   /**
    * Utility to safely and recursively extract clean text content from React children.
@@ -615,17 +625,21 @@ export default function ReportPage() {
                     console.log('[H2 DEBUG] Original bytes:', Array.from(textContent).map(c => c.charCodeAt(0)));
                       
                     // Remove emojis (ES5-compatible version)
-                    const noEmojis = textContent
+                  const noEmojis = textContent
                       .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '') // Surrogate pairs (emojis)
                       .replace(/[\u2600-\u26FF\u2700-\u27BF]/g, ''); // Other symbols
                     console.log('[H2 DEBUG] After emoji removal:', noEmojis);
                       
                     // Normalize spacing
-                    const normalized = noEmojis.replace(/\s+/g, ' ').trim();
+                  const normalized = noEmojis.replace(/\s+/g, ' ').trim();
                     console.log('[H2 DEBUG] After normalization:', normalized);
+                  
+                  // Detect inline anchor {#id}
+                  const anchorMatch = normalized.match(/\{#([a-z0-9\-]+)\}\s*$/i);
+                  const normalizedWithoutAnchors = normalized.replace(/\s*\{#([^\}]+)\}\s*$/i, '').trim();
                       
                     // Convert to lowercase
-                    const cleanText = normalized.toLowerCase();
+                  const cleanText = normalizedWithoutAnchors.toLowerCase();
                     console.log('[H2 DEBUG] CLEAN TEXT:', cleanText);
                     console.log('[H2 DEBUG] Clean bytes:', Array.from(cleanText).map(c => c.charCodeAt(0)));
                       
@@ -661,17 +675,27 @@ export default function ReportPage() {
                       // Recommendations variations
                       'ключевые рекомендации': 'recommendations',
                       'рекомендации': 'recommendations',
-                      'выводы': 'recommendations'
+                      'выводы': 'recommendations',
+                      
+                      // Product analysis variations
+                      'анализ и стратификация': 'analysis',
+                      'анализа и стратификация': 'analysis',
+                      'список целевых предприятий': 'enterprises',
+                      'таблица стратегии продаж': 'sales-strategy',
+                      
+                      // Visualization
+                      'визуализация стратегии': 'visualization',
+                      'визуализация стратегии mind map': 'visualization'
                     };
                       
                     // Find matching ID - try exact match first, then partial
-                    let customId: string | undefined;
+                    let customId: string | undefined = anchorMatch ? anchorMatch[1] : undefined;
                       
                     // Try exact match first
-                    if (titleMapping[cleanText]) {
+                    if (!customId && titleMapping[cleanText]) {
                       customId = titleMapping[cleanText];
                       console.log(`[H2 DEBUG] ✅ EXACT MATCH: "${cleanText}" → ${customId}`);
-                    } else {
+                    } else if (!customId) {
                       // Try partial match (contains)
                       for (const [keyword, id] of Object.entries(titleMapping)) {
                         if (cleanText.includes(keyword)) {
@@ -772,11 +796,49 @@ export default function ReportPage() {
                     }} {...props} />
                   ),
                   
+                  code: ({ node, inline, children, ...props }: any) => {
+                    if (inline) {
+                      return (
+                        <code
+                          style={{
+                            background: '#F5F5F7',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            fontFamily: 'Monaco, Courier, monospace',
+                          }}
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    }
+                    
+                    return (
+                      <code
+                        style={{
+                          display: 'block',
+                          background: '#F5F5F7',
+                          padding: '16px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          fontFamily: 'Monaco, Courier, monospace',
+                          overflowX: 'auto',
+                          marginBottom: '16px',
+                        }}
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    );
+                  },
+                  
                   // Tables
                   table: ({node, ...props}) => (
                     <div style={{ overflowX: 'auto', marginTop: '0', marginBottom: '24px' }}>
                       <table style={{
                         width: '100%',
+                        tableLayout: 'fixed',
                         borderCollapse: 'collapse',
                         border: '1px solid var(--border-color)'
                       }} {...props} />
@@ -798,7 +860,10 @@ export default function ReportPage() {
                     <td style={{
                       border: '1px solid var(--border-color)',
                       padding: '12px 16px',
-                      color: 'var(--text-primary)'
+                      color: 'var(--text-primary)',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      whiteSpace: 'normal'
                     }} {...props} />
                   ),
                   
@@ -813,10 +878,9 @@ export default function ReportPage() {
                   ),
                 }}
               >
-                {report.reportText}
+                {reportText || ''}
               </ReactMarkdown>
             </div>
-
           </div>
           )}
           
@@ -1147,11 +1211,49 @@ export default function ReportPage() {
                         }} {...props} />
                       ),
                       
+                      code: ({ node, inline, children, ...props }: any) => {
+                        if (inline) {
+                          return (
+                            <code
+                              style={{
+                                background: '#F5F5F7',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                fontFamily: 'Monaco, Courier, monospace',
+                              }}
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          );
+                        }
+                        
+                        return (
+                          <code
+                            style={{
+                              display: 'block',
+                              background: '#F5F5F7',
+                              padding: '16px',
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              fontFamily: 'Monaco, Courier, monospace',
+                              overflowX: 'auto',
+                              marginBottom: '16px',
+                            }}
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
+                      
                       // Tables
                       table: ({node, ...props}) => (
                         <div style={{ overflowX: 'auto', marginTop: '0', marginBottom: '24px' }}>
                           <table style={{
                             width: '100%',
+                            tableLayout: 'fixed',
                             borderCollapse: 'collapse',
                             border: '1px solid var(--border-color)'
                           }} {...props} />
@@ -1173,7 +1275,10 @@ export default function ReportPage() {
                         <td style={{
                           border: '1px solid var(--border-color)',
                           padding: '12px 16px',
-                          color: 'var(--text-primary)'
+                          color: 'var(--text-primary)',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          whiteSpace: 'normal'
                         }} {...props} />
                       ),
                       
@@ -1263,6 +1368,7 @@ export default function ReportPage() {
         
         .markdown-content table {
           width: 100%;
+          table-layout: fixed;
           border-collapse: collapse;
           margin: 24px 0;
         }
@@ -1272,6 +1378,9 @@ export default function ReportPage() {
           padding: 12px;
           text-align: left;
           border: 1px solid var(--border-color);
+          word-break: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
         }
         
         .markdown-content table th {

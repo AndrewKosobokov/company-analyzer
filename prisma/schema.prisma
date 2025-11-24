@@ -81,6 +81,9 @@ model Analysis {
   // Color label for reports
   label       String?  @default("gray")
   
+  // Analysis type: "company" or "product"
+  analysisType String  @default("company")
+  
   createdAt   DateTime @default(now())
   
   @@index([userId])

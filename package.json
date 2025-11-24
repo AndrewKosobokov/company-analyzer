@@ -28,6 +28,8 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.3",
     "jspdf-autotable": "^5.0.2",
+    "lucide-react": "^0.554.0",
+    "mermaid": "^10.9.1",
     "next": "^14.0.0",
     "nodemailer": "^7.0.9",
     "prisma": "^6.17.0",

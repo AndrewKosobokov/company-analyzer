@@ -12,6 +12,7 @@ interface ReportData {
   reportText: string;
   targetProposal?: string | null;
   createdAt: string;
+  analysisType?: string | null;
 }
 
 // Extract company info from report text

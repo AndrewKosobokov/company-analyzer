@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
                 companyInn: true,
                 createdAt: true,
                 isDeleted: true,
+                analysisType: true,
             }
         });
 

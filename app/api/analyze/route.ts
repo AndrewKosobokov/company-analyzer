@@ -255,17 +255,26 @@ export async function POST(request: Request) {
     const prompt = generatePrompt(siteText, finalUrl, finalInn);
     console.log(`📝 Generated prompt (${prompt.length} chars)`);
 
-    // 6. CALL VERTEX AI (MAIN ANALYSIS)
+    // 6. CALL VERTEX AI (MAIN ANALYSIS + MIND MAP)
     console.log('🤖 Calling Vertex AI...');
     const { callVertexAI } = await import('@/lib/vertexai');
     let aiResponse;
     try {
-      aiResponse = await retryWithExponentialBackoff(
-        () => callVertexAI(prompt, true),  // true = с Google Search
+      // Step 1: Main report with Google Search
+      console.log('[Analysis] Step 1: Generating main report...');
+      const reportResult = await retryWithExponentialBackoff(
+        () => callVertexAI(prompt, true),
         3,
         1000
       );
-      console.log(`✅ Received ${aiResponse.text.length} characters from Vertex AI`);
+      console.log(`✅ Received ${reportResult.text.length} characters from Vertex AI (main report)`);
+
+      const finalReport = reportResult.text;
+
+      aiResponse = {
+        text: finalReport,
+        citations: reportResult.citations,
+      };
     } catch (error) {
       console.error('❌ Vertex AI Error:', error);
       return NextResponse.json({ error: 'Ошибка при анализе компании через Vertex AI' }, { status: 500 });
@@ -339,6 +348,7 @@ export async function POST(request: Request) {
         firstContactExample: firstContactExample,
         isNonTargetClient: isNonTargetClient,
         creditsUsed: creditsUsed,
+        analysisType: "company", // тип анализа
       },
     });
 

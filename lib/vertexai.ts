@@ -16,6 +16,11 @@ export async function callVertexAI(
     
     const generativeModel = vertexAI.getGenerativeModel({
       model: model,
+      generationConfig: {
+        maxOutputTokens: 8192,
+        temperature: 0.3,
+        topP: 0.95,
+      },
       safetySettings: [
         {
           category: HarmCategory.HARM_CATEGORY_HARASSMENT,

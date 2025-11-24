@@ -18,6 +18,7 @@ interface Company {
   companyInn: string;
   reportText?: string;
   createdAt: string;
+  analysisType?: string;
 }
 
 // Функция сокращения организационно-правовой формы ТОЛЬКО для списка отчётов
@@ -106,6 +107,7 @@ export default function CompaniesPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<'company' | 'product'>('company');
   const router = useRouter();
   const { logout } = useAuth();
   
@@ -171,28 +173,37 @@ export default function CompaniesPage() {
     fetchCompanies();
   }, []);
 
-  // Filter companies based on search query
+  // Filter companies based on search query and filter type
   const filteredCompanies = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return companies;
+    let filtered = companies;
+
+    // Filter by analysis type
+    filtered = filtered.filter(company => {
+      const analysisType = company.analysisType || 'company';
+      return analysisType === filterType;
+    });
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      
+      filtered = filtered.filter(company => {
+        const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
+        const innMatch = company.reportText?.match(/\*\*ИНН:\*\*\s*(\d+)/);
+        const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
+        const displayInn = innMatch ? innMatch[1] : company.companyInn;
+        
+        return (
+          (displayName?.toLowerCase().includes(query) || false) ||
+          (displayInn?.includes(query) || false) ||
+          (company.companyName?.toLowerCase().includes(query) || false) ||
+          (company.companyInn?.includes(query) || false)
+        );
+      });
     }
 
-    const query = searchQuery.toLowerCase().trim();
-    
-    return companies.filter(company => {
-      const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
-      const innMatch = company.reportText?.match(/\*\*ИНН:\*\*\s*(\d+)/);
-      const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
-      const displayInn = innMatch ? innMatch[1] : company.companyInn;
-      
-      return (
-        (displayName?.toLowerCase().includes(query) || false) ||
-        (displayInn?.includes(query) || false) ||
-        (company.companyName?.toLowerCase().includes(query) || false) ||
-        (company.companyInn?.includes(query) || false)
-      );
-    });
-  }, [companies, searchQuery]);
+    return filtered;
+  }, [companies, searchQuery, filterType]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -367,12 +378,88 @@ export default function CompaniesPage() {
       >
         <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
         
+        {/* Apple-style segmented control toggle for filter */}
+        {companies.length > 0 && !error && (
+          <div style={{
+            display: 'flex',
+            backgroundColor: '#F5F5F7',
+            borderRadius: '8px',
+            padding: '4px',
+            marginBottom: 'var(--space-lg)',
+            maxWidth: '500px',
+            margin: '0 auto var(--space-lg) auto',
+            position: 'relative',
+            transition: 'all 0.3s ease'
+          }}>
+            <button
+              type="button"
+              onClick={() => setFilterType('company')}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                fontSize: '15px',
+                fontWeight: 500,
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                backgroundColor: filterType === 'company' ? '#1D1D1F' : 'transparent',
+                color: filterType === 'company' ? '#FFFFFF' : '#1D1D1F',
+                transition: 'all 0.3s ease',
+                outline: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (filterType !== 'company') {
+                  e.currentTarget.style.background = '#E5E5E7';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (filterType !== 'company') {
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              Отчёты по компаниям
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterType('product')}
+              style={{
+                flex: 1,
+                padding: '10px 16px',
+                fontSize: '15px',
+                fontWeight: 500,
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                backgroundColor: filterType === 'product' ? '#1D1D1F' : 'transparent',
+                color: filterType === 'product' ? '#FFFFFF' : '#1D1D1F',
+                transition: 'all 0.3s ease',
+                outline: 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (filterType !== 'product') {
+                  e.currentTarget.style.background = '#E5E5E7';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (filterType !== 'product') {
+                  e.currentTarget.style.background = 'transparent';
+                }
+              }}
+            >
+              Отчёты по продукции
+            </button>
+          </div>
+        )}
+        
         {/* Search Bar - Show if there are companies or if searching */}
         {(companies.length > 0 || searchQuery) && !error && (
           <SearchBar
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Поиск по названию или ИНН..."
+            placeholder="Поиск"
             resultsCount={filteredCompanies.length}
             totalCount={companies.length}
           />
@@ -393,7 +480,22 @@ export default function CompaniesPage() {
             <p style={{ fontSize: '17px', marginBottom: '32px' }}>
               Создайте первый анализ компании
             </p>
-            <Link href="/analysis" className="button-primary" style={{ display: 'inline-block', padding: '12px 32px', transition: 'all 0.2s ease' }}>
+            <Link 
+              href="/analysis" 
+              className="button-primary" 
+              style={{ 
+                display: 'inline-block', 
+                padding: '12px 32px', 
+                transition: 'all 0.2s ease',
+                background: '#1D1D1F'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#2D2D2F';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#1D1D1F';
+              }}
+            >
               Создать первый анализ
             </Link>
           </div>
@@ -461,18 +563,41 @@ export default function CompaniesPage() {
                   }}
                 >
                   <div className="company-info">
-                    <Link href={`/report/${company.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <Link 
+                      href={`/report/${company.id}`} 
+                      style={{ 
+                        textDecoration: 'none', 
+                        color: 'inherit',
+                        display: 'inline-block',
+                        marginBottom: '4px'
+                      }}
+                    >
                       <h3 className="company-name">
                         {formatCompanyNameForList(displayName)}
                       </h3>
                     </Link>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                      ИНН: {displayInn} • {new Date(company.createdAt).toLocaleDateString('ru-RU')}
+                      {displayInn ? `ИНН: ${displayInn} • ` : ''}{new Date(company.createdAt).toLocaleDateString('ru-RU')}
                     </p>
                   </div>
                   
                   <div className="company-actions">
-                    <Link href={`/report/${company.id}`} className="button-primary" style={{ fontSize: '14px', padding: '6px 12px', transition: 'all 0.2s ease' }}>
+                    <Link 
+                      href={`/report/${company.id}`} 
+                      className="button-primary" 
+                      style={{ 
+                        fontSize: '14px', 
+                        padding: '6px 12px', 
+                        transition: 'all 0.2s ease',
+                        background: '#1D1D1F'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#2D2D2F';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#1D1D1F';
+                      }}
+                    >
                       Открыть
                     </Link>
                     
@@ -660,7 +785,21 @@ export default function CompaniesPage() {
               <button onClick={() => { setShowDeleteModal(false); setDeleteTarget(null); }} className="button-secondary" style={{ flex: 1, transition: 'all 0.2s ease' }}>
                 Отмена
               </button>
-              <button onClick={() => handleDelete(deleteTarget!)} className="button-primary" style={{ flex: 1, transition: 'all 0.2s ease' }}>
+              <button 
+                onClick={() => handleDelete(deleteTarget!)} 
+                className="button-primary" 
+                style={{ 
+                  flex: 1, 
+                  transition: 'all 0.2s ease',
+                  background: '#1D1D1F'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = '#2D2D2F';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = '#1D1D1F';
+                }}
+              >
                 Удалить
               </button>
             </div>

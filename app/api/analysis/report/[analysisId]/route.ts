@@ -29,6 +29,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
                 firstContactExample: true, // Включаем кэшированный пример первого контакта
                 createdAt: true,
                 isDeleted: true,
+                analysisType: true,
             }
         });
 

@@ -6,3 +6,4 @@ node_modules/
 gcp-service-account.json
 build.log
 main
+*.json
