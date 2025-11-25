@@ -348,7 +348,6 @@ export async function POST(request: Request) {
         firstContactExample: firstContactExample,
         isNonTargetClient: isNonTargetClient,
         creditsUsed: creditsUsed,
-        analysisType: "company", // тип анализа
       },
     });
 
