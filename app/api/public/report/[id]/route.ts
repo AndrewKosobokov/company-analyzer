@@ -27,7 +27,6 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
                 reportText: true,
                 // targetProposal: true, // Removed - using firstContactExample instead
                 createdAt: true,
-                analysisType: true,
             }
         });
 

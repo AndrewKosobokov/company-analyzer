@@ -225,7 +225,6 @@ Input Variable:
         firstContactExample: null, // для продукции нет скрипта
         isNonTargetClient: false,
         creditsUsed: 0, // НЕ списываем баланс
-        analysisType: "product", // тип анализа
         isDeleted: false,
       },
     });
