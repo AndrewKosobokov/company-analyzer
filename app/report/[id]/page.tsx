@@ -66,7 +66,7 @@ export default function ReportPage() {
   const [showFirstContact, setShowFirstContact] = useState(false);
   const { showToast } = useToast();
   const { logout } = useAuth();
-  const isProductAnalysis = report?.analysisType === 'product';
+  const isProductAnalysis = !report?.companyInn || report?.companyInn === '';
   const navigationItems = isProductAnalysis ? productNavigationItems : companyNavigationItems;
   const reportText = report?.reportText || '';
   
