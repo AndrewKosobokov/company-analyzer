@@ -133,7 +133,7 @@ export default function CompaniesPage() {
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const response = await fetch('/api/analysis/manage?isDeleted=false&type=company', {
+        const response = await fetch('/api/analysis/manage?isDeleted=false', {
           headers: {
             'Authorization': `Bearer ${getToken()}`
           }
@@ -179,8 +179,13 @@ export default function CompaniesPage() {
 
     // Filter by analysis type
     filtered = filtered.filter(company => {
-      const analysisType = company.analysisType || 'company';
-      return analysisType === filterType;
+      if (filterType === 'company') {
+        // Компании: есть ИНН
+        return company.companyInn !== null && company.companyInn !== '';
+      } else {
+        // Продукция: нет ИНН
+        return company.companyInn === null || company.companyInn === '';
+      }
     });
 
     // Filter by search query
