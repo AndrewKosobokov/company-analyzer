@@ -94,65 +94,6 @@ export default function PricingContent() {
   return (
     <div className="page-container">
       {/* Header */}
-      <header className="header">
-        <div className="header-container">
-          {/* Logo + Subtitle */}
-          <Link href={isLoggedIn ? "/analysis" : "/"} className="logo">
-            <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-              Аналитика. Фокус. Результат.
-            </div>
-          </Link>
-          
-          {/* Navigation */}
-          {isLoggedIn ? (
-            <nav className="nav">
-              <Link href="/analysis" className="button-primary header-button">
-                Анализ
-              </Link>
-              <Link href="/companies" className="nav-link">
-                Отчеты
-              </Link>
-              <Link 
-                href="/pricing" 
-                className="nav-link"
-                style={{ fontWeight: 600, color: 'var(--text-primary)' }}
-              >
-                Тарифы
-              </Link>
-              <Link href="/profile" className="nav-link">
-                Профиль
-              </Link>
-              {isAdmin && (
-                <Link href="/admin" className="nav-link">Админ-панель</Link>
-              )}
-              <button 
-                onClick={handleLogout} 
-                className="nav-link"
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                Выйти
-              </button>
-            </nav>
-          ) : (
-            <nav className="nav">
-              <Link 
-                href="/pricing" 
-                className="nav-link"
-                style={{ fontWeight: 600, color: 'var(--text-primary)' }}
-              >
-                Тарифы
-              </Link>
-              <Link 
-                href="/login" 
-                className="button-primary header-button"
-              >
-                Войти
-              </Link>
-            </nav>
-          )}
-        </div>
-      </header>
       
       {/* Main Content */}
       <main 

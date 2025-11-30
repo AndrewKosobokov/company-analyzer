@@ -6,6 +6,7 @@ import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/
 import Footer from './components/Footer';
 import MobileMenu from './components/MobileMenu';
 import './globals.css';
+import Header from './components/Header';
 
 export const metadata = {
   title: {
@@ -76,11 +77,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <NotificationProvider>
             <ToastProvider>
-              <div className="min-h-screen flex flex-col">
-                <div className="flex-1">
-                  {children}
-                </div>
-                <Footer />
+<div className="min-h-screen flex flex-col">
+  <Header />
+  <div className="flex-1">
+    {children}
+  </div>                <Footer />
               </div>
               <MobileMenu />
             </ToastProvider>

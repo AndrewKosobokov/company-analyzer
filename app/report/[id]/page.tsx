@@ -183,6 +183,7 @@ export default function ReportPage() {
   // Loading State
   if (loading) {
     return (
+      <>
       <div style={{ 
         minHeight: '100vh', 
         display: 'flex', 
@@ -202,29 +203,6 @@ export default function ReportPage() {
   if (error || !report) {
     return (
       <>
-        <header className="header">
-          <div className="header-container">
-            <Link href="/analysis" className="logo">
-              <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-                Аналитика. Фокус. Результат.
-              </div>
-            </Link>
-            
-            <nav className="nav">
-              <Link href="/analysis" className="button-primary header-button">Анализ</Link>
-              <Link href="/companies" className="nav-link">Отчеты</Link>
-              <Link href="/pricing" className="nav-link">Тарифы</Link>
-              <Link href="/profile" className="nav-link">Профиль</Link>
-              {isAdmin && (
-                <Link href="/admin" className="nav-link">Админ-панель</Link>
-              )}
-              <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
-                Выйти
-              </button>
-            </nav>
-          </div>
-        </header>
         
         <div className="container" style={{ maxWidth: '800px', paddingTop: '64px' }}>
           <div className="card" style={{ textAlign: 'center', padding: 'var(--space-2xl)' }}>
@@ -256,33 +234,6 @@ export default function ReportPage() {
   return (
     <>
       {/* Header */}
-      <header className="header">
-        <div className="header-container">
-          <Link href="/analysis" className="logo">
-            <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-              Аналитика. Фокус. Результат.
-            </div>
-          </Link>
-          
-          <nav className="nav">
-            <Link href="/analysis" className="button-primary header-button">Анализ</Link>
-            <Link href="/companies" className="nav-link">Отчеты</Link>
-            <Link href="/pricing" className="nav-link">Тарифы</Link>
-            <Link href="/profile" className="nav-link">Профиль</Link>
-            {isAdmin && (
-              <Link href="/admin" className="nav-link">Админ-панель</Link>
-            )}
-            <button 
-              onClick={handleLogout}
-              className="nav-link"
-              style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              Выйти
-            </button>
-          </nav>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="container" style={{ maxWidth: '1400px', paddingTop: '0', paddingBottom: '64px' }}>

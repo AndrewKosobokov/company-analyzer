@@ -130,7 +130,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{
+      <>
+            <div style={{
         minHeight: '100vh',
         backgroundColor: '#F5F5F7',
         display: 'flex',
@@ -145,31 +146,6 @@ export default function DashboardPage() {
   if (error) {
     return (
       <>
-        <header className="header">
-          <div className="header-container">
-            <Link href="/analysis" className="logo">
-              <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-                Аналитика. Фокус. Результат.
-              </div>
-            </Link>
-            
-            <nav className="nav">
-              <Link href="/analysis" className="button-primary header-button">Анализ</Link>
-              <Link href="/companies" className="nav-link">Отчеты</Link>
-              <Link href="/pricing" className="nav-link">Тарифы</Link>
-              <Link href="/profile" className="nav-link">Профиль</Link>
-              <Link href="/admin" className="nav-link">Админ-панель</Link>
-              <button 
-                onClick={handleLogout}
-                className="nav-link"
-                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-              >
-                Выйти
-              </button>
-            </nav>
-          </div>
-        </header>
 
         <div style={{
           minHeight: 'calc(100vh - 80px)',
@@ -228,31 +204,6 @@ export default function DashboardPage() {
 
   return (
     <>
-      <header className="header">
-        <div className="header-container">
-          <Link href="/analysis" className="logo">
-            <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-              Аналитика. Фокус. Результат.
-            </div>
-          </Link>
-          
-          <nav className="nav">
-            <Link href="/analysis" className="button-primary header-button">Анализ</Link>
-            <Link href="/companies" className="nav-link">Отчеты</Link>
-            <Link href="/pricing" className="nav-link">Тарифы</Link>
-            <Link href="/profile" className="nav-link">Профиль</Link>
-            <Link href="/admin" className="nav-link">Админ-панель</Link>
-            <button 
-              onClick={handleLogout}
-              className="nav-link"
-              style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              Выйти
-            </button>
-          </nav>
-        </div>
-      </header>
 
       <div style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#F5F5F7', paddingTop: '80px' }}>
         {/* Шапка */}

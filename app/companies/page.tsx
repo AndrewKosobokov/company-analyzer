@@ -198,12 +198,15 @@ export default function CompaniesPage() {
         const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
         const displayInn = innMatch ? innMatch[1] : company.companyInn;
         
-        return (
-          (displayName?.toLowerCase().includes(query) || false) ||
-          (displayInn?.includes(query) || false) ||
-          (company.companyName?.toLowerCase().includes(query) || false) ||
-          (company.companyInn?.includes(query) || false)
-        );
+       return (
+  <>
+    {(displayName?.toLowerCase().includes(query) || false) ||
+    (displayInn?.includes(query) || false) ||
+    (company.companyName?.toLowerCase().includes(query) || false) ||
+    (company.companyInn?.includes(query) || false)
+    }
+  </>
+);
       });
     }
 
@@ -289,29 +292,6 @@ export default function CompaniesPage() {
   if (loading) {
     return (
       <>
-        <header className="header">
-          <div className="header-container">
-            <Link href="/analysis" className="logo">
-              <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-                Аналитика. Фокус. Результат.
-              </div>
-            </Link>
-            
-            <nav className="nav">
-              <Link href="/analysis" className="button-primary header-button">Анализ</Link>
-              <Link href="/companies" className="nav-link" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                Отчеты
-              </Link>
-              <Link href="/pricing" className="nav-link">Тарифы</Link>
-              <Link href="/profile" className="nav-link">Профиль</Link>
-              {isAdmin && (
-                <Link href="/admin" className="nav-link">Админ-панель</Link>
-              )}
-              <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Выйти</button>
-            </nav>
-          </div>
-        </header>
         
         <main className="container" style={{ maxWidth: '1000px', paddingTop: '64px', paddingBottom: '64px' }}>
           <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
@@ -349,29 +329,6 @@ export default function CompaniesPage() {
   }
   return (
     <>
-      <header className="header">
-        <div className="header-container">
-          <Link href="/analysis" className="logo">
-            <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-              Аналитика. Фокус. Результат.
-            </div>
-          </Link>
-          
-          <nav className="nav">
-            <Link href="/analysis" className="button-primary header-button">Анализ</Link>
-            <Link href="/companies" className="nav-link" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-              Отчеты
-            </Link>
-            <Link href="/pricing" className="nav-link">Тарифы</Link>
-            <Link href="/profile" className="nav-link">Профиль</Link>
-            {isAdmin && (
-              <Link href="/admin" className="nav-link">Админ-панель</Link>
-            )}
-            <button onClick={handleLogout} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Выйти</button>
-          </nav>
-        </div>
-      </header>
       
       <main 
         className="container page-container companies-container" 

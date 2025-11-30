@@ -112,26 +112,6 @@ export default function CompanyDetailPage() {
   if (error || !company) {
     return (
       <>
-        <header className="header">
-          <div className="header-container">
-            <Link href="/analysis" className="logo">
-              <div style={{ fontSize: '24px', fontWeight: 600 }}>Вектор.Про</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-                Аналитика. Фокус. Результат.
-              </div>
-            </Link>
-            
-            <nav className="nav">
-              <Link href="/analysis" className="nav-link">Анализ</Link>
-              <Link href="/companies" className="nav-link">Компании</Link>
-              <Link href="/pricing" className="nav-link">Тарифы</Link>
-              <Link href="/profile" className="nav-link">Профиль</Link>
-              <button onClick={handleLogout} className="button-secondary header-button">
-                Выйти
-              </button>
-            </nav>
-          </div>
-        </header>
         
         <div className="container" style={{ maxWidth: '800px', paddingTop: '64px' }}>
           <div className="card" style={{ textAlign: 'center', padding: 'var(--space-2xl)' }}>
@@ -163,36 +143,6 @@ export default function CompanyDetailPage() {
   return (
     <>
       {/* Header */}
-      <header className="header">
-        <div className="header-container">
-          <Link href="/analysis" className="logo">
-            <div style={{ fontSize: '24px', fontWeight: 600 }}>Вектор.Про</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-              Аналитика. Фокус. Результат.
-            </div>
-          </Link>
-          
-          <nav className="nav">
-            <Link href="/analysis" className="nav-link">Анализ</Link>
-            <Link 
-              href="/companies" 
-              className="nav-link"
-              style={{ fontWeight: 600, color: 'var(--text-primary)' }}
-            >
-              Компании
-            </Link>
-            <Link href="/pricing" className="nav-link">Тарифы</Link>
-            <Link href="/profile" className="nav-link">Профиль</Link>
-            
-            <button 
-              onClick={handleLogout}
-              className="button-secondary header-button"
-            >
-              Выйти
-            </button>
-          </nav>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="container" style={{ maxWidth: '900px', paddingTop: '64px', paddingBottom: '64px' }}>

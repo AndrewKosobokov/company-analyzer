@@ -48,12 +48,16 @@ export async function POST(request: Request) {
     }
     
     // Generate JWT
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '30d' }
-    );
-    
+// Generate JWT
+const token = jwt.sign(
+  { 
+    userId: user.id, 
+    email: user.email,
+    role: user.role  // ← ДОБАВЬТЕ ЭТУ СТРОКУ
+  },
+  process.env.JWT_SECRET || 'your-secret-key',
+  { expiresIn: '30d' }
+);    
     return NextResponse.json({
       token,
       user: {

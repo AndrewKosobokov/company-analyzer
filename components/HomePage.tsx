@@ -25,20 +25,6 @@ export default function HomePage() {
   return (
     <div className="page-container">
       {/* Header */}
-      <header className="header">
-        <div className="header-container">
-          <Link href="/" className="logo">
-            <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 400, marginTop: '2px' }}>
-              Аналитика. Фокус. Результат.
-            </div>
-          </Link>
-          <nav className="nav">
-            <Link href="/pricing" className="nav-link">Тарифы</Link>
-            <Link href="/login" className="button-primary header-button">Войти</Link>
-          </nav>
-        </div>
-      </header>
 
       {/* Hero Section */}
       <section 

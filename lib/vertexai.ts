@@ -12,7 +12,17 @@ export async function callVertexAI(
   console.log(`[VertexAI] Initializing client for project: ${projectId}, location: ${location}`);
 
   try {
-    const vertexAI = new VertexAI({ project: projectId, location: location });
+    const path = require('path');
+const keyPath = path.resolve('/home/ubuntu/company-analyzer/gen-lang-client-0523149055-26537c6d784b.json');
+
+const vertexAI = new VertexAI({
+  project: projectId,
+  location: location,
+  googleAuthOptions: {
+    keyFile: keyPath,
+    scopes: 'https://www.googleapis.com/auth/cloud-platform'
+  }
+});
     
     const generativeModel = vertexAI.getGenerativeModel({
       model: model,
