@@ -131,22 +131,22 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <>
-            <div style={{
-        minHeight: '100vh',
-        backgroundColor: '#F5F5F7',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <div style={{ color: '#86868B', fontSize: '15px' }}>Загрузка...</div>
-      </div>
+        <div style={{
+          minHeight: '100vh',
+          backgroundColor: '#F5F5F7',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <div style={{ color: '#86868B', fontSize: '15px' }}>Загрузка...</div>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
       <>
-
         <div style={{
           minHeight: 'calc(100vh - 80px)',
           backgroundColor: '#F5F5F7',
@@ -204,7 +204,6 @@ export default function DashboardPage() {
 
   return (
     <>
-
       <div style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#F5F5F7', paddingTop: '80px' }}>
         {/* Шапка */}
         <div style={{

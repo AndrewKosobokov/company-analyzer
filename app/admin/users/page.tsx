@@ -58,16 +58,17 @@ export default function UsersPage() {
     );
   }
 
-if (error) {
+  if (error) {
+    return (
+      <>
+        <p>{error}</p>
+      </>
+    );
+  }
+
   return (
     <>
-      <p>{error}</p>
-    </>
-  );
-}
-  return (
-  <>
-    <main 
+      <main 
         className="container" 
         style={{ 
           maxWidth: '1400px', 
@@ -116,7 +117,7 @@ if (error) {
           <UsersTable />
         </div>
       </main>
-    </div>
+    </>
   );
 }
 

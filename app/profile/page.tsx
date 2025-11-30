@@ -207,8 +207,8 @@ export default function ProfilePage() {
   
   return (
     <>
-    {/* Main Content */}
-    <main ...> 
+      {/* Main Content */}
+      <main 
         className="container" 
         style={{ 
           maxWidth: '900px', 

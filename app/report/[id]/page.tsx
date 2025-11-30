@@ -184,18 +184,19 @@ export default function ReportPage() {
   if (loading) {
     return (
       <>
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: '16px'
-      }}>
-        <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>
-          Загрузка отчета...
-        </p>
-      </div>
+        <div style={{ 
+          minHeight: '100vh', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
+          <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>
+            Загрузка отчета...
+          </p>
+        </div>
+      </>
     );
   }
   
@@ -203,7 +204,6 @@ export default function ReportPage() {
   if (error || !report) {
     return (
       <>
-        
         <div className="container" style={{ maxWidth: '800px', paddingTop: '64px' }}>
           <div className="card" style={{ textAlign: 'center', padding: 'var(--space-2xl)' }}>
             <p style={{ 
@@ -309,9 +309,9 @@ export default function ReportPage() {
           
           {/* Report Card - Only show when NOT viewing script */}
           {!showFirstContact && (
-          <div className="card">
-          {/* Header Section */}
-          <div>
+            <div className="card">
+              {/* Header Section */}
+              <div>
             {(() => {
               const { companyName, inn } = extractCompanyInfo(report.reportText);
               const displayName = companyName || report.companyName;
@@ -319,19 +319,19 @@ export default function ReportPage() {
               
               return (
                 <>
-            <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '8px' }}>
+                  <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '8px' }}>
                     {displayName}
-            </h1>
-            <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>
+                  </h1>
+                  <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>
                     ИНН: {displayInn} • {new Date(report.createdAt).toLocaleDateString('ru-RU')}
-              </p>
+                  </p>
                 </>
               );
             })()}
-            </div>
+              </div>
 
-            {/* Action Buttons */}
-          <div 
+              {/* Action Buttons */}
+              <div 
             style={{ 
               marginTop: '24px', 
               display: 'flex',
@@ -546,21 +546,21 @@ export default function ReportPage() {
             >
               🗑️
             </button>
-          </div>
+              </div>
 
-            {/* Divider */}
-          <div style={{ 
+              {/* Divider */}
+              <div style={{ 
             borderTop: '1px solid var(--border-color)', 
             margin: '32px 0' 
-          }} />
+              }} />
 
-            {/* Report Text */}
-            <div 
+              {/* Report Text */}
+              <div 
               className="markdown-content"
               style={{
-              lineHeight: '1.8',
-            fontSize: '17px',
-            color: 'var(--text-tertiary)'
+                lineHeight: '1.8',
+                fontSize: '17px',
+                color: 'var(--text-tertiary)'
               }}
             >
               <ReactMarkdown
@@ -831,8 +831,8 @@ export default function ReportPage() {
               >
                 {reportText || ''}
               </ReactMarkdown>
+              </div>
             </div>
-          </div>
           )}
           
           {/* Script Card - Only show when viewing script */}

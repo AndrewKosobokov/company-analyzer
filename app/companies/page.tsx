@@ -198,15 +198,12 @@ export default function CompaniesPage() {
         const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
         const displayInn = innMatch ? innMatch[1] : company.companyInn;
         
-       return (
-  <>
-    {(displayName?.toLowerCase().includes(query) || false) ||
-    (displayInn?.includes(query) || false) ||
-    (company.companyName?.toLowerCase().includes(query) || false) ||
-    (company.companyInn?.includes(query) || false)
-    }
-  </>
-);
+        return (
+          (displayName?.toLowerCase().includes(query) || false) ||
+          (displayInn?.includes(query) || false) ||
+          (company.companyName?.toLowerCase().includes(query) || false) ||
+          (company.companyInn?.includes(query) || false)
+        );
       });
     }
 
@@ -292,7 +289,6 @@ export default function CompaniesPage() {
   if (loading) {
     return (
       <>
-        
         <main className="container" style={{ maxWidth: '1000px', paddingTop: '64px', paddingBottom: '64px' }}>
           <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
           
@@ -327,9 +323,9 @@ export default function CompaniesPage() {
       </>
     );
   }
+
   return (
     <>
-      
       <main 
         className="container page-container companies-container" 
         style={{ 
