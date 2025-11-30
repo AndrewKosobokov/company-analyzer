@@ -11,45 +11,49 @@ export default function Header() {
   const router = useRouter();
   const { logout } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-useEffect(() => {
-  setToken(getToken());
-}, []);
+  useEffect(() => {
+    setToken(getToken());
+  }, []);
 
-useEffect(() => {
-  const checkAdmin = async () => {
-    const token = getToken();
-    
-    // Проверка по userId (временное решение)
-    try {
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.userId === '6c499a0a-cddf-4bf2-8ac5-8a98d90bac4a') {
-          setIsAdmin(true);
-          return;
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const currentToken = getToken();
+      setToken(currentToken);
+      
+      // Проверка по userId (временное решение)
+      try {
+        if (currentToken) {
+          const payload = JSON.parse(atob(currentToken.split('.')[1]));
+          if (payload.userId === '6c499a0a-cddf-4bf2-8ac5-8a98d90bac4a') {
+            setIsAdmin(true);
+            return;
+          }
         }
+      } catch (e) {
+        console.error('Token parse error:', e);
       }
-    } catch (e) {
-      console.error('Token parse error:', e);
-    }
 
-    if (!token) return;
-
-    try {
-      const response = await fetch('/api/auth/status', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setIsAdmin(data.user?.role === 'admin');
+      if (!currentToken) {
+        setIsAdmin(false);
+        return;
       }
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-    }
-  };
-  checkAdmin();
-}, []);
+
+      try {
+        const response = await fetch('/api/auth/status', {
+          headers: { Authorization: `Bearer ${currentToken}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIsAdmin(data.user?.role === 'admin');
+        }
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+      }
+    };
+    checkAdmin();
+  }, [token]);
   const handleLogout = () => {
     logout();
     router.push('/login');
@@ -117,7 +121,7 @@ useEffect(() => {
       </Link>
       {isAdmin && (
         <Link 
-          href="/admin/dashboard" 
+          href="/admin" 
           className={isActive('/admin') ? 'button-primary header-button' : 'nav-link'}
         >
           Админ-панель
