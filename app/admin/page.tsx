@@ -150,19 +150,10 @@ export default function AdminPage() {
               fontSize: '24px', 
               fontWeight: 600, 
               margin: 0,
-              marginBottom: '8px',
               color: '#1D1D1F'
             }}>
-              📊 Аналитика
+              Аналитика
             </h2>
-            <p style={{ 
-              fontSize: '15px', 
-              color: '#86868B',
-              margin: 0,
-              lineHeight: '1.5'
-            }}>
-              Финансовые метрики, статистика пользователей и AI здоровье
-            </p>
           </div>
         </Link>
 
@@ -210,19 +201,10 @@ export default function AdminPage() {
               fontSize: '24px', 
               fontWeight: 600, 
               margin: 0,
-              marginBottom: '8px',
               color: '#1D1D1F'
             }}>
-              👥 Пользователи
+              Пользователи
             </h2>
-            <p style={{ 
-              fontSize: '15px', 
-              color: '#86868B',
-              margin: 0,
-              lineHeight: '1.5'
-            }}>
-              Управление пользователями, тарифами и доступом
-            </p>
           </div>
         </Link>
       </div>
