@@ -9,7 +9,9 @@ interface AuthContextType {
     name: string;
     email: string;
     organization: string;
+    role?: string;
   } | null;
+  isAdmin: boolean;
   loading: boolean;
   hydrated: boolean;
   login: (token: string, userData: any) => void;
@@ -32,7 +34,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     name: string;
     email: string;
     organization: string;
+    role?: string;
   } | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Check localStorage on mount
   useEffect(() => {
@@ -40,13 +44,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('userData');
     
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+      try {
+        const userData = JSON.parse(storedUser);
+        setToken(storedToken);
+        setUser(userData);
+        setIsAuthenticated(true);
+        
+        // Check admin status
+        checkAdminStatus(storedToken, userData);
+      } catch (e) {
+        console.error('Error parsing stored user data:', e);
+      }
     }
     setLoading(false);
     setHydrated(true);
   }, []);
+
+  const checkAdminStatus = async (token: string, userData: any) => {
+    // Проверка по userId (временное решение)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.userId === '6c499a0a-cddf-4bf2-8ac5-8a98d90bac4a') {
+        setIsAdmin(true);
+        return;
+      }
+    } catch (e) {
+      console.error('Token parse error:', e);
+    }
+
+    // Проверка по роли в userData
+    if (userData?.role === 'admin') {
+      setIsAdmin(true);
+      return;
+    }
+
+    // Проверка через API
+    try {
+      const response = await fetch('/api/auth/status', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setIsAdmin(data.user?.role === 'admin' || data.role === 'admin');
+      }
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+  };
 
   const login = (token: string, userData: any) => {
     if (typeof window !== 'undefined') {
@@ -57,24 +101,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(token);
     setUser(userData);
     setIsAuthenticated(true);
+    
+    // Check admin status after login
+    checkAdminStatus(token, userData);
   };
 
-const logout = () => {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    
-    // Редирект на страницу логина
-    window.location.href = '/login';
-  }
-  setToken(null);
-  setUser(null);
-  setIsAuthenticated(false);
-};
+  const logout = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userData');
+      
+      // Редирект на страницу логина
+      window.location.href = '/login';
+    }
+    setToken(null);
+    setUser(null);
+    setIsAuthenticated(false);
+    setIsAdmin(false);
+  };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, token, user, loading, hydrated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, user, isAdmin, loading, hydrated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

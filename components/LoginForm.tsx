@@ -47,6 +47,7 @@ export default function LoginForm() {
         name: data.user.name || '',
         email: data.user.email || '',
         organization: data.user.organizationName || '',
+        role: data.user.role || data.role, // Добавляем роль пользователя
       };
       login(data.token, userData);
       router.push('/analysis');
