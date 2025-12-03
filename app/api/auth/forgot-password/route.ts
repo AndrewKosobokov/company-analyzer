@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 import { sendEmail, getPasswordResetEmailTemplate } from '@/utils/email';
-
-const prisma = new PrismaClient();
+import prisma from '@/app/lib/prisma';
 
 export async function POST(req: NextRequest) {
   try {

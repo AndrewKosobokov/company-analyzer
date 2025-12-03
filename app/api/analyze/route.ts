@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { generatePrompt } from '@/utils/prompt';
 import { formatAnalysisText } from '@/utils/formatAnalysisText';
 import { extractAndValidateInn } from '@/utils/extractInn';
-
-const prisma = new PrismaClient();
+import prisma from '@/app/lib/prisma';
 
 // Функция для извлечения только нужных разделов из отчёта
 function extractKeySections(reportText: string) {

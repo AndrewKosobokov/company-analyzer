@@ -1,6 +1,8 @@
 'use client';
 
-export default function Footer() {
+import React from 'react';
+
+function Footer() {
   return (
     <footer style={{
       borderTop: '1px solid #E5E5E7',
@@ -28,3 +30,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default React.memo(Footer);

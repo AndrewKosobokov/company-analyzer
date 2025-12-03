@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react';
 import Link from 'next/link'
 
 interface NavigationProps {
@@ -7,7 +8,7 @@ interface NavigationProps {
   showAuth?: boolean
 }
 
-export default function Navigation({ currentPage = 'home', showAuth = true }: NavigationProps) {
+function Navigation({ currentPage = 'home', showAuth = true }: NavigationProps) {
   return (
     <nav className="nav">
       <div className="nav-container">
@@ -40,6 +41,8 @@ export default function Navigation({ currentPage = 'home', showAuth = true }: Na
     </nav>
   )
 }
+
+export default React.memo(Navigation);
 
 
 

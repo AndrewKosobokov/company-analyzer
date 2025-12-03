@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { exportTargetProposalToPDF, exportTargetProposalToWord, shareToTelegram, shareToWhatsApp, copyToClipboard } from '@/utils/exportReport';
+import { shareToTelegram, shareToWhatsApp, copyToClipboard } from '@/utils/exportReport';
 import ProgressBar from '@/components/ProgressBar';
 import { useToast } from '@/components/ui/ToastProvider';
 import { getToken } from '@/app/lib/auth';
@@ -140,6 +140,7 @@ export default function TargetProposalModal({
 
   const handleExportPDF = async () => {
     try {
+      const { exportTargetProposalToPDF } = await import('@/utils/exportReport');
       await exportTargetProposalToPDF(
         companyName,
         companyInn,
@@ -152,6 +153,7 @@ export default function TargetProposalModal({
 
   const handleExportWord = async () => {
     try {
+      const { exportTargetProposalToWord } = await import('@/utils/exportReport');
       await exportTargetProposalToWord(
         companyName,
         companyInn,

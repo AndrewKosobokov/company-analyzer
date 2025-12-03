@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 interface SearchBarProps {
   value: string;
@@ -11,15 +11,31 @@ interface SearchBarProps {
   totalCount?: number;
 }
 
-export default function SearchBar({ 
-  value, 
-  onChange, 
+function SearchBar({
+  value,
+  onChange,
   placeholder = 'Поиск...',
   autoFocus = false,
   resultsCount,
   totalCount
 }: SearchBarProps) {
   const [isFocused, setIsFocused] = useState(false);
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  }, [onChange]);
+
+  const handleClear = useCallback(() => {
+    onChange('');
+  }, [onChange]);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+  }, []);
 
   return (
     <div style={{
@@ -62,9 +78,9 @@ export default function SearchBar({
         <input
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onChange={handleChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder={placeholder}
           autoFocus={autoFocus}
           style={{
@@ -89,7 +105,7 @@ export default function SearchBar({
         {value && (
           <button
             type="button"
-            onClick={() => onChange('')}
+            onClick={handleClear}
             style={{
               position: 'absolute',
               right: '12px',
@@ -154,6 +170,8 @@ export default function SearchBar({
     </div>
   );
 }
+
+export default React.memo(SearchBar);
 
 
 
