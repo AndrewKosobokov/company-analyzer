@@ -49,6 +49,11 @@ model User {
   // Relationship to Archive
   analyses         Analysis[]
   payments         Payment[]
+
+  // Performance indexes
+  @@index([plan])
+  @@index([role])
+  @@index([isEmailVerified])
 }
 
 // ===========================================
@@ -85,9 +90,14 @@ model Analysis {
   analysisType String  @default("company")
   
   createdAt   DateTime @default(now())
-  
+
+  // Performance indexes
   @@index([userId])
   @@index([createdAt])
+  @@index([userId, isDeleted])
+  @@index([userId, createdAt])
+  @@index([isDeleted, createdAt])
+  @@index([isNonTargetClient])
 }
 
 model Payment {
@@ -105,8 +115,10 @@ model Payment {
 
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Performance indexes
   @@index([userId])
-  @@index([paymentId])
+  @@index([status])
+  @@index([userId, status, createdAt])
 }
 
 

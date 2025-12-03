@@ -1,21 +1,22 @@
 'use client';
 
+import React, { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 
-export default function Header() {
+function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAdmin, logout } = useAuth();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     router.push('/login');
-  };
+  }, [logout, router]);
 
   // Определяем активную страницу
-  const isActive = (path: string) => {
+  const isActive = useCallback((path: string) => {
     if (path === '/analysis') {
       return pathname === '/analysis' || pathname.startsWith('/analysis');
     }
@@ -26,7 +27,7 @@ export default function Header() {
       return pathname.startsWith('/admin');
     }
     return pathname === path;
-  };
+  }, [pathname]);
 
   return (
     <header className="header">
@@ -111,3 +112,5 @@ export default function Header() {
     </header>
   );
 }
+
+export default React.memo(Header);
