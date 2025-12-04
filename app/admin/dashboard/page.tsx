@@ -242,14 +242,6 @@ export default function DashboardPage() {
             >
               ← Назад
             </Link>
-            <h1 style={{
-              fontSize: '34px',
-              fontWeight: '600',
-              color: '#1D1D1F',
-              margin: 0
-            }}>
-              Аналитика
-            </h1>
           </div>
         </div>
 

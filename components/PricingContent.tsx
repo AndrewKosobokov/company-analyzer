@@ -106,10 +106,6 @@ export default function PricingContent() {
           transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
         }}
       >
-        <h1 style={{ fontSize: '48px', textAlign: 'center', marginBottom: '48px' }}>
-          Тарифы
-        </h1>
-        
         {/* Pricing Grid */}
         <div className="pricing-grid">
           {/* Card 1 - Start */}
