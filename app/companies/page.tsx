@@ -290,8 +290,6 @@ export default function CompaniesPage() {
     return (
       <>
         <main className="container" style={{ maxWidth: '1000px', paddingTop: '64px', paddingBottom: '64px' }}>
-          <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
-          
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {[1, 2, 3].map(i => (
               <div key={i} style={{
@@ -334,8 +332,6 @@ export default function CompaniesPage() {
           paddingBottom: '64px'
         }}
       >
-        <h1 style={{ fontSize: '48px', fontWeight: 600, marginBottom: '48px', textAlign: 'center' }}>Отчеты</h1>
-        
         {/* Apple-style segmented control toggle for filter */}
         {companies.length > 0 && !error && (
           <div style={{

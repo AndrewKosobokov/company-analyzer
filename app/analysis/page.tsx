@@ -256,16 +256,6 @@ export default function AnalysisPage() {
           transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
         }}
       >
-        <h1 style={{ 
-          fontSize: '36px', 
-          textAlign: 'center', 
-          marginBottom: 'var(--space-2xl)',
-          fontWeight: 600,
-          letterSpacing: '-0.022em'
-        }}>
-          Анализ
-        </h1>
-        
         <div 
           className="card"
           style={{

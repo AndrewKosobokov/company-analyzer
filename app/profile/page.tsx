@@ -219,10 +219,6 @@ export default function ProfilePage() {
           transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
         }}
       >
-        <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>
-          Профиль
-        </h1>
-        
         {/* Section 1: Personal Info */}
         <div 
           className="profile-section"
