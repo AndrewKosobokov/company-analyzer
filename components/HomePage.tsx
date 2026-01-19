@@ -43,8 +43,8 @@ export default function HomePage() {
 Мы выявляем скрытые потребности в редких и сертифицированных позициях, превращая холодные звонки в экспертные переговоры с <strong>готовым скриптом</strong>.
         </p>
         <div className="hero-buttons">
-          <Link 
-            href="/login" 
+          <Link
+            href="/login"
             className="button-primary"
             style={{ transition: 'all 0.3s ease' }}
             onMouseEnter={(e) => {
@@ -58,8 +58,9 @@ export default function HomePage() {
           >
             Начать бесплатно
           </Link>
-          <Link 
-            href="/pricing" 
+          {/* Временно скрыта кнопка тарифов */}
+          {/* <Link
+            href="/pricing"
             className="button-secondary"
             style={{ transition: 'all 0.3s ease' }}
             onMouseEnter={(e) => {
@@ -72,7 +73,7 @@ export default function HomePage() {
             }}
           >
             Посмотреть тарифы
-          </Link>
+          </Link> */}
         </div>
       </section>
 
@@ -208,7 +209,8 @@ export default function HomePage() {
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/login" className="button-primary">Начать бесплатно</Link>
-            <Link href="/pricing" className="button-secondary">Посмотреть тарифы</Link>
+            {/* Временно скрыта кнопка тарифов */}
+            {/* <Link href="/pricing" className="button-secondary">Посмотреть тарифы</Link> */}
           </div>
         </div>
       </section>
