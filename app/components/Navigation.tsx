@@ -22,10 +22,11 @@ function Navigation({ currentPage = 'home', showAuth = true }: NavigationProps) 
           <Link href="/companies" className="nav-link">
             Companies
           </Link>
-          {/* Временно скрыт раздел Pricing */}
-          {/* <Link href="/pricing" className="nav-link">
-            Pricing
-          </Link> */}
+          {false && (
+            <Link href="/pricing" className="nav-link">
+              Pricing
+            </Link>
+          )}
           {showAuth && (
             currentPage === 'profile' ? (
               <Link href="/profile" className="btn btn-primary btn-small">

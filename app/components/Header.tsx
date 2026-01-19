@@ -62,13 +62,14 @@ function Header() {
               >
                 Отчеты
               </Link>
-              {/* Временно скрыт раздел Тарифы */}
-              {/* <Link
-                href="/pricing"
-                className={isActive('/pricing') ? 'button-primary header-button' : 'nav-link'}
-              >
-                Тарифы
-              </Link> */}
+              {false && (
+                <Link
+                  href="/pricing"
+                  className={isActive('/pricing') ? 'button-primary header-button' : 'nav-link'}
+                >
+                  Тарифы
+                </Link>
+              )}
               <Link
                 href="/profile"
                 className={isActive('/profile') ? 'button-primary header-button' : 'nav-link'}
@@ -94,13 +95,14 @@ function Header() {
           ) : (
             // Меню для НЕзалогиненных пользователей
             <>
-              {/* Временно скрыт раздел Тарифы */}
-              {/* <Link
-                href="/pricing"
-                className="nav-link"
-              >
-                Тарифы
-              </Link> */}
+              {false && (
+                <Link
+                  href="/pricing"
+                  className="nav-link"
+                >
+                  Тарифы
+                </Link>
+              )}
               <Link
                 href="/login"
                 className="button-primary header-button"
