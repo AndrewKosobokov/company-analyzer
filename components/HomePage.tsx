@@ -58,22 +58,23 @@ export default function HomePage() {
           >
             Начать бесплатно
           </Link>
-          {/* Временно скрыта кнопка тарифов */}
-          {/* <Link
-            href="/pricing"
-            className="button-secondary"
-            style={{ transition: 'all 0.3s ease' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '';
-            }}
-          >
-            Посмотреть тарифы
-          </Link> */}
+          {false && (
+            <Link
+              href="/pricing"
+              className="button-secondary"
+              style={{ transition: 'all 0.3s ease' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '';
+              }}
+            >
+              Посмотреть тарифы
+            </Link>
+          )}
         </div>
       </section>
 
@@ -209,8 +210,9 @@ export default function HomePage() {
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/login" className="button-primary">Начать бесплатно</Link>
-            {/* Временно скрыта кнопка тарифов */}
-            {/* <Link href="/pricing" className="button-secondary">Посмотреть тарифы</Link> */}
+            {false && (
+              <Link href="/pricing" className="button-secondary">Посмотреть тарифы</Link>
+            )}
           </div>
         </div>
       </section>
