@@ -473,7 +473,8 @@ export default function AnalysisPage() {
             <h2 className="text-2xl font-semibold text-black mb-4">Лимит анализов исчерпан</h2>
             <p className="text-base text-[#1d1d1f] leading-relaxed mb-8">Для дальнейшего использования ознакомьтесь с тарифами</p>
             <div className="flex gap-4">
-              <Link href="/pricing" className="bg-black text-white hover:bg-gray-800 rounded-xl px-8 py-3 font-medium transition-colors text-center">Посмотреть тарифы</Link>
+              {/* Временно скрыта кнопка тарифов */}
+              {/* <Link href="/pricing" className="bg-black text-white hover:bg-gray-800 rounded-xl px-8 py-3 font-medium transition-colors text-center">Посмотреть тарифы</Link> */}
               <button onClick={() => setShowLimitModal(false)} className="text-gray-600 hover:text-black rounded-xl px-8 py-3 font-medium transition-colors">Закрыть</button>
             </div>
           </div>
