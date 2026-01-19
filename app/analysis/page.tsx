@@ -77,10 +77,11 @@ export default function AnalysisPage() {
         }
       }
 
-      if (typeof analysesRemaining === 'number' && analysesRemaining <= 0) {
-        setShowLimitModal(true);
-        return;
-      }
+      // Временно отключена проверка лимитов
+      // if (typeof analysesRemaining === 'number' && analysesRemaining <= 0) {
+      //   setShowLimitModal(true);
+      //   return;
+      // }
     } else {
       if (!trimmedProductName) {
         setError('Введите название продукции');
@@ -152,14 +153,15 @@ export default function AnalysisPage() {
       
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        if (
-          currentMode === 'company' &&
-          response.status === 403 &&
-          (data?.analysesRemaining === 0 || (data?.error || '').includes('Лимит анализов'))
-        ) {
-          setShowLimitModal(true);
-          throw new Error(data?.error || 'Лимит анализов исчерпан');
-        }
+        // Временно отключена проверка лимитов
+        // if (
+        //   currentMode === 'company' &&
+        //   response.status === 403 &&
+        //   (data?.analysesRemaining === 0 || (data?.error || '').includes('Лимит анализов'))
+        // ) {
+        //   setShowLimitModal(true);
+        //   throw new Error(data?.error || 'Лимит анализов исчерпан');
+        // }
         throw new Error(data?.error || 'Ошибка анализа');
       }
       

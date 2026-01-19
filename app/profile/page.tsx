@@ -259,8 +259,8 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        {/* Warning: Low balance */}
-        {profile.analysesRemaining <= 5 && profile.plan !== 'trial' && (
+        {/* Warning: Low balance - Временно скрыто */}
+        {/* {profile.analysesRemaining <= 5 && profile.plan !== 'trial' && (
           <div className="card" style={{
             backgroundColor: '#FEF3C7',
             border: '1px solid #FDE047',
@@ -269,24 +269,24 @@ export default function ProfilePage() {
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
               <span style={{ fontSize: '24px' }}>⚠️</span>
               <div>
-                <h3 style={{ 
-                  fontSize: '17px', 
+                <h3 style={{
+                  fontSize: '17px',
                   fontWeight: 600,
                   marginBottom: '8px',
                   color: '#92400E'
                 }}>
                   У вас заканчиваются отчёты
                 </h3>
-                <p style={{ 
-                  fontSize: '15px', 
+                <p style={{
+                  fontSize: '15px',
                   color: '#78350F',
                   marginBottom: 'var(--space-md)'
                 }}>
-                  Осталось всего {profile.analysesRemaining} {profile.analysesRemaining === 1 ? 'анализ' : 'анализа'}. 
+                  Осталось всего {profile.analysesRemaining} {profile.analysesRemaining === 1 ? 'анализ' : 'анализа'}.
                   Пополните баланс, чтобы не потерять доступ к генерации отчётов в важный момент.
                 </p>
-                <Link 
-                  href="/pricing" 
+                <Link
+                  href="/pricing"
                   className="button-primary"
                   style={{ display: 'inline-block' }}
                 >
@@ -295,7 +295,7 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Section 2: My Tariff */}
         <div 
@@ -395,11 +395,11 @@ export default function ProfilePage() {
               );
             })()}
 
-            {/* Button */}
-            <Link 
-              href="/pricing" 
+            {/* Button - Временно скрыта кнопка пополнения */}
+            {/* <Link
+              href="/pricing"
               className="button-primary"
-              style={{ 
+              style={{
                 display: 'block',
                 textAlign: 'center',
                 padding: '12px 24px',
@@ -407,7 +407,7 @@ export default function ProfilePage() {
               }}
             >
               Пополнить отчёты
-            </Link>
+            </Link> */}
           </div>
         </div>
         

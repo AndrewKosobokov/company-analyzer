@@ -204,12 +204,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (user.analysesRemaining <= 0) {
-      return NextResponse.json({
-        error: 'Лимит анализов исчерпан. Обновите тариф.',
-        analysesRemaining: 0
-      }, { status: 403 });
-    }
+    // Временно убрано ограничение на количество анализов
+    // if (user.analysesRemaining <= 0) {
+    //   return NextResponse.json({
+    //     error: 'Лимит анализов исчерпан. Обновите тариф.',
+    //     analysesRemaining: 0
+    //   }, { status: 403 });
+    // }
 
     // 4. FETCH WEBSITE CONTENT (ONLY if URL provided)
     let siteText = '';
@@ -350,13 +351,13 @@ export async function POST(request: Request) {
     });
 
     // 9. UPDATE USER ANALYSES COUNT
-    // Всегда списывать анализ
-    await prisma.user.update({
-      where: { id: userId },
-      data: { analysesRemaining: { decrement: 1 } }
-    });
-    const updatedAnalysesRemaining = user.analysesRemaining - 1;
-    console.log(`✅ Analysis count decremented. Remaining: ${updatedAnalysesRemaining}. Non-target client: ${isNonTargetClient}`);
+    // Временно отключено списывание анализов
+    // await prisma.user.update({
+    //   where: { id: userId },
+    //   data: { analysesRemaining: { decrement: 1 } }
+    // });
+    const updatedAnalysesRemaining = user.analysesRemaining; // Не уменьшаем баланс
+    console.log(`✅ Analysis completed without decrement. Remaining: ${updatedAnalysesRemaining}. Non-target client: ${isNonTargetClient}`);
 
     console.log(`✅ Analysis saved. ID: ${analysis.id}, User remaining: ${updatedAnalysesRemaining}`);
 
