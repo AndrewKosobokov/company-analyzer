@@ -56,20 +56,21 @@ function Header() {
               >
                 Анализ
               </Link>
-              <Link 
-                href="/companies" 
+              <Link
+                href="/companies"
                 className={isActive('/companies') ? 'button-primary header-button' : 'nav-link'}
               >
                 Отчеты
               </Link>
-              <Link 
-                href="/pricing" 
+              {/* Временно скрыт раздел Тарифы */}
+              {/* <Link
+                href="/pricing"
                 className={isActive('/pricing') ? 'button-primary header-button' : 'nav-link'}
               >
                 Тарифы
-              </Link>
-              <Link 
-                href="/profile" 
+              </Link> */}
+              <Link
+                href="/profile"
                 className={isActive('/profile') ? 'button-primary header-button' : 'nav-link'}
               >
                 Профиль
@@ -93,14 +94,15 @@ function Header() {
           ) : (
             // Меню для НЕзалогиненных пользователей
             <>
-              <Link 
-                href="/pricing" 
+              {/* Временно скрыт раздел Тарифы */}
+              {/* <Link
+                href="/pricing"
                 className="nav-link"
               >
                 Тарифы
-              </Link>
-              <Link 
-                href="/login" 
+              </Link> */}
+              <Link
+                href="/login"
                 className="button-primary header-button"
               >
                 Войти
