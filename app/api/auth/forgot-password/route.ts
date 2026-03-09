@@ -2,16 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { sendEmail, getPasswordResetEmailTemplate } from '@/utils/email';
 import prisma from '@/app/lib/prisma';
+import { checkRateLimit, passwordResetLimiter } from '@/app/lib/rateLimiter';
+import { validateRequest } from '@/app/lib/validateRequest';
+import { forgotPasswordSchema } from '@/app/lib/schemas';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
-
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email обязателен' },
-        { status: 400 }
-      );
+    // Валидация входных данных
+    const validation = await validateRequest(req, forgotPasswordSchema);
+    if (!validation.success) return validation.response;
+    
+    const { email } = validation.data;
+    
+    // Rate limiting по email (защита от email bombing)
+    const rateLimitResult = await checkRateLimit(email, passwordResetLimiter);
+    
+    if (!rateLimitResult.success) {
+      console.warn(`[RateLimit] Password reset blocked for ${email}`);
+      // Не раскрываем что лимит превышен - возвращаем общий ответ
+      return NextResponse.json({
+        message: 'Если email существует, на него отправлена ссылка для восстановления',
+      });
     }
 
     const user = await prisma.user.findUnique({

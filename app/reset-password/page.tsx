@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import ResetPasswordForm from '@/components/ResetPasswordForm';
 
 export const metadata: Metadata = {
@@ -17,5 +18,9 @@ export const metadata: Metadata = {
 };
 
 export default function ResetPassword() {
-  return <ResetPasswordForm />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Загрузка...</div>}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
 }

@@ -1,28 +1,37 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { getAccessToken } from '@/app/lib/cookies';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    // Extract token from Authorization header
-    const authHeader = request.headers.get('Authorization');
+    // Получаем токен из httpOnly cookie
+    const accessToken = getAccessToken(request);
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // Fallback на Authorization header для обратной совместимости
+    const authHeader = request.headers.get('Authorization');
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    
+    const token = accessToken || headerToken;
+    
+    if (!token) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
     
-    const token = authHeader.substring(7); // Remove "Bearer " prefix
-    
     // Verify JWT token
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { 
+        userId: string; 
+        email: string;
+        role: string;
+      };
     } catch (err) {
       return NextResponse.json(
-        { error: 'Invalid token' },
+        { error: 'Invalid token', needsRefresh: true },
         { status: 401 }
       );
     }
@@ -53,6 +62,18 @@ export async function GET(request: Request) {
     }
     
     return NextResponse.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        organizationName: user.organizationName,
+        phone: user.phone,
+        plan: user.plan,
+        analysesRemaining: user.analysesRemaining,
+        planStartDate: user.planStartDate,
+        role: user.role
+      },
+      // Также возвращаем поля на верхнем уровне для обратной совместимости
       name: user.name,
       email: user.email,
       plan: user.plan,
@@ -67,7 +88,5 @@ export async function GET(request: Request) {
       { error: 'Failed to fetch user' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

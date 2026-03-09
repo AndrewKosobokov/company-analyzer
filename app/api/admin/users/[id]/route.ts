@@ -16,7 +16,7 @@ export async function PATCH(
     const token = authHeader.substring(7);
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
     } catch {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -106,8 +106,6 @@ export async function PATCH(
   } catch (error) {
     console.error('[Admin Update User] Error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

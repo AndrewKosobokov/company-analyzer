@@ -18,8 +18,6 @@ export async function POST() {
     return NextResponse.json({ 
       error: 'Failed to set admin role' 
     }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

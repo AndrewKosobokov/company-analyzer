@@ -3,18 +3,32 @@ import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendEmail, getEmailVerificationTemplate } from '@/utils/email';
 import prisma from '@/app/lib/prisma';
+import { checkRateLimit, authLimiter, getIdentifier } from '@/app/lib/rateLimiter';
+import { validateRequest } from '@/app/lib/validateRequest';
+import { registerSchema } from '@/app/lib/schemas';
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name, organization, phone } = await request.json();
+    // Rate limiting по IP (защита от спама регистраций)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, authLimiter);
     
-    // Validation
-    if (!email || !password) {
+    if (!rateLimitResult.success) {
+      console.warn(`[RateLimit] Registration blocked for ${identifier}`);
       return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
+        { error: 'Слишком много попыток регистрации. Попробуйте через 15 минут.' },
+        { 
+          status: 429,
+          headers: { 'Retry-After': rateLimitResult.retryAfter!.toString() }
+        }
       );
     }
+    
+    // Валидация входных данных
+    const validation = await validateRequest(request, registerSchema);
+    if (!validation.success) return validation.response;
+    
+    const { email, password, name, organization, phone } = validation.data;
     
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
@@ -81,7 +95,5 @@ export async function POST(request: Request) {
       { error: 'Registration failed' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

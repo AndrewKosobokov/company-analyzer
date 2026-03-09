@@ -10,7 +10,7 @@ export async function DELETE(request: Request) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string; email?: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; email?: string };
 
     const adminUser = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -47,8 +47,6 @@ export async function DELETE(request: Request) {
   } catch (error: any) {
     console.error('Delete user error:', error);
     return NextResponse.json({ error: error.message || 'Failed to delete user' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

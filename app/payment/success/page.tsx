@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getToken } from '@/app/lib/auth';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [checking, setChecking] = useState(true);
@@ -19,11 +18,8 @@ export default function PaymentSuccessPage() {
       }
 
       try {
-        const token = getToken();
         const response = await fetch(`/api/payment/check/${paymentId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: 'include',
         });
 
         const data = await response.json();
@@ -129,4 +125,17 @@ export default function PaymentSuccessPage() {
   );
 }
 
-
+export default function PaymentSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-700">Загрузка...</p>
+        </div>
+      </div>
+    }>
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}

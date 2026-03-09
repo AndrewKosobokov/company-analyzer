@@ -1,66 +1,74 @@
-// File: app/lib/auth.ts (НОВЫЙ ФАЙЛ)
-
 import jwt from 'jsonwebtoken';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
+import { getAccessToken } from './cookies';
 
 /**
- * Проверяет JWT-токен из заголовка Authorization.
+ * Проверяет JWT-токен из httpOnly cookie или Authorization header.
  * @param req NextRequest
- * @returns Объект payload токена (userId, userInn) или null, если токен недействителен.
+ * @returns Объект payload токена или null, если токен недействителен.
  */
 export const verifyAuth = (req: NextRequest) => {
-    const authHeader = req.headers.get('Authorization');
+    // 1. Сначала проверяем httpOnly cookie
+    const cookieToken = getAccessToken(req);
     
-    // 1. Проверка наличия заголовка
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // 2. Fallback на Authorization header (для обратной совместимости)
+    const authHeader = req.headers.get('Authorization');
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    
+    const token = cookieToken || headerToken;
+    
+    if (!token) {
         return null;
     }
 
-    const token = authHeader.split(' ')[1];
     const JWT_SECRET = process.env.JWT_SECRET;
 
     if (!JWT_SECRET) {
         console.error("JWT_SECRET is not defined.");
-        // В продакшене это критическая ошибка конфигурации
         return null; 
     }
 
     try {
-        // 2. Верификация токена и извлечение данных
-        const payload = jwt.verify(token, JWT_SECRET) as { userId: string; userInn: string; iat: number; exp: number };
+        const payload = jwt.verify(token, JWT_SECRET) as { 
+            userId: string; 
+            email: string;
+            role: string;
+            iat: number; 
+            exp: number 
+        };
         return payload;
     } catch (e) {
-        // Ошибка, если токен просрочен или невалиден (jwt.verify бросает исключение)
         return null;
     }
 };
 
 /**
- * Сохраняет JWT токен в localStorage
- * @param token JWT токен
+ * @deprecated Используйте httpOnly cookies. Эта функция оставлена для обратной совместимости.
+ */
+export const getToken = (): string | null => {
+  console.warn('getToken() is deprecated. Tokens are now stored in httpOnly cookies.');
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken');
+  }
+  return null;
+};
+
+/**
+ * @deprecated Используйте AuthContext.login(). Эта функция оставлена для обратной совместимости.
  */
 export const login = (token: string) => {
+  console.warn('login() from auth.ts is deprecated. Use AuthContext.login() instead.');
   if (typeof window !== 'undefined') {
     localStorage.setItem('authToken', token);
   }
 };
 
 /**
- * Удаляет JWT токен из localStorage
+ * @deprecated Используйте AuthContext.logout(). Эта функция оставлена для обратной совместимости.
  */
 export const logout = () => {
+  console.warn('logout() from auth.ts is deprecated. Use AuthContext.logout() instead.');
   if (typeof window !== 'undefined') {
     localStorage.removeItem('authToken');
   }
-};
-
-/**
- * Получает JWT токен из localStorage
- * @returns JWT токен или null
- */
-export const getToken = (): string | null => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
-  }
-  return null;
 };

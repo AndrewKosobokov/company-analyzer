@@ -52,7 +52,5 @@ export async function GET(req: NextRequest) {
       { success: false, error: 'Ошибка сервера' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

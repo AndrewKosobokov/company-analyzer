@@ -7,6 +7,10 @@ import Footer from './components/Footer';
 import MobileMenu from './components/MobileMenu';
 import './globals.css';
 import Header from './components/Header';
+import { validateEnv } from '@/app/lib/env';
+
+// Валидируем environment variables при старте приложения
+validateEnv();
 
 export const metadata = {
   title: {

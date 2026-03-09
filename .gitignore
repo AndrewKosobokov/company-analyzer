@@ -1,9 +1,15 @@
 node_modules/
 .next/
 .env.local
+.env
 *.db
-*.loggcp-service-account.json
+*.log
+
+# Google Cloud credentials - НЕ коммитить!
+gen-lang-client*.json
 gcp-service-account.json
+*-service-account.json
+
+# Build artifacts
 build.log
 main
-*.json

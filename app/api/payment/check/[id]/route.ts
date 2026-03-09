@@ -15,7 +15,7 @@ export async function GET(
 
     const token = authHeader.substring(7);
     try {
-      jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      jwt.verify(token, process.env.JWT_SECRET!);
     } catch {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }

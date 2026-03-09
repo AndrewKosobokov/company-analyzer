@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const token = authHeader.substring(7);
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
     } catch {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -70,7 +70,5 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Dashboard AI health error:', error);
     return NextResponse.json({ error: 'Failed to fetch AI health status' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

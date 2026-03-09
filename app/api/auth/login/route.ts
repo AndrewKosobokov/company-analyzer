@@ -2,20 +2,34 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { setAuthCookies } from '@/app/lib/cookies';
+import { checkRateLimit, authLimiter, getIdentifier } from '@/app/lib/rateLimiter';
+import { validateRequest } from '@/app/lib/validateRequest';
+import { loginSchema } from '@/app/lib/schemas';
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    // Rate limiting по IP (защита от брутфорса)
+    const identifier = getIdentifier(request);
+    const rateLimitResult = await checkRateLimit(identifier, authLimiter);
     
-    // Validation
-    if (!email || !password) {
+    if (!rateLimitResult.success) {
+      console.warn(`[RateLimit] Login blocked for ${identifier}`);
       return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
+        { error: 'Слишком много попыток входа. Попробуйте через 15 минут.' },
+        { 
+          status: 429,
+          headers: { 'Retry-After': rateLimitResult.retryAfter!.toString() }
+        }
       );
     }
     
-    // Find user
+    // Валидация входных данных
+    const validation = await validateRequest(request, loginSchema);
+    if (!validation.success) return validation.response;
+    
+    const { email, password } = validation.data;
+    
     const user = await prisma.user.findUnique({
       where: { email }
     });
@@ -27,7 +41,6 @@ export async function POST(request: Request) {
       );
     }
     
-    // CRITICAL: Check if email is verified
     if (!user.isEmailVerified) {
       return NextResponse.json(
         { error: 'Please verify your email before logging in' },
@@ -35,7 +48,6 @@ export async function POST(request: Request) {
       );
     }
     
-    // Compare password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     
     if (!isPasswordValid) {
@@ -45,19 +57,23 @@ export async function POST(request: Request) {
       );
     }
     
-    // Generate JWT
-// Generate JWT
-const token = jwt.sign(
-  { 
-    userId: user.id, 
-    email: user.email,
-    role: user.role  // ← ДОБАВЬТЕ ЭТУ СТРОКУ
-  },
-  process.env.JWT_SECRET || 'your-secret-key',
-  { expiresIn: '30d' }
-);    
-    return NextResponse.json({
-      token,
+    // Generate Access Token (15 минут)
+    const accessToken = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET!,
+      { expiresIn: '15m' }
+    );
+    
+    // Generate Refresh Token (30 дней)
+    const refreshToken = jwt.sign(
+      { userId: user.id, type: 'refresh' },
+      process.env.JWT_SECRET!,
+      { expiresIn: '30d' }
+    );
+    
+    // Set httpOnly cookies
+    const response = NextResponse.json({
+      success: true,
       user: {
         id: user.id,
         email: user.email,
@@ -66,8 +82,11 @@ const token = jwt.sign(
         phone: user.phone,
         plan: user.plan,
         analysesRemaining: user.analysesRemaining,
+        role: user.role
       },
     });
+    
+    return setAuthCookies(response, accessToken, refreshToken);
     
   } catch (error) {
     console.error('Login error:', error);
@@ -75,7 +94,5 @@ const token = jwt.sign(
       { error: 'Login failed' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

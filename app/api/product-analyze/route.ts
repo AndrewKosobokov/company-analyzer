@@ -2,44 +2,45 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { callVertexAI } from '@/lib/vertexai';
 import prisma from '@/app/lib/prisma';
+import { checkRateLimit, analyzeLimiter } from '@/app/lib/rateLimiter';
+import { validateRequest } from '@/app/lib/validateRequest';
+import { productAnalyzeSchema } from '@/app/lib/schemas';
 
 export async function POST(request: Request) {
   try {
-    // 1. AUTHENTICATION
+    // 1. GET USER ID FROM TOKEN (already validated by middleware)
+    const accessToken = request.cookies.get('access_token')?.value;
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = accessToken || headerToken;
+
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.substring(7);
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
-    } catch (err) {
+    // Decode token (no need to verify - middleware already did)
+    const decoded = jwt.decode(token) as { userId: string };
+    if (!decoded || !decoded.userId) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = decoded.userId;
-
-    // 2. GET INPUT DATA
-    const { productName } = await request.json();
-
-    if (!productName || !productName.trim()) {
+    
+    // RATE LIMITING
+    const rateLimitResult = await checkRateLimit(userId, analyzeLimiter);
+    if (!rateLimitResult.success) {
+      console.warn(`[RateLimit] User ${userId} exceeded product-analyze limit`);
       return NextResponse.json(
-        { error: 'Введите название продукции' },
-        { status: 400 }
+        { error: 'Слишком много запросов. Попробуйте позже.' },
+        { status: 429, headers: { 'Retry-After': rateLimitResult.retryAfter!.toString() } }
       );
     }
 
-    const productNameTrimmed = productName.trim();
-
-    // Basic length validation before proceeding
-    if (productNameTrimmed.length < 2 || productNameTrimmed.length > 200) {
-      return NextResponse.json(
-        { error: 'Введите корректный запрос' },
-        { status: 400 }
-      );
-    }
+    // 2. ВАЛИДАЦИЯ ВХОДНЫХ ДАННЫХ
+    const validation = await validateRequest(request, productAnalyzeSchema);
+    if (!validation.success) return validation.response;
+    
+    const productNameTrimmed = validation.data.productName;
 
     // 3. BUILD PROMPT
     const prompt = `Role: Ты — ведущий аналитик рынка B2B и эксперт по лидогенерации. Твоя задача — дать исчерпывающую карту рынка для менеджера по продажам.
@@ -154,7 +155,5 @@ Input Variable:
       { error: error.message || 'Ошибка при анализе продукции' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

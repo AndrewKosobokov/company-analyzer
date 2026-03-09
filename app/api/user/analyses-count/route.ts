@@ -21,8 +21,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ count });
   } catch (error) {
     return NextResponse.json({ error: 'Error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     // Verify JWT token
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
     } catch (err) {
       return NextResponse.json(
         { error: 'Invalid token' },
@@ -89,8 +89,6 @@ export async function POST(request: Request) {
       { error: 'Failed to change password' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
 

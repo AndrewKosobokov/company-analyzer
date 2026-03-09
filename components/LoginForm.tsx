@@ -30,26 +30,8 @@ export default function LoginForm() {
     setError('');
     
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || data.message || 'Invalid credentials');
-      }
-      
-      // Используем login из AuthContext для сохранения токена и данных пользователя
-      const userData = {
-        name: data.user.name || '',
-        email: data.user.email || '',
-        organization: data.user.organizationName || '',
-        role: data.user.role || data.role, // Добавляем роль пользователя
-      };
-      login(data.token, userData);
+      // login() из AuthContext сам делает fetch и устанавливает cookies
+      await login(email, password);
       router.push('/analysis');
     } catch (err) {
       const errorMessage = getErrorMessage(err);

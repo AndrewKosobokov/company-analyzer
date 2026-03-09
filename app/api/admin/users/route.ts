@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -42,8 +42,6 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Admin users error:', error);
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -55,7 +53,7 @@ export async function PATCH(request: Request) {
     }
 
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
 
     const admin = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -78,7 +76,5 @@ export async function PATCH(request: Request) {
   } catch (error) {
     console.error('Admin update error:', error);
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

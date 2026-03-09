@@ -4,95 +4,9 @@ import { generatePrompt } from '@/utils/prompt';
 import { formatAnalysisText } from '@/utils/formatAnalysisText';
 import { extractAndValidateInn } from '@/utils/extractInn';
 import prisma from '@/app/lib/prisma';
-
-// Функция для извлечения только нужных разделов из отчёта
-function extractKeySections(reportText: string) {
-  const sections = {
-    companyInfo: '',
-    keyRecommendations: '',
-    insights: ''
-  };
-  
-  // Извлекаем информацию о компании (первые 500 символов до первого ##)
-  const headerMatch = reportText.match(/^([\s\S]*?)(?=##)/);
-  if (headerMatch) {
-    sections.companyInfo = headerMatch[1].trim();
-  }
-  
-  // Извлекаем "КЛЮЧЕВЫЕ РЕКОМЕНДАЦИИ"
-  const keyRecsMatch = reportText.match(/## КЛЮЧЕВЫЕ РЕКОМЕНДАЦИИ[\s\S]*?(?=##|$)/);
-  if (keyRecsMatch) {
-    sections.keyRecommendations = keyRecsMatch[0];
-  }
-  
-  // Извлекаем "ИНСАЙТЫ И СТРАТЕГИЯ ВЗАИМОДЕЙСТВИЯ"
-  const insightsMatch = reportText.match(/## ИНСАЙТЫ И СТРАТЕГИЯ ВЗАИМОДЕЙСТВИЯ[\s\S]*?(?=##|$)/);
-  if (insightsMatch) {
-    sections.insights = insightsMatch[0];
-  }
-  
-  return sections;
-}
-
-const TARGET_PROPOSAL_PROMPT = `
-РОЛЬ: Вы — эксперт по B2B продажам и стратегическому консультированию для поставщика металлопроката.
-
-ЗАДАЧА: На основе предоставленного ниже Аналитического Отчета разработайте высокоэффективный, детализированный Скрипт "Первого Касания" (Холодный Звонок), нацеленный на руководителя отдела снабжения целевой компании.
-
-**ЯЗЫК ОТВЕТА: Весь текст должен быть на русском языке. 
-ИСКЛЮЧЕНИЯ: технические термины, марки стали (AISI, EN, ГОСТ), названия оборудования, брендов и компаний оставляйте на языке оригинала.**
-
-КРИТИЧЕСКИЕ ТРЕБОВАНИЯ И ЗАПРЕТЫ:
-
-1.  **ЗАПРЕЩАЕТСЯ генерировать или придумывать любые факты, которые отсутствуют в предоставленном АНАЛИТИЧЕСКОМ ОТЧЕТЕ.**
-2.  **ЗАПРЕЩАЕТСЯ ссылаться на любые внешние события (новые контракты, новости, инфоповоды), которые не были упомянуты в Отчете.**
-3.  **Главный Инсайт (HOOK):** Скрипт должен начинаться с использования **1-2 ключевых, стратегических рекомендаций** из раздела **КЛЮЧЕВЫЕ РЕКОМЕНДАЦИИ** (например, акцент на скорости, сертификации или дефиците), чтобы сразу показать понимание специфики клиента.
-4.  Целевое Лицо: Скрипт адаптирован для общения с менеджером или руководителем отдела снабжения.
-5.  Стратегия: Переключите фокус разговора с "низкой цены" на "надежность, экспертизу и решение проблем роста/сложности".
-
-6.  Структура Скрипта (3 этапа):
-
-    ЭТАП 1. Вступление и Актуализация
-    - Использование главного инсайта (из КЛЮЧЕВЫХ РЕКОМЕНДАЦИЙ) для создания актуальности.
-    - Создание контекста для разговора вокруг проблем клиента (сроки, дефицит, сертификация).
-
-    ЭТАП 2. Предложение Ценности и Экспертиза
-    - Представление компании как эксперта
-    - 2-3 ключевые проблемы, которые мы можем решить
-    - Специфика их производства (например, поставка алюминия Д16Т, редких сплавов или услуг обработки)
-
-    ЭТАП 3. Призыв к Действию
-    - Предложить "тест-драйв" с низким порогом входа
-    - Примеры: "дайте нам самую сложную позицию для расчета" или "сравните нас на срочной поставке"
-
-7.  Блок Обработки Возражений
-    Обязательно добавьте таблицу с 3-мя типичными возражениями:
-    - "У нас есть поставщики"
-    - "Отправьте коммерческое предложение"
-    - "Ваша цена высокая"
-
-    Для каждого возражения дайте убедительный экспертный ответ, основанный на том что мы предлагаем целевому лицу.
-
-ИНФОРМАЦИЯ О КОМПАНИИ:
-{companyInfo}
-
-{insights}
-
-{keyRecommendations}
-
-ФОРМАТ ОТВЕТА:
-Начните СРАЗУ с первого этапа (БЕЗ вступительных фраз и БЕЗ заголовка "Скрипт первого касания для..."):
-
-## ЭТАП 1. Вступление и Актуализация
-
-Затем следуйте структуре 3 этапов выше, завершая блоком обработки возражений.
-
-ВАЖНО: 
-- БЕЗ эмодзи
-- Чёткая структура с заголовками
-- Профессиональный, но человеческий язык
-- Конкретные примеры из анализа компании
-`;
+import { checkRateLimit, analyzeLimiter } from '@/app/lib/rateLimiter';
+import { validateRequest } from '@/app/lib/validateRequest';
+import { analyzeSchema } from '@/app/lib/schemas';
 
 // Simple retry function with exponential backoff
 async function retryWithExponentialBackoff<T>(
@@ -100,7 +14,7 @@ async function retryWithExponentialBackoff<T>(
   maxRetries: number = 3,
   initialDelay: number = 1000
 ): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
   
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -118,81 +32,52 @@ async function retryWithExponentialBackoff<T>(
   throw lastError;
 }
 
-// Clean up any introductory phrases that AI might still add
-function cleanProposal(text: string): string {
-  const introPatterns = [
-    /^Отлично[,.]?\s*задача ясна[.!]?\s*/i,
-    /^Я проанализировал[^.!\n]*[.!\n]\s*/i,
-    /^Хорошо[,.]?\s*[^.!\n]*[.!\n]\s*/i,
-    /^Понятно[,.]?\s*[^.!\n]*[.!\n]\s*/i,
-    /^Конечно[,.]?\s*[^.!\n]*[.!\n]\s*/i,
-    /^Ясно[,.]?\s*[^.!\n]*[.!\n]\s*/i,
-    /^Хорошо[,.]?\s*создам предложение[.!]?\s*/i,
-    /^Сейчас[,.]?\s*[^.!\n]*[.!\n]\s*/i,
-  ];
-  
-  for (const pattern of introPatterns) {
-    text = text.replace(pattern, '');
-  }
-  
-  text = text.replace(
-    /^#\s*Шпаргалка для первого звонка в/im,
-    '# Скрипт первого касания для'
-  );
-  text = text.replace(
-    /^#\s*Вариант для первого звонка в/im,
-    '# Скрипт первого касания для'
-  );
-  
-  return text.trim();
-}
-
 export async function POST(request: Request) {
+  const analysisStartTime = Date.now();
+  
   try {
-    // 1. AUTHENTICATION
+    // 1. GET USER ID FROM TOKEN (already validated by middleware)
+    const accessToken = request.cookies.get('access_token')?.value;
     const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = accessToken || headerToken;
+
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.substring(7);
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
-    } catch (err) {
+    // Decode token (no need to verify - middleware already did)
+    const decoded = jwt.decode(token) as { userId: string };
+    if (!decoded || !decoded.userId) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = decoded.userId;
-
-    // 2. GET INPUT DATA
-    const { url, inn } = await request.json();
-
-    const finalUrl = url?.trim() || '';
-    const finalInn = inn?.trim() || '';
-
-    // Validation: at least one must be provided
-    if (!finalUrl && !finalInn) {
+    
+    // RATE LIMITING (защита от злоупотребления дорогими AI запросами)
+    const rateLimitResult = await checkRateLimit(userId, analyzeLimiter);
+    
+    if (!rateLimitResult.success) {
+      console.warn(`[RateLimit] User ${userId} exceeded analyze limit`);
       return NextResponse.json(
-        { error: 'Укажите сайт или ИНН компании' },
-        { status: 400 }
+        { 
+          error: 'Слишком много запросов на анализ. Попробуйте позже.',
+          retryAfter: rateLimitResult.retryAfter 
+        },
+        { 
+          status: 429,
+          headers: { 'Retry-After': rateLimitResult.retryAfter!.toString() }
+        }
       );
     }
 
-    // Validate INN format (10 or 12 digits)
-    if (finalInn && (finalInn.length !== 10 && finalInn.length !== 12)) {
-      return NextResponse.json(
-        { error: 'ИНН должен содержать 10 или 12 цифр' },
-        { status: 400 }
-      );
-    }
-
-    if (finalInn && !/^\d+$/.test(finalInn)) {
-      return NextResponse.json(
-        { error: 'ИНН должен содержать только цифры' },
-        { status: 400 }
-      );
-    }
+    // 2. ВАЛИДАЦИЯ ВХОДНЫХ ДАННЫХ
+    const validation = await validateRequest(request, analyzeSchema);
+    if (!validation.success) return validation.response;
+    
+    const { url, inn } = validation.data;
+    const finalUrl = url;
+    const finalInn = inn;
 
     // 3. CHECK USER LIMITS
     const user = await prisma.user.findUnique({
@@ -216,42 +101,63 @@ export async function POST(request: Request) {
 
     if (finalUrl) {
       try {
-        console.log('📥 Fetching website:', finalUrl);
+        console.log(`[Website] Fetching: ${finalUrl}`);
+        const fetchStartTime = Date.now();
 
         const siteResponse = await fetch(finalUrl, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml',
+            'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.8',
           },
-          signal: AbortSignal.timeout(15000) // 15 second timeout
+          signal: AbortSignal.timeout(5000) // 5 секунд вместо 15
         });
+
+        const fetchTime = Date.now() - fetchStartTime;
+        console.log(`[Website] Response in ${fetchTime}ms, status: ${siteResponse.status}`);
 
         if (siteResponse.ok) {
           const html = await siteResponse.text();
 
-          // Extract text from HTML (remove scripts, styles, tags)
+          // Улучшенная очистка HTML
           siteText = html
             .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
             .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+            .replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, '')
+            .replace(/<!--[\s\S]*?-->/g, '')
+            .replace(/<svg\b[^<]*(?:(?!<\/svg>)<[^<]*)*<\/svg>/gi, '')
             .replace(/<[^>]+>/g, ' ')
             .replace(/\s+/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&[a-z]+;/g, '')
             .trim()
-            .substring(0, 50000); // Limit to 50k characters
+            .substring(0, 30000); // 30k символов
 
-          console.log(`✅ Fetched ${siteText.length} characters from website`);
+          console.log(`✅ [Website] Parsed ${siteText.length} chars`);
+          
+          if (siteText.length < 100) {
+            console.warn(`⚠️ [Website] Very little content (${siteText.length} chars), may be blocked`);
+          }
         } else {
-          console.warn(`⚠️ Could not fetch website (${siteResponse.status}). Continuing with analysis...`);
+          console.warn(`⚠️ [Website] HTTP ${siteResponse.status}, continuing without site content`);
+          siteText = '';
         }
-      } catch (error) {
-        console.warn('⚠️ Error fetching website:', error);
-        // Continue with analysis even if fetch fails
+      } catch (error: unknown) {
+        const err = error as { name?: string; message?: string };
+        if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+          console.warn(`⚠️ [Website] Timeout after 5s for ${finalUrl}`);
+        } else {
+          console.warn(`⚠️ [Website] Error:`, err.message || error);
+        }
+        siteText = '';
       }
     } else {
-      console.log('📝 Analysis by INN only (no website parsing)');
+      console.log('[Website] No URL provided, INN-only analysis');
     }
 
     // 5. GENERATE PROMPT
     const prompt = generatePrompt(siteText, finalUrl, finalInn);
-    console.log(`📝 Generated prompt (${prompt.length} chars)`);
+    console.log(`📝 Generated prompt (${prompt.length} chars, site: ${siteText.length} chars)`);
 
     // 6. CALL VERTEX AI (MAIN ANALYSIS + MIND MAP)
     console.log('🤖 Calling Vertex AI...');
@@ -281,41 +187,7 @@ export async function POST(request: Request) {
     const rawAnalysisText = aiResponse.text;
     const analysisText = formatAnalysisText(rawAnalysisText);
 
-    // 7. ГЕНЕРАЦИЯ "ПРИМЕР ПЕРВОГО КОНТАКТА"
-    let firstContactExample: string | null = null;
-
-    try {
-      console.log('📞 Generating "Cold Call Script" (without Google Search)...');
-      
-      // Извлекаем только нужные разделы из отчёта
-      const keySections = extractKeySections(analysisText);
-      
-      // Определяем имя компании из отчета
-      const companyNameMatch = analysisText.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
-      let companyName = companyNameMatch ? companyNameMatch[1].replace(/\*\*/g, '').trim() : 
-        (finalUrl ? `Компания ${finalUrl}` : `Компания ИНН ${finalInn || 'Не указан'}`);
-      
-      const targetPrompt = TARGET_PROPOSAL_PROMPT
-        .replace('{companyInfo}', keySections.companyInfo)
-        .replace('{insights}', keySections.insights)
-        .replace('{keyRecommendations}', keySections.keyRecommendations)
-        .replace('{companyName}', companyName || 'компанию');
-      
-      const contactResponse = await retryWithExponentialBackoff(
-        () => callVertexAI(targetPrompt, false),  // false = БЕЗ Google Search
-        3,
-        1000
-      );
-      
-      firstContactExample = cleanProposal(contactResponse.text);
-      console.log(`✅ Generated first contact example: ${firstContactExample.length} characters`);
-      
-    } catch (error) {
-      console.error('⚠️ Failed to generate first contact example:', error);
-      firstContactExample = null;
-    }
-
-    // CHECK IF NON-TARGET CLIENT
+    // 7. CHECK IF NON-TARGET CLIENT
     const isNonTargetClient = analysisText.includes("## АНАЛИЗ НЕЦЕЛЕСООБРАЗЕН");
     console.log(`🎯 [QUALIFICATION] Is non-target client: ${isNonTargetClient}`);
 
@@ -335,7 +207,7 @@ export async function POST(request: Request) {
       ? `Компания ${finalUrl}`
       : `Компания ИНН ${finalCompanyInn || 'Не указан'}`;
 
-    const creditsUsed = 1; // Всегда списывать, неважно целевой или нет
+    const creditsUsed = 1;
 
     const analysis = await prisma.analysis.create({
       data: {
@@ -343,7 +215,7 @@ export async function POST(request: Request) {
         companyName: companyName,
         companyInn: finalCompanyInn,
         reportText: analysisText,
-        firstContactExample: firstContactExample,
+        firstContactExample: null, // Больше не генерируем
         isNonTargetClient: isNonTargetClient,
         creditsUsed: creditsUsed,
       },
@@ -359,12 +231,22 @@ export async function POST(request: Request) {
     console.log(`✅ Analysis count decremented. Remaining: ${updatedAnalysesRemaining}. Non-target client: ${isNonTargetClient}`);
 
     console.log(`✅ Analysis saved. ID: ${analysis.id}, User remaining: ${updatedAnalysesRemaining}`);
+    
+    // Статистика для мониторинга
+    const totalTime = Date.now() - analysisStartTime;
+    console.log(`[Stats] Analysis completed:`, {
+      userId,
+      url: finalUrl || 'none',
+      inn: finalInn || 'none',
+      siteContentLength: siteText.length,
+      isNonTargetClient,
+      totalTimeMs: totalTime,
+    });
 
     // 10. RETURN RESPONSE
     return NextResponse.json({
-      id: analysis.id,  // ← Изменили analysisId на id
-      analysisId: analysis.id,  // ← Оставляем для обратной совместимости
-      hasFirstContact: !!firstContactExample,
+      id: analysis.id,
+      analysisId: analysis.id,
       message: isNonTargetClient ? 'Анализ завершён (нецелевой клиент)' : 'Анализ завершён',
       analysesRemaining: updatedAnalysesRemaining,
       isNonTargetClient: isNonTargetClient
@@ -376,7 +258,5 @@ export async function POST(request: Request) {
       { error: 'Ошибка при создании анализа' },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }
