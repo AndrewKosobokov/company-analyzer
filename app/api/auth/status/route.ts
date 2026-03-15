@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
         phone: true,
         plan: true,
         analysesRemaining: true,
+        analysesInitial: true,
         planStartDate: true,
         isEmailVerified: true,
         role: true,
@@ -70,6 +71,7 @@ export async function GET(request: NextRequest) {
         phone: user.phone,
         plan: user.plan,
         analysesRemaining: user.analysesRemaining,
+        analysesInitial: user.analysesInitial,
         planStartDate: user.planStartDate,
         role: user.role
       },
@@ -78,6 +80,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
       plan: user.plan,
       analysesRemaining: user.analysesRemaining,
+      analysesInitial: user.analysesInitial,
       planStartDate: user.planStartDate,
       role: user.role
     });

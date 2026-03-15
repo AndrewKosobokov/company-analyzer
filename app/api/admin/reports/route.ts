@@ -1,25 +1,11 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../lib/verifyAdmin';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const reports = await prisma.analysis.findMany({
       where: { isDeleted: false },
@@ -37,8 +23,16 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ reports });
 
-  } catch (error) {
-    console.error('Admin reports error:', error);
+  } catch (error: any) {
+    console.error('❌ Admin reports error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch reports' }, { status: 500 });
   }
 }

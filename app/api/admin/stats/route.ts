@@ -1,30 +1,11 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../lib/verifyAdmin';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    } catch {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const totalUsers = await prisma.user.count();
     const totalAnalyses = await prisma.analysis.count();
@@ -49,8 +30,16 @@ export async function GET(request: Request) {
       planDistribution: planCounts
     });
 
-  } catch (error) {
-    console.error('Admin stats error:', error);
+  } catch (error: any) {
+    console.error('❌ Admin stats error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
   }
 }

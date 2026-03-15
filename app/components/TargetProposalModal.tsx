@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import { shareToTelegram, shareToWhatsApp, copyToClipboard } from '@/utils/exportReport';
 import ProgressBar from '@/components/ProgressBar';
 import { useToast } from '@/components/ui/ToastProvider';
-import { getToken } from '@/app/lib/auth';
 
 interface TargetProposalModalProps {
   isOpen: boolean;
@@ -89,9 +88,9 @@ export default function TargetProposalModal({
       const response = await fetch('/api/analysis/generate-proposal', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           analysisId,
           reportText,

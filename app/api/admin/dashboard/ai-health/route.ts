@@ -1,30 +1,11 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../../lib/verifyAdmin';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    } catch {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const yesterday = new Date();
     yesterday.setHours(yesterday.getHours() - 24);
@@ -46,7 +27,6 @@ export async function GET(request: Request) {
     const errors = allAnalyses.filter(a =>
       !a.reportText ||
       a.reportText.trim().length < 100
-      // ← Убрали || a.isNonTargetClient
     ).length;
 
     const totalAnalyses = allAnalyses.length;
@@ -57,9 +37,7 @@ export async function GET(request: Request) {
       : 100;
 
     // Среднее время генерации - в текущей схеме БД не хранится
-    // Можно добавить позже поле generationTime в модель Analysis
-    // Пока возвращаем заглушку: среднее время ~40 секунд
-    const averageGenerationTime = 42; // TODO: добавить поле generationTime в модель Analysis
+    const averageGenerationTime = 42;
 
     return NextResponse.json({
       errors24h: errors,
@@ -67,8 +45,16 @@ export async function GET(request: Request) {
       successRate: Math.round(successRate * 10) / 10
     });
 
-  } catch (error) {
-    console.error('Dashboard AI health error:', error);
+  } catch (error: any) {
+    console.error('❌ Dashboard AI health API error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch AI health status' }, { status: 500 });
   }
 }

@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import ProgressBar from '@/components/ProgressBar';
+import { AnalysisProgressBar } from '@/components/AnalysisProgressBar';
 import { useNotification } from '@/components/NotificationProvider';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function AnalysisPage() {
@@ -140,9 +139,9 @@ export default function AnalysisPage() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payload),
       });
       
@@ -163,16 +162,22 @@ export default function AnalysisPage() {
         throw new Error(data?.error || 'Ошибка анализа');
       }
       
-      await response.json();
+      const data = await response.json();
       
       setTimeout(() => {
         showNotification(
           currentMode === 'company'
-            ? 'Анализ компании готов и сохранён'
-            : 'Анализ продукции сохранён'
+            ? 'Анализ компании готов! Открываем отчет...'
+            : 'Анализ продукции готов! Открываем отчет...'
           , 'success'
         );
-        router.push('/companies');
+
+        if (data.id) {
+          router.push(`/report/${data.id}`);
+        } else {
+          console.warn('API не вернул id отчета, редирект на список');
+          router.push('/companies');
+        }
       }, 500);
       
     } catch (err) {
@@ -196,13 +201,11 @@ export default function AnalysisPage() {
 
   useEffect(() => {
     const checkStatus = async () => {
-      const token = getToken();
-      if (!token) return;
-      
       try {
         const res = await fetch('/api/auth/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
+        if (!res.ok) return;
         const data = await res.json();
         setIsAdmin(data.role === 'admin');
         if (typeof data.analysesRemaining === 'number') {
@@ -432,16 +435,18 @@ export default function AnalysisPage() {
             {loading && (
               <div 
                 style={{ 
-                  marginTop: '32px', 
-                  textAlign: 'center',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginTop: '32px',
+                  minHeight: '200px',
                   opacity: showProgress ? 1 : 0,
                   transform: showProgress ? 'translateY(0)' : 'translateY(-10px)',
                   transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
                 }}
               >
-                <ProgressBar 
-                  progress={progress} 
-                  message={progressMessage}
+                <AnalysisProgressBar 
+                  estimatedTimeSeconds={analysisMode === 'company' ? 67 : 45}
                 />
               </div>
             )}

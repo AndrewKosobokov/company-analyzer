@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { getToken } from '@/app/lib/auth';
 
 interface EditUserModalProps {
   user: {
@@ -26,19 +25,14 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
     setError('');
     
     try {
-      const token = getToken();
-      if (!token) {
-        throw new Error('Токен авторизации не найден');
-      }
-      
       // 1. Изменяем тариф (если изменился)
       if (plan !== user.plan) {
         const res = await fetch(`/api/admin/users/${user.id}`, {
           method: 'PATCH',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             action: 'SET_PLAN',
             value: plan
@@ -65,9 +59,9 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
       const res = await fetch(`/api/admin/users/${user.id}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           action,
           value: numValue

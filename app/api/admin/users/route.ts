@@ -1,25 +1,11 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../lib/verifyAdmin';
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const users = await prisma.user.findMany({
       select: {
@@ -28,6 +14,7 @@ export async function GET(request: Request) {
         name: true,
         plan: true,
         analysesRemaining: true,
+        analysesInitial: true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -39,30 +26,24 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ users });
 
-  } catch (error) {
-    console.error('Admin users error:', error);
+  } catch (error: any) {
+    console.error('❌ Admin users API error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-
-    const admin = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!admin || admin.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const { userId, analysesRemaining } = await request.json();
 
@@ -73,8 +54,16 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, user: updated });
 
-  } catch (error) {
-    console.error('Admin update error:', error);
+  } catch (error: any) {
+    console.error('❌ Admin update error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }

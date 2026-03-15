@@ -1,21 +1,14 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../../../lib/verifyAdmin';
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role: string };
-    if (decoded.role !== 'admin') {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const count = await prisma.analysis.count({
       where: {
@@ -25,7 +18,17 @@ export async function GET(
     });
 
     return NextResponse.json({ count });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error' }, { status: 500 });
+    
+  } catch (error: any) {
+    console.error('❌ Admin user analyses count error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

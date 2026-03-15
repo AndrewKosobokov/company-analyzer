@@ -43,17 +43,6 @@ export const verifyAuth = (req: NextRequest) => {
 };
 
 /**
- * @deprecated Используйте httpOnly cookies. Эта функция оставлена для обратной совместимости.
- */
-export const getToken = (): string | null => {
-  console.warn('getToken() is deprecated. Tokens are now stored in httpOnly cookies.');
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
-  }
-  return null;
-};
-
-/**
  * @deprecated Используйте AuthContext.login(). Эта функция оставлена для обратной совместимости.
  */
 export const login = (token: string) => {

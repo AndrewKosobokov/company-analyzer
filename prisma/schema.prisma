@@ -54,6 +54,7 @@ model User {
   @@index([plan])
   @@index([role])
   @@index([isEmailVerified])
+  @@index([createdAt, plan])
 }
 
 // ===========================================
@@ -119,6 +120,7 @@ model Payment {
   @@index([userId])
   @@index([status])
   @@index([userId, status, createdAt])
+  @@index([createdAt, status])
 }
 
 

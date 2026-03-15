@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { callVertexAI } from '@/lib/vertexai';
 import prisma from '@/app/lib/prisma';
@@ -6,7 +6,7 @@ import { checkRateLimit, analyzeLimiter } from '@/app/lib/rateLimiter';
 import { validateRequest } from '@/app/lib/validateRequest';
 import { productAnalyzeSchema } from '@/app/lib/schemas';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     // 1. GET USER ID FROM TOKEN (already validated by middleware)
     const accessToken = request.cookies.get('access_token')?.value;

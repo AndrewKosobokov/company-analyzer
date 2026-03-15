@@ -1,30 +1,11 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../../lib/verifyAdmin';
 
 export async function GET(request: Request) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    } catch {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!user || user.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
+    // Проверка админских прав
+    await verifyAdmin();
 
     const { searchParams } = new URL(request.url);
     const period = parseInt(searchParams.get('period') || '30');
@@ -39,7 +20,7 @@ export async function GET(request: Request) {
     const revenueResult = await prisma.payment.aggregate({
       where: {
         createdAt: { gte: startDate },
-        status: 'succeeded' // ← ИСПРАВЛЕНО!
+        status: 'succeeded'
       },
       _sum: { amount: true },
       _count: true
@@ -92,61 +73,63 @@ export async function GET(request: Request) {
       ? ((avgOrderValue - previousAvgOrderValue) / previousAvgOrderValue) * 100
       : (avgOrderValue > 0 ? 100 : 0);
     
-    // 3. Конверсия Trial → Paid
-    // Пользователи, зарегистрированные в текущем периоде с планом trial
-    const trialUsers = await prisma.user.count({
+    // 3. КОНВЕРСИЯ (Trial → Paid)
+    // ЛОГИКА: Считаем всех новых пользователей за период,
+    // затем из них тех, кто совершил успешный платеж.
+    // ВАЖНО: НЕ фильтруем по plan, т.к. после оплаты он меняется!
+    
+    // Все новые пользователи за период (база для конверсии)
+    const newUsersCount = await prisma.user.count({
       where: {
-        createdAt: { gte: startDate },
-        plan: 'trial'
+        createdAt: { gte: startDate }
       }
     });
     
-    // Пользователи, которые зарегистрировались как trial и затем сделали покупку
-    const trialUsersWithPayments = await prisma.user.count({
+    // Из них те, кто совершил успешный платеж в этом же периоде
+    const convertedUsersCount = await prisma.user.count({
       where: {
         createdAt: { gte: startDate },
-        plan: 'trial',
         payments: {
           some: {
-            status: 'succeeded', // ← ИСПРАВЛЕНО!
+            status: 'succeeded',
             createdAt: { gte: startDate }
           }
         }
       }
     });
     
-    const conversionRate = trialUsers > 0
-      ? (trialUsersWithPayments / trialUsers) * 100
+    const conversionRate = newUsersCount > 0
+      ? (convertedUsersCount / newUsersCount) * 100
       : 0;
     
     // Конверсия за предыдущий период
-    const previousTrialUsers = await prisma.user.count({
+    const previousNewUsersCount = await prisma.user.count({
       where: {
-        createdAt: { gte: previousStartDate, lt: startDate },
-        plan: 'trial'
+        createdAt: { gte: previousStartDate, lt: startDate }
       }
     });
     
-    const previousTrialUsersWithPayments = await prisma.user.count({
+    const previousConvertedUsersCount = await prisma.user.count({
       where: {
         createdAt: { gte: previousStartDate, lt: startDate },
-        plan: 'trial',
         payments: {
           some: {
-            status: 'succeeded', // ← ИСПРАВЛЕНО!
+            status: 'succeeded',
             createdAt: { gte: previousStartDate, lt: startDate }
           }
         }
       }
     });
     
-    const previousConversionRate = previousTrialUsers > 0
-      ? (previousTrialUsersWithPayments / previousTrialUsers) * 100
+    const previousConversionRate = previousNewUsersCount > 0
+      ? (previousConvertedUsersCount / previousNewUsersCount) * 100
       : 0;
     
+    // Процентное изменение (относительный рост)
+    // Пример: 5% → 10% = +100% (удвоение)
     const conversionRateChange = previousConversionRate > 0
-      ? conversionRate - previousConversionRate
-      : (conversionRate > 0 ? conversionRate : 0);
+      ? ((conversionRate - previousConversionRate) / previousConversionRate) * 100
+      : (conversionRate > 0 ? 100 : 0);
     
     // 4. Повторные покупки
     // Пользователи с более чем одной покупкой
@@ -209,9 +192,10 @@ export async function GET(request: Request) {
       ? (previousUsersWithRepeatPurchases / previousTotalPayingUsers) * 100
       : 0;
     
+    // Процентное изменение (относительный рост)
     const repeatPurchaseRateChange = previousRepeatPurchaseRate > 0
-      ? repeatPurchaseRate - previousRepeatPurchaseRate
-      : (repeatPurchaseRate > 0 ? repeatPurchaseRate : 0);
+      ? ((repeatPurchaseRate - previousRepeatPurchaseRate) / previousRepeatPurchaseRate) * 100
+      : (repeatPurchaseRate > 0 ? 100 : 0);
     
     // 5. Новые регистрации
     const newRegistrations = await prisma.user.count({
@@ -259,8 +243,16 @@ export async function GET(request: Request) {
       }
     });
 
-  } catch (error) {
-    console.error('Dashboard metrics error:', error);
+  } catch (error: any) {
+    console.error('❌ Dashboard metrics API error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Failed to fetch metrics' }, { status: 500 });
   }
 }

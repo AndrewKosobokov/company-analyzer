@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { getToken } from '@/app/lib/auth';
 import UserRow from './UserRow';
 import EditUserModal from './EditUserModal';
 
@@ -10,6 +9,7 @@ interface User {
   name: string | null;
   plan: string;
   analysesRemaining: number;
+  analysesInitial: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,9 +29,8 @@ export default function UsersTable() {
 
   const fetchUsers = async () => {
     try {
-      const token = getToken();
       const res = await fetch('/api/admin/users', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       
       if (!res.ok) throw new Error('Failed to fetch users');

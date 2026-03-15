@@ -6,6 +6,7 @@ import { OrganizationSchema, SoftwareApplicationSchema, WebSiteSchema } from '@/
 import Footer from './components/Footer';
 import MobileMenu from './components/MobileMenu';
 import './globals.css';
+import './globals-print.css';
 import Header from './components/Header';
 import { validateEnv } from '@/app/lib/env';
 

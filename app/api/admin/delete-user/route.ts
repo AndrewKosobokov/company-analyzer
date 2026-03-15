@@ -1,25 +1,17 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../lib/verifyAdmin';
 
 export async function DELETE(request: Request) {
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; email?: string };
-
+    // Проверка админских прав и получение userId админа
+    const adminUserId = await verifyAdmin();
+    
+    // Получить email админа для проверки самоудаления
     const adminUser = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, email: true, role: true }
+      where: { id: adminUserId },
+      select: { email: true }
     });
-
-    if (!adminUser || adminUser.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
 
     const { email } = await request.json();
 
@@ -28,7 +20,7 @@ export async function DELETE(request: Request) {
     }
 
     // Prevent self-delete
-    if (adminUser.email === email) {
+    if (adminUser && adminUser.email === email) {
       return NextResponse.json({ error: 'Нельзя удалить самого себя' }, { status: 400 });
     }
 
@@ -44,8 +36,17 @@ export async function DELETE(request: Request) {
     await prisma.user.delete({ where: { id: targetUser.id } });
 
     return NextResponse.json({ success: true, message: 'Пользователь успешно удалён' });
+    
   } catch (error: any) {
-    console.error('Delete user error:', error);
+    console.error('❌ Delete user error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: error.message || 'Failed to delete user' }, { status: 500 });
   }
 }

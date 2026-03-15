@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getToken } from '@/app/lib/auth';
+import { createPortal } from 'react-dom';
 
 interface User {
   id: string;
@@ -9,6 +9,7 @@ interface User {
   name: string | null;
   plan: string;
   analysesRemaining: number;
+  analysesInitial: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,12 +22,15 @@ interface UserRowProps {
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
   const [analysesCount, setAnalysesCount] = useState(0);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchCount = async () => {
       try {
         const res = await fetch(`/api/admin/users/analyses-count?userId=${user.id}`, {
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          credentials: 'include'
         });
         const data = await res.json();
         setAnalysesCount(data.count || 0);
@@ -37,9 +41,20 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     fetchCount();
   }, [user.id]);
 
-  const totalBalance = user.analysesRemaining + analysesCount;
-  const used = analysesCount;
-  const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
+  // ПРАВИЛЬНЫЙ РАСЧЕТ ИСПОЛЬЗОВАННЫХ АНАЛИЗОВ И ПРОГРЕССА
+  
+  // 1. Получаем initial из пользователя
+  const initial = user.analysesInitial || 0;
+  const remaining = user.analysesRemaining || 0;
+
+  // 2. Защита от "испорченных" данных (если remaining > initial)
+  const validRemaining = Math.max(0, Math.min(remaining, initial));
+
+  // 3. Правильный расчет использованных
+  const used = initial - validRemaining;
+
+  // 4. Правильный процент использования
+  const percentage = initial > 0 ? (used / initial) * 100 : 0;
   
   const progressColor = 
     percentage > 50 ? '#34C759' : 
@@ -50,6 +65,39 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
   const lastActivityDate = new Date(user.updatedAt);
   const daysSinceActivity = Math.floor((Date.now() - lastActivityDate.getTime()) / (1000 * 60 * 60 * 24));
   const isActive = daysSinceActivity < 7;
+
+  const confirmLabel = (user.name || '').trim() || user.email;
+  const isConfirmValid = deleteConfirmName.trim() === confirmLabel;
+
+  const handleDelete = async () => {
+    if (!isConfirmValid) {
+      alert('Введено неправильно!');
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        alert('Пользователь успешно удален');
+        setShowDeleteModal(false);
+        setDeleteConfirmName('');
+        window.location.reload();
+      } else {
+        alert('Ошибка при удалении пользователя');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      alert('Ошибка при удалении');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Относительное время
   const getRelativeTime = (date: Date) => {
@@ -64,7 +112,99 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     return `${Math.floor(days / 365)} г назад`;
   };
 
+  const deleteModal = showDeleteModal && typeof document !== 'undefined' && createPortal(
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        padding: '30px',
+        borderRadius: '12px',
+        maxWidth: '400px',
+        width: '90%',
+      }}>
+        <h3 style={{ marginBottom: '20px' }}>Удалить пользователя?</h3>
+
+        <p style={{ marginBottom: '20px', color: '#86868B' }}>
+          Это действие необратимо. Для подтверждения введите имя пользователя:
+        </p>
+
+        <p style={{
+          marginBottom: '10px',
+          fontWeight: 'bold',
+          padding: '10px',
+          backgroundColor: '#F5F5F7',
+          borderRadius: '8px',
+        }}>
+          {confirmLabel}
+        </p>
+
+        <input
+          type="text"
+          value={deleteConfirmName}
+          onChange={(e) => setDeleteConfirmName(e.target.value)}
+          placeholder={user.name ? 'Введите имя пользователя' : 'Введите email'}
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: '1px solid var(--border-color)',
+            borderRadius: '8px',
+            fontSize: '15px',
+            marginBottom: '20px',
+            boxSizing: 'border-box',
+          }}
+        />
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={() => {
+              setShowDeleteModal(false);
+              setDeleteConfirmName('');
+            }}
+            style={{
+              flex: 1,
+              padding: '12px',
+              backgroundColor: 'transparent',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+            }}
+          >
+            Отмена
+          </button>
+
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting || !isConfirmValid}
+            style={{
+              flex: 1,
+              padding: '12px',
+              backgroundColor: isConfirmValid ? '#FF3B30' : '#cccccc',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: isConfirmValid ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {isDeleting ? 'Удаление...' : 'Удалить'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+
   return (
+    <>
     <tr style={{ 
       borderBottom: '1px solid #F5F5F7',
       transition: 'background-color 0.2s ease'
@@ -146,8 +286,25 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
         >
           Редактировать
         </button>
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          style={{
+            marginLeft: '8px',
+            padding: '6px 12px',
+            backgroundColor: '#FF3B30',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+          }}
+        >
+          Удалить
+        </button>
       </td>
     </tr>
+    {deleteModal}
+    </>
   );
 }
 

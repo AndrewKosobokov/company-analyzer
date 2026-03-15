@@ -16,6 +16,10 @@ export function MetricCard({ title, value, subtitle, change, icon }: MetricCardP
     <div 
       className="card"
       style={{
+        height: '100%',
+        minHeight: '140px',
+        display: 'flex',
+        flexDirection: 'column',
         padding: '24px',
         borderRadius: '12px',
         border: '1px solid #D2D2D7',

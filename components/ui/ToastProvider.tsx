@@ -57,7 +57,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       {typeof window !== 'undefined' && createPortal(
-        <div className="pointer-events-none fixed top-6 right-6 z-[1000] px-4 sm:px-0">
+        <div className="pointer-events-none fixed top-6 right-6 z-[1000] px-4 sm:px-0 no-print">
           <div className="flex w-full max-w-[400px] flex-col items-end gap-2 sm:px-0">
             {toasts.map((t) => (
               <div

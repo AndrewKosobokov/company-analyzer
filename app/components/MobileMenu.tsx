@@ -44,7 +44,7 @@ export default function MobileMenu() {
           alignItems: 'center',
           gap: '4px'
         }}
-        className="mobile-menu-btn"
+        className="mobile-menu-btn no-print"
       >
         <span style={{ width: '20px', height: '2px', background: '#FFF', transition: '0.3s' }} />
         <span style={{ width: '20px', height: '2px', background: '#FFF', transition: '0.3s' }} />

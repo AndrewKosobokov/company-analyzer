@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import { generatePrompt } from '@/utils/prompt';
 import { formatAnalysisText } from '@/utils/formatAnalysisText';
@@ -32,7 +32,32 @@ async function retryWithExponentialBackoff<T>(
   throw lastError;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🔍 STARTING ANALYSIS');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  
+  console.log('📊 Environment Variables:');
+  console.log('  GOOGLE_CLOUD_PROJECT:', process.env.GOOGLE_CLOUD_PROJECT || 'NOT SET');
+  console.log('  GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS || 'NOT SET');
+  console.log('  GCLOUD_LOCATION:', process.env.GCLOUD_LOCATION || 'NOT SET (will use us-central1)');
+  console.log('  VERTEX_AI_LOCATION:', process.env.VERTEX_AI_LOCATION || 'NOT SET (will use us-central1)');
+  
+  // Проверка существования credentials файла
+  const fs = require('fs');
+  const credPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (credPath) {
+    const exists = fs.existsSync(credPath);
+    console.log('  Credentials file exists:', exists);
+    if (!exists) {
+      console.error('❌ CREDENTIALS FILE NOT FOUND AT:', credPath);
+    } else {
+      console.log('✅ Credentials file found at:', credPath);
+    }
+  } else {
+    console.error('❌ GOOGLE_APPLICATION_CREDENTIALS not set in environment');
+  }
+  
   const analysisStartTime = Date.now();
   
   try {
@@ -253,9 +278,19 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('❌ ANALYSIS FAILED');
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('Error name:', (error as Error).name);
+    console.error('Error message:', (error as Error).message);
+    console.error('Error stack:', (error as Error).stack);
+    
     console.error('❌ Unexpected error:', error);
     return NextResponse.json(
-      { error: 'Ошибка при создании анализа' },
+      { 
+        error: 'Ошибка при создании анализа',
+        details: (error as Error).message 
+      },
       { status: 500 }
     );
   }

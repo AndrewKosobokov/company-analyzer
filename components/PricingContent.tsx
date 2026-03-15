@@ -3,33 +3,26 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function PricingContent() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
-  const { logout } = useAuth();
-  
+  const { isAuthenticated, logout } = useAuth();
+
   useEffect(() => {
-    const token = getToken();
-    setIsLoggedIn(!!token);
-    // Trigger fade in animation after component mounts
     setTimeout(() => setIsMounted(true), 50);
   }, []);
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = getToken();
-      if (!token) return;
-      
       try {
         const res = await fetch('/api/auth/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
+        if (!res.ok) return;
         const data = await res.json();
         setIsAdmin(data.role === 'admin');
       } catch (err) {
@@ -45,31 +38,24 @@ export default function PricingContent() {
   };
 
   const handleSelectPlan = async (planId: string) => {
-    console.log('🎯 BUTTON CLICKED! Plan:', planId);
     setLoading(planId);
 
     try {
-      const token = getToken();
-      console.log('🔑 Token exists:', !!token);
-      
-      if (!token) {
-        console.log('❌ No token, redirecting to /login');
+      if (!isAuthenticated) {
+        console.log('❌ User not authenticated, redirecting to /login');
         router.push('/login');
         return;
       }
 
-      console.log('📤 Sending POST to /api/payment/create');
+      console.log('📤 Creating payment for plan:', planId);
       const response = await fetch('/api/payment/create', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ planId }),
       });
-
-      console.log('📥 Response status:', response.status);
-      console.log('📥 Response ok:', response.ok);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -86,7 +72,6 @@ export default function PricingContent() {
       console.error('💥 PAYMENT ERROR:', error);
       alert('Ошибка создания платежа. Попробуйте позже.');
     } finally {
-      console.log('🏁 Finally block');
       setLoading(null);
     }
   };

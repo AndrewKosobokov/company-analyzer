@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
 import { DollarSign, CreditCard, TrendingUp, RefreshCw, Users, AlertCircle } from 'lucide-react';
 import { MetricCard } from './components/MetricCard';
@@ -64,13 +63,19 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
-  const { logout } = useAuth();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
-      const token = getToken();
-      if (!token) {
+      // Проверка авторизации через AuthContext
+      if (!isAuthenticated) {
         router.push('/login');
+        return;
+      }
+      
+      if (!isAdmin) {
+        setError('Доступ запрещён. Требуется роль администратора.');
+        setLoading(false);
         return;
       }
 
@@ -80,13 +85,13 @@ export default function DashboardPage() {
       try {
         const [metricsRes, usersRes, aiHealthRes] = await Promise.all([
           fetch(`/api/admin/dashboard/metrics?period=${period}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
           }),
           fetch('/api/admin/dashboard/users', {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
           }),
           fetch('/api/admin/dashboard/ai-health', {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
           })
         ]);
         
@@ -122,7 +127,7 @@ export default function DashboardPage() {
     }
     
     fetchData();
-  }, [period, router]);
+  }, [period, router, isAuthenticated, isAdmin]);
 
   const handleLogout = () => {
     logout();
@@ -297,7 +302,8 @@ export default function DashboardPage() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
             gap: '16px',
-            marginBottom: '32px'
+            marginBottom: '32px',
+            alignItems: 'stretch'
           }}>
             {[
               { icon: <DollarSign size={24} color="#1D1D1F" />, title: "Доход", value: `${metrics.revenue.total.toLocaleString('ru-RU')} ₽`, subtitle: `за ${period} дней`, change: metrics.revenue.change },
@@ -309,6 +315,8 @@ export default function DashboardPage() {
               <div
                 key={index}
                 style={{
+                  height: '100%',
+                  minHeight: '140px',
                   opacity: isMounted ? 1 : 0,
                   transform: isMounted ? 'translateY(0)' : 'translateY(20px)',
                   transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',

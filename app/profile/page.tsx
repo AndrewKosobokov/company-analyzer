@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import SuccessToast from '../components/SuccessToast';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
 
 interface UserProfile {
@@ -14,6 +13,7 @@ interface UserProfile {
   phone?: string;
   plan: string;
   analysesRemaining: number;
+  analysesInitial: number;
   planStartDate: string;
 }
 
@@ -44,13 +44,11 @@ export default function ProfilePage() {
   
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = getToken();
-      if (!token) return;
-      
       try {
         const res = await fetch('/api/auth/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
+        if (!res.ok) return;
         const data = await res.json();
         setIsAdmin(data.role === 'admin');
       } catch (err) {
@@ -64,11 +62,9 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = getToken();
-        
         // Fetch profile
         const profileRes = await fetch('/api/auth/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
         if (profileRes.ok) {
           const profileData = await profileRes.json();
@@ -77,7 +73,7 @@ export default function ProfilePage() {
         
         // Fetch payments
         const paymentsRes = await fetch('/api/payments/history', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
         if (paymentsRes.ok) {
           const paymentsData = await paymentsRes.json();
@@ -108,7 +104,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchAnalysesCount = async () => {
       const res = await fetch('/api/user/analyses-count', {
-        headers: { 'Authorization': `Bearer ${getToken()}` }
+        credentials: 'include'
       });
       const data = await res.json();
       setTotalAnalyses(data.count || 0);
@@ -117,9 +113,11 @@ export default function ProfilePage() {
       fetchAnalysesCount();
       // Animate progress bar after data is loaded
       setTimeout(() => {
-        const totalBalance = (profile.analysesRemaining + (totalAnalyses || 0)) || 1;
-        const used = totalAnalyses || 0;
-        const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
+        const initial = profile.analysesInitial || 0;
+        const remaining = profile.analysesRemaining || 0;
+        const validRemaining = Math.max(0, Math.min(remaining, initial));
+        const used = initial - validRemaining;
+        const percentage = initial > 0 ? (used / initial) * 100 : 0;
         setProgressWidth(percentage);
       }, 300);
     }
@@ -142,9 +140,9 @@ export default function ProfilePage() {
       const response = await fetch('/api/auth/change-password', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ currentPassword, newPassword }),
       });
       
@@ -335,15 +333,16 @@ export default function ProfilePage() {
                 отчётов осталось
               </div>
               {(() => {
-                // Расчёт
-                const totalBalance = profile.analysesRemaining + totalAnalyses;
-                const used = totalAnalyses;
-                const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
+                const initial = profile.analysesInitial || 0;
+                const remaining = profile.analysesRemaining || 0;
+                const validRemaining = Math.max(0, Math.min(remaining, initial));
+                const used = initial - validRemaining;
+                const percentage = initial > 0 ? (used / initial) * 100 : 0;
 
                 return (
                   <>
                     <div style={{ marginTop: '16px', fontSize: '15px', color: '#86868B' }}>
-                      Использовано: {used} из {totalBalance}
+                      Использовано: {used} из {initial}
                     </div>
                     <div style={{ marginTop: '12px', width: '100%', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
                       <div style={{ 
@@ -361,10 +360,11 @@ export default function ProfilePage() {
 
             {/* Progress bar */}
             {(() => {
-              // Расчёт
-              const totalBalance = profile.analysesRemaining + totalAnalyses;
-              const used = totalAnalyses;
-              const percentage = totalBalance > 0 ? (used / totalBalance) * 100 : 0;
+              const initial = profile.analysesInitial || 0;
+              const remaining = profile.analysesRemaining || 0;
+              const validRemaining = Math.max(0, Math.min(remaining, initial));
+              const used = initial - validRemaining;
+              const percentage = initial > 0 ? (used / initial) * 100 : 0;
 
               return (
                 <div style={{ marginBottom: 'var(--space-lg)' }}>
@@ -375,7 +375,7 @@ export default function ProfilePage() {
                     color: 'var(--text-secondary)',
                     marginBottom: '8px'
                   }}>
-                    <span>Использовано: {used} из {totalBalance}</span>
+                    <span>Использовано: {used} из {initial}</span>
                     <span>{percentage.toFixed(1)}%</span>
                   </div>
                   <div style={{ 

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/ui/ToastProvider';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
 
 interface CompanyDetail {
@@ -28,9 +27,7 @@ export default function CompanyDetailPage() {
     const fetchCompany = async () => {
       try {
         const response = await fetch(`/api/analysis/${params.id}`, {
-          headers: {
-            'Authorization': `Bearer ${getToken()}`
-          }
+          credentials: 'include'
         });
         
         if (!response.ok) throw new Error('Компания не найдена');
@@ -54,9 +51,9 @@ export default function CompanyDetailPage() {
       const response = await fetch('/api/analysis/manage', {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ 
           analysisId: params.id, 
           isDeleted: true 

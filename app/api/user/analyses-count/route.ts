@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { getAccessToken } from '@/app/lib/cookies';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    const accessToken = getAccessToken(request);
+    const authHeader = request.headers.get('authorization');
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = accessToken || headerToken;
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

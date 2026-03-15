@@ -18,9 +18,6 @@ export default function HomePage() {
     setTimeout(() => setIsMounted(true), 50);
   }, [user, loading, router]);
 
-  if (loading) {
-    return null;
-  }
 
   return (
     <div className="page-container">

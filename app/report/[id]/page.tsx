@@ -5,11 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 import ScrollToTop from '@/components/ScrollToTop';
 import ReportTOC from '@/app/components/ReportTOC';
 import { useToast } from '@/components/ui/ToastProvider';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
+import { wrapCallInfoSection } from '@/utils/markdownFormatter';
 
 interface ReportData {
   id: string;
@@ -41,6 +42,7 @@ function extractCompanyInfo(reportText: string): { companyName: string | null; i
 
 // Navigation items for Table of Contents
 const companyNavigationItems = [
+  { id: 'call-info', title: 'Информация для звонка' },
   { id: 'financial-analysis', title: 'Финансовый Анализ' },
   { id: 'procurement', title: 'Закупки' },
   { id: 'high-margin', title: 'Маржинальные позиции' },
@@ -69,6 +71,9 @@ export default function ReportPage() {
   const navigationItems = isProductAnalysis ? productNavigationItems : companyNavigationItems;
   const reportText = report?.reportText || '';
   
+  // Оборачиваем раздел "ИНФОРМАЦИЯ ДЛЯ ЗВОНКА" в HTML-блок для стилизации
+  const processedMarkdown = wrapCallInfoSection(reportText);
+  
   /**
    * Utility to safely and recursively extract clean text content from React children.
    * This handles nested Markdown elements robustly.
@@ -87,13 +92,11 @@ export default function ReportPage() {
   
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = getToken();
-      if (!token) return;
-      
       try {
         const res = await fetch('/api/auth/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
+        if (!res.ok) return;
         const data = await res.json();
         setIsAdmin(data.role === 'admin');
       } catch (err) {
@@ -108,9 +111,7 @@ export default function ReportPage() {
     const fetchReport = async () => {
       try {
         const response = await fetch(`/api/analysis/report/${params.id}`, {
-          headers: {
-            'Authorization': `Bearer ${getToken()}`
-          }
+          credentials: 'include'
         });
         
         if (!response.ok) throw new Error('Отчет не найден');
@@ -154,9 +155,9 @@ export default function ReportPage() {
       const response = await fetch(`/api/analysis/manage`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({
           analysisId: report!.id,
           isDeleted: true
@@ -301,122 +302,51 @@ export default function ReportPage() {
           >
             {/* Save button removed */}
             
+            {/* Кнопка Печать */}
             <button 
-              onClick={async () => {
-                try {
-                  const { exportToWord } = await import('@/utils/exportReport');
-                  const { companyName, inn } = extractCompanyInfo(report.reportText);
-                  await exportToWord(
-                    companyName || report.companyName, 
-                    inn || report.companyInn, 
-                    report.reportText
-                  );
-                } catch (error) {
-                  showToast('Ошибка экспорта в Word', { variant: 'error' });
-                }
-              }} 
-              className="button-secondary"
+              onClick={() => window.print()}
+              className="button-secondary no-print"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             >
-              <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
-                <path d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm220.1-208c-5.7 0-10.6 4-11.7 9.5-20.6 97.7-20.4 95.4-21 103.5-.2-1.2-.4-2.6-.7-4.3-.8-5.1.3.2-23.6-99.5-1.3-5.4-6.1-9.2-11.7-9.2h-13.3c-5.5 0-10.3 3.8-11.7 9.1-24.4 99-24 96.2-24.8 103.7-.1-1.1-.2-2.5-.5-4.2-.7-5.2-14.1-73.3-19.1-99-1.1-5.6-6-9.7-11.8-9.7h-16.8c-7.8 0-13.5 7.3-11.7 14.8 8 32.6 26.7 109.5 33.2 136 1.3 5.4 6.1 9.1 11.7 9.1h25.2c5.5 0 10.3-3.7 11.6-9.1l17.9-71.4c1.5-6.2 2.5-12 3-17.3l2.9 17.3c.1.4 12.6 50.5 17.9 71.4 1.3 5.3 6.1 9.1 11.6 9.1h24.7c5.5 0 10.3-3.7 11.6-9.1 20.8-81.9 30.2-119 34.5-136 1.9-7.6-3.8-14.9-11.6-14.9h-15.8z"/>
+              <svg width="20" height="20" viewBox="0 0 512 512" fill="currentColor">
+                <path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
               </svg>
-              Word
+              Печать
             </button>
             
+            {/* Кнопка PDF */}
             <button 
-              onClick={async () => {
-                try {
-                  const { exportToPDF } = await import('@/utils/exportReport');
-                  const { companyName, inn } = extractCompanyInfo(report.reportText);
-                  
-                  // Проверяем, мобильное устройство или нет
-                  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-                  
-                  if (isMobile) {
-                    // На мобильных: открываем в новой вкладке
-                    const html2pdf = (await import('html2pdf.js')).default;
-                    const element = document.createElement('div');
-                    const htmlContent = report.reportText
-                      .replace(/## (.+)/g, '<h2 style="font-size: 16pt; font-weight: bold; margin-top: 20px; margin-bottom: 10px; color: #1a1a1a;">$1</h2>')
-                      .replace(/### (.+)/g, '<h3 style="font-size: 13pt; font-weight: bold; margin-top: 15px; margin-bottom: 8px; color: #333;">$1</h3>')
-                      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-                      .replace(/^\s*[-*+]\s+(.+)$/gm, '<li style="margin-left: 20px; margin-bottom: 5px;">$1</li>')
-                      .replace(/\n\n/g, '</p><p style="margin: 8px 0; line-height: 1.5;">')
-                      .replace(/\n/g, '<br/>');
-                    
-                    element.innerHTML = `
-                      <div style="font-family: 'DejaVu Sans', Arial, sans-serif; padding: 20px; color: #1a1a1a; line-height: 1.6;">
-                        <h1 style="font-size: 20pt; font-weight: bold; margin-bottom: 20px; text-align: center; color: #000;">АНАЛИТИЧЕСКИЙ ОТЧЕТ</h1>
-                        <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                          <p style="margin: 5px 0;"><strong>Компания:</strong> ${companyName || report.companyName}</p>
-                          <p style="margin: 5px 0;"><strong>ИНН:</strong> ${inn || report.companyInn}</p>
-                          <p style="margin: 5px 0;"><strong>Дата:</strong> ${new Date().toLocaleDateString('ru-RU')}</p>
-                        </div>
-                        <hr style="border: none; border-top: 2px solid #ddd; margin: 20px 0;" />
-                        <div style="font-size: 10pt; line-height: 1.6;">
-                          <p style="margin: 8px 0; line-height: 1.5;">${htmlContent}</p>
-                        </div>
-                      </div>
-                    `;
-                    
-                    const opt = {
-                      margin: [10, 15, 10, 15] as [number, number, number, number],
-                      image: { type: 'jpeg' as const, quality: 0.98 },
-                      html2canvas: { 
-                        scale: 2,
-                        useCORS: true,
-                        letterRendering: true
-                      },
-                      jsPDF: { 
-                        unit: 'mm' as const, 
-                        format: 'a4' as const, 
-                        orientation: 'portrait' as const,
-                        compress: true
-                      }
-                    };
-                    
-                    const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
-                    const url = URL.createObjectURL(pdfBlob);
-                    window.open(url, '_blank');
-                    // URL будет освобожден после закрытия вкладки
-                  } else {
-                    // На десктопе: скачиваем файл
-                    await exportToPDF(
-                      companyName || report.companyName, 
-                      inn || report.companyInn, 
-                      report.reportText
-                    );
-                  }
-                } catch (error) {
-                  showToast('Ошибка экспорта в PDF', { variant: 'error' });
-                }
-              }} 
-              className="button-secondary"
+              onClick={() => {
+                window.open(`/api/export/pdf?id=${report.id}`, '_blank');
+              }}
+              className="button-secondary no-print"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             >
               <svg width="20" height="20" viewBox="0 0 384 512" fill="currentColor">
-                <path d="M369.9 97.9L286 14C277 5 264.8-.1 252.1-.1H48C21.5 0 0 21.5 0 48v416c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V131.9c0-12.7-5.1-25-14.1-34zM332.1 128H256V51.9l76.1 76.1zM48 464V48h160v104c0 13.3 10.7 24 24 24h104v288H48zm250.2-143.7c-12.2-12-47-8.7-64.4-6.5-17.2-10.5-28.7-25-36.8-46.3 3.9-16.1 10.1-40.6 5.4-56-4.2-26.2-37.8-23.6-42.6-5.9-4.4 16.1-.4 38.5 7 67.1-10 23.9-24.9 56-35.4 74.4-20 10.3-47 26.2-51 46.2-3.3 15.8 26 55.2 76.1-31.2 22.4-7.4 46.8-16.5 68.4-20.1 18.9 10.2 41 17 55.8 17 25.5 0 28-28.2 17.5-38.7zm-198.1 77.8c5.1-13.7 24.5-29.5 30.4-35-19 30.3-24.2 31.6-30.4 35zm81.6-190.6c7.4 0 6.7 32.1 1.8 40.8-4.4-13.9-4.3-40.8-1.8-40.8zm-24.4 136.6c9.7-16.9 18-37 24.7-54.7 8.3 15.1 18.9 27.2 30.1 35.5-20.8 4.3-38.9 13.1-54.8 19.2zm131.6-5s-5 6-37.3-7.8c35.1-2.6 40.9 5.4 37.3 7.8z"/>
+                <path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0zM112 256H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16zm0 64H272c8.8 0 16 7.2 16 16s-7.2 16-16 16H112c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/>
               </svg>
               PDF
             </button>
             
-            {/* Print Button */}
+            {/* Word Button */}
             <button 
-              onClick={() => {
-                window.print();
-              }} 
+              onClick={async () => {
+                const { companyName, inn } = extractCompanyInfo(report.reportText);
+                const displayName = companyName || report.companyName;
+                const displayInn = inn || report.companyInn;
+                const { exportToWord } = await import('@/utils/exportReport');
+                await exportToWord(displayName, displayInn, report.reportText);
+              }}
               className="button-secondary"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-              title="Печать отчёта"
+              title="Скачать Word"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="6 9 6 2 18 2 18 9"/>
-                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                <rect x="6" y="14" width="12" height="8"/>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <path d="M9 13h6"/><path d="M9 17h6"/>
               </svg>
-              Печать
+              Word
             </button>
 
             {/* Copy Button */}
@@ -512,6 +442,30 @@ export default function ReportPage() {
             margin: '32px 0' 
               }} />
 
+              {/* Обложка для печати */}
+              <div className="report-cover print-only">
+                {(() => {
+                  const { companyName, inn } = extractCompanyInfo(report.reportText);
+                  const displayName = companyName || report.companyName;
+                  const displayInn = inn || report.companyInn;
+                  
+                  return (
+                    <>
+                      <h1>АНАЛИТИЧЕСКИЙ ОТЧЁТ</h1>
+                      <div className="company-name">{displayName}</div>
+                      {displayInn && <div className="inn">ИНН: {displayInn}</div>}
+                      <div className="date">
+                        {new Date(report.createdAt).toLocaleDateString('ru-RU', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
               {/* Report Text */}
               <div 
               className="markdown-content"
@@ -523,6 +477,7 @@ export default function ReportPage() {
             >
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
                 components={{
                   // Main sections (## with emojis)
                   h2: ({node, ...props}) => {
@@ -554,6 +509,11 @@ export default function ReportPage() {
                       
                     // STEP 3: Comprehensive mapping with ALL variations
                     const titleMapping: Record<string, string> = {
+                      // Call Info variations
+                      'информация для звонка': 'call-info',
+                      'боевая карточка для звонка': 'call-info',
+                      'боевая карточка': 'call-info',
+                      
                       // Financial Analysis variations
                       'финансовый анализ': 'financial-analysis',
                       'финансовый анализ и надежность компании': 'financial-analysis',
@@ -620,6 +580,24 @@ export default function ReportPage() {
                       console.log('[H2 DEBUG] Available keywords:', Object.keys(titleMapping));
                     }
                     console.log('━━━━━━━━━━━━━━━━━━━━━━━━\n');
+
+                    // Специальное выделение для раздела "ИНФОРМАЦИЯ ДЛЯ ЗВОНКА"
+                    if (customId === 'call-info' || cleanText.includes('информация для звонка') || cleanText.includes('боевая карточка')) {
+                      return (
+                        <h2 
+                          id={customId || 'call-info'}
+                          style={{
+                            fontSize: '26px',
+                            fontWeight: '700',
+                            color: '#1D1D1F',
+                            margin: '0 0 12px 0',
+                            letterSpacing: '-0.5px'
+                          }}
+                        >
+                          {props.children}
+                        </h2>
+                      );
+                    }
 
                     return (
                       <h2 
@@ -787,7 +765,7 @@ export default function ReportPage() {
                   ),
                 }}
               >
-                {reportText || ''}
+                {processedMarkdown || ''}
               </ReactMarkdown>
               </div>
             </div>
@@ -818,8 +796,54 @@ export default function ReportPage() {
       {/* Scroll to Top Button */}
       <ScrollToTop />
 
+      {/* Маркер для Puppeteer - показывает что страница загружена */}
+      <div 
+        id="report-ready-marker" 
+        style={{ display: 'none' }}
+        data-ready="true"
+      />
+
       {/* Responsive Styles */}
       <style jsx global>{`
+        /* Стилизация раздела "ИНФОРМАЦИЯ ДЛЯ ЗВОНКА" через HTML wrapper */
+        .markdown-content .call-info-section {
+          background-color: #FFF9E6;
+          border-left: 4px solid #FF9500;
+          padding: 28px;
+          border-radius: 8px;
+          margin: 40px 0;
+          box-shadow: 0 2px 8px rgba(255, 149, 0, 0.1);
+        }
+
+        .markdown-content .call-info-section h2 {
+          font-size: 26px;
+          font-weight: 700;
+          color: #1D1D1F;
+          margin: 0 0 12px 0;
+          letter-spacing: -0.5px;
+        }
+
+        .markdown-content .call-info-section h3 {
+          font-size: 18px;
+          font-weight: 600;
+          color: #1D1D1F;
+          margin: 24px 0 12px 0;
+        }
+
+        /* Разделитель между подразделами */
+        .markdown-content .call-info-section h3:not(:first-of-type) {
+          border-top: 1px solid rgba(255, 149, 0, 0.15);
+          padding-top: 20px;
+        }
+
+        .markdown-content .call-info-section p,
+        .markdown-content .call-info-section ul,
+        .markdown-content .call-info-section ol {
+          color: #1D1D1F;
+          line-height: 1.6;
+          margin-bottom: 16px;
+        }
+        
         .markdown-content h1,
         .markdown-content h2,
         .markdown-content h3 {

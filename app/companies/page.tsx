@@ -4,11 +4,11 @@ import dynamic from 'next/dynamic';
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getToken } from '@/app/lib/auth';
 import { useAuth } from '@/app/context/AuthContext';
 
 const ScrollToTop = dynamic(() => import('@/components/ScrollToTop'), { ssr: false });
 const SearchBar = dynamic(() => import('../components/SearchBar'), { ssr: false });
+const ExportButtons = dynamic(() => import('@/app/components/ExportButtons'), { ssr: false });
 const SuccessToast = dynamic(() => import('../components/SuccessToast'), { ssr: false });
 const CardSkeleton = dynamic(() => import('@/components/CardSkeleton'), { ssr: false });
 
@@ -113,13 +113,11 @@ export default function CompaniesPage() {
   
   useEffect(() => {
     const checkAdmin = async () => {
-      const token = getToken();
-      if (!token) return;
-      
       try {
         const res = await fetch('/api/auth/status', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          credentials: 'include'
         });
+        if (!res.ok) return;
         const data = await res.json();
         setIsAdmin(data.role === 'admin');
       } catch (err) {
@@ -134,9 +132,7 @@ export default function CompaniesPage() {
     const fetchCompanies = async () => {
       try {
         const response = await fetch('/api/analysis/manage?isDeleted=false', {
-          headers: {
-            'Authorization': `Bearer ${getToken()}`
-          }
+          credentials: 'include'
         });
         if (!response.ok) throw new Error('Ошибка загрузки');
         const companiesList = await response.json();
@@ -145,9 +141,7 @@ export default function CompaniesPage() {
           companiesList.map(async (company: Company) => {
             try {
               const reportResponse = await fetch(`/api/analysis/report/${company.id}`, {
-                headers: {
-                  'Authorization': `Bearer ${getToken()}`
-                }
+                credentials: 'include'
               });
               if (reportResponse.ok) {
                 const reportData = await reportResponse.json();
@@ -253,9 +247,9 @@ export default function CompaniesPage() {
       const response = await fetch('/api/analysis/manage', {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken()}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ 
           analysisId: id, 
           isDeleted: true 
@@ -585,84 +579,12 @@ export default function CompaniesPage() {
                         <div 
                           className="share-dropdown-menu"
                         >
-                          <button
-                            onClick={async (e) => { 
-                              e.preventDefault(); 
-                              e.stopPropagation(); 
-                              try { 
-                                const { exportToPDF } = await import('@/utils/exportReport');
-                                await exportToPDF(displayName, displayInn, company.reportText || ''); 
-                                setShareOpen(null);
-                              } catch (error) { 
-                                setError('Ошибка экспорта'); 
-                              }
-                            }}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                              <polyline points="14 2 14 8 20 8"/>
-                            </svg>
-                            PDF
-                          </button>
-                    
-                          <button
-                            onClick={async (e) => { 
-                              e.preventDefault(); 
-                              e.stopPropagation(); 
-                              try { 
-                                const { exportToWord } = await import('@/utils/exportReport');
-                                await exportToWord(displayName, displayInn, company.reportText || ''); 
-                                setShareOpen(null);
-                              } catch (error) { 
-                                setError('Ошибка экспорта'); 
-                              }
-                            }}
-                          >
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                              <polyline points="14 2 14 8 20 8"/>
-                              <path d="M9 13h6"/><path d="M9 17h6"/>
-                            </svg>
-                            Word
-                          </button>
+                          <ExportButtons
+                            reportId={company.id}
+                            reportTitle={displayName}
+                            onClose={() => setShareOpen(null)}
+                          />
 
-                          <button
-                            onClick={async (e) => { 
-                              e.preventDefault(); 
-                              e.stopPropagation(); 
-                              try {
-                                const { copyToClipboard } = await import('@/utils/exportReport');
-                                const success = await copyToClipboard(company.reportText || ''); 
-                                if (success) { 
-                                  setCopySuccess(company.id); 
-                                  setTimeout(() => setCopySuccess(null), 2000); 
-                                  setShareOpen(null);
-                                } else { 
-                                  setError('Ошибка копирования');
-                                }
-                              } catch (error) {
-                                setError('Ошибка копирования');
-                              }
-                            }}
-                          >
-                            {copySuccess === company.id ? (
-                              <>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <polyline points="20 6 9 17 4 12"/>
-                                </svg>
-                                Скопировано
-                              </>
-                            ) : (
-                              <>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                                </svg>
-                                Копировать
-                              </>
-                            )}
-                          </button>
-                    
                           <button
                             onClick={(e) => { 
                               e.preventDefault(); 

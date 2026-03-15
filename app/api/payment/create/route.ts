@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { getAccessToken } from '@/app/lib/cookies';
 import { createPayment } from '@/lib/yukassa';
 
 const PLANS = {
@@ -11,12 +12,15 @@ const PLANS = {
 
 export async function POST(req: NextRequest) {
   try {
+    const accessToken = getAccessToken(req);
     const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = accessToken || headerToken;
+
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.substring(7);
     let decoded: any;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET!);

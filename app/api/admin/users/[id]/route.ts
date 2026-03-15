@@ -1,45 +1,14 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { verifyAdmin } from '../../lib/verifyAdmin';
 
-export async function PATCH(
-  request: Request,
+export async function DELETE(
+  _request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    // 1. Проверка авторизации
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    await verifyAdmin();
 
-    const token = authHeader.substring(7);
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-    } catch {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    // 2. Проверка роли admin
-    const admin = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { role: true }
-    });
-
-    if (!admin || admin.role !== 'admin') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    // 3. Получаем action и value
-    const body = await request.json();
-    const { action, value } = body;
-
-    if (!action || value === undefined) {
-      return NextResponse.json({ error: 'Missing action or value' }, { status: 400 });
-    }
-
-    // 4. Находим пользователя
     const user = await prisma.user.findUnique({
       where: { id: params.id }
     });
@@ -48,15 +17,75 @@ export async function PATCH(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // 5. Выполняем действие
+    await prisma.user.delete({
+      where: { id: params.id }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('❌ Admin delete user error:', error);
+
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    // Проверка админских прав
+    await verifyAdmin();
+
+    // Получаем action и value
+    const body = await request.json();
+    const { action, value } = body;
+
+    if (!action || value === undefined) {
+      return NextResponse.json({ error: 'Missing action or value' }, { status: 400 });
+    }
+
+    // Находим пользователя
+    const user = await prisma.user.findUnique({
+      where: { id: params.id }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Выполняем действие
     let updateData: any = {};
 
     switch (action) {
       case 'SET_PLAN':
-        if (!['trial', 'start', 'optimal', 'profi'].includes(value)) {
-          return NextResponse.json({ error: 'Invalid plan value' }, { status: 400 });
+        // Лимиты анализов для каждого тарифа
+        const planLimits: Record<string, number> = {
+          'trial': 3,
+          'start': 40,
+          'optimal': 100,
+          'profi': 200
+        };
+
+        if (!planLimits.hasOwnProperty(value)) {
+          return NextResponse.json(
+            { error: 'Invalid plan value' }, 
+            { status: 400 }
+          );
         }
+
+        // При смене тарифа обновляем ВСЕ связанные поля
         updateData.plan = value;
+        updateData.analysesInitial = planLimits[value];
+        updateData.analysesRemaining = planLimits[value];
+        updateData.planStartDate = new Date();
         break;
 
       case 'SET_REPORTS':
@@ -87,7 +116,7 @@ export async function PATCH(
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }
 
-    // 6. Обновляем пользователя
+    // Обновляем пользователя
     const updatedUser = await prisma.user.update({
       where: { id: params.id },
       data: updateData
@@ -103,8 +132,16 @@ export async function PATCH(
       }
     });
 
-  } catch (error) {
-    console.error('[Admin Update User] Error:', error);
+  } catch (error: any) {
+    console.error('❌ Admin update user error:', error);
+    
+    if (error.message === 'UNAUTHORIZED' || error.message === 'INVALID_TOKEN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (error.message === 'ACCESS_DENIED') {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

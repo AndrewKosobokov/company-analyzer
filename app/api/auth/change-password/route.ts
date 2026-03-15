@@ -2,21 +2,23 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
+import { cookies } from 'next/headers';
 
 export async function POST(request: Request) {
   try {
-    // Extract token from Authorization header
+    const cookieStore = cookies();
+    const accessToken = cookieStore.get('access_token')?.value;
     const authHeader = request.headers.get('Authorization');
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = accessToken || headerToken;
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
-    
-    const token = authHeader.substring(7);
-    
+
     // Verify JWT token
     let decoded;
     try {
