@@ -8,6 +8,7 @@
   nav,
   .no-print,
   button,
+  .report-actions,
   .navigation,
   .sidebar,
   .header,
@@ -227,6 +228,12 @@
   }
   
   .screen-only {
+    display: none !important;
+  }
+
+  /* Скрыть пустые/битые картинки (черный квадрат в PDF) */
+  img[src=""],
+  img:not([src]) {
     display: none !important;
   }
 }

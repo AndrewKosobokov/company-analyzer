@@ -3,27 +3,26 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '@/app/lib/prisma';
 import { setAuthCookies } from '@/app/lib/cookies';
-import { checkRateLimit, authLimiter, getIdentifier } from '@/app/lib/rateLimiter';
+// Rate limiting временно отключен для удобства пользователей
+// TODO: Настроить более гибкий rate limiting (например, 50 попыток в час)
+// import { checkRateLimit, authLimiter, getIdentifier } from '@/app/lib/rateLimiter';
 import { validateRequest } from '@/app/lib/validateRequest';
 import { loginSchema } from '@/app/lib/schemas';
 
 export async function POST(request: Request) {
   try {
-    // Rate limiting по IP (защита от брутфорса)
-    const identifier = getIdentifier(request);
-    const rateLimitResult = await checkRateLimit(identifier, authLimiter);
-    
-    if (!rateLimitResult.success) {
-      console.warn(`[RateLimit] Login blocked for ${identifier}`);
-      return NextResponse.json(
-        { error: 'Слишком много попыток входа. Попробуйте через 15 минут.' },
-        { 
-          status: 429,
-          headers: { 'Retry-After': rateLimitResult.retryAfter!.toString() }
-        }
-      );
-    }
-    
+    // Rate limiting временно отключен для удобства пользователей
+    // TODO: Настроить более гибкий rate limiting (например, 50 попыток в час)
+    // const identifier = getIdentifier(request);
+    // const rateLimitResult = await checkRateLimit(identifier, authLimiter);
+    // if (!rateLimitResult.success) {
+    //   console.warn(`[RateLimit] Login blocked for ${identifier}`);
+    //   return NextResponse.json(
+    //     { error: 'Слишком много попыток входа. Попробуйте через 15 минут.' },
+    //     { status: 429, headers: { 'Retry-After': rateLimitResult.retryAfter!.toString() } }
+    //   );
+    // }
+
     // Валидация входных данных
     const validation = await validateRequest(request, loginSchema);
     if (!validation.success) return validation.response;

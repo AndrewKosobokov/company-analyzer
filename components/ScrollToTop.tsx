@@ -29,6 +29,7 @@ export default function ScrollToTop() {
 
   return (
     <button
+      className="no-print"
       onClick={scrollToTop}
       style={{
         position: 'fixed',

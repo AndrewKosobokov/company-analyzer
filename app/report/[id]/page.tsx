@@ -591,7 +591,8 @@ export default function ReportPage() {
                             fontWeight: '700',
                             color: '#1D1D1F',
                             margin: '0 0 12px 0',
-                            letterSpacing: '-0.5px'
+                            letterSpacing: '-0.5px',
+                            scrollMarginTop: '96px'
                           }}
                         >
                           {props.children}
@@ -754,6 +755,12 @@ export default function ReportPage() {
                     }} {...props} />
                   ),
                   
+                  // Images - не рендерить пустые/битые (черный квадрат в PDF)
+                  img: ({node, src, ...props}: any) => {
+                    if (!src || src.trim() === '') return null;
+                    return <img src={src} alt={props.alt || ''} loading="lazy" className="report-img" {...props} />;
+                  },
+
                   // Dividers
                   hr: ({node, ...props}) => (
                     <hr style={{
@@ -805,6 +812,13 @@ export default function ReportPage() {
 
       {/* Responsive Styles */}
       <style jsx global>{`
+        /* Offset для якорей (учитывает высоту Header ~80px + отступ) */
+        .markdown-content [id],
+        .markdown-content h2[id],
+        .markdown-content h3[id] {
+          scroll-margin-top: 96px;
+        }
+
         /* Стилизация раздела "ИНФОРМАЦИЯ ДЛЯ ЗВОНКА" через HTML wrapper */
         .markdown-content .call-info-section {
           background-color: #FFF9E6;
