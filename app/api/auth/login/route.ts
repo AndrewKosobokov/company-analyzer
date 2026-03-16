@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const user = await prisma.user.findUnique({
       where: { email }
     });
-    
+
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -43,13 +43,13 @@ export async function POST(request: Request) {
     
     if (!user.isEmailVerified) {
       return NextResponse.json(
-        { error: 'Please verify your email before logging in' },
+        { error: 'Пожалуйста, подтвердите email. Проверьте почту.' },
         { status: 403 }
       );
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-    
+
     if (!isPasswordValid) {
       return NextResponse.json(
         { error: 'Invalid credentials' },

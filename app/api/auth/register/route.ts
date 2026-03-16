@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     
-    // Create user (NOT verified yet)
+    // Create user (требуется подтверждение email)
     const user = await prisma.user.create({
       data: {
         email,
@@ -64,11 +64,12 @@ export async function POST(request: Request) {
         emailVerificationExpires: verificationExpires,
       },
     });
-    
-    // Send verification email
-    const verificationUrl = `${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`;
+
+    // Отправка email для подтверждения
+    const baseUrl = process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
     const emailTemplate = getEmailVerificationTemplate(verificationUrl, email);
-    
+
     const emailResult = await sendEmail({
       to: email,
       subject: 'Подтвердите ваш email - МеталлВектор',
@@ -77,15 +78,12 @@ export async function POST(request: Request) {
     });
 
     if (!emailResult.success) {
-      console.error('Failed to send verification email:', emailResult.error);
-      // Continue anyway - user can request resend later
+      console.error('❌ Failed to send verification email:', emailResult.error);
+      // НЕ блокируем регистрацию — пользователь может запросить повторную отправку
     }
 
-    console.log('Verification email sent to:', email);
-    console.log('Verification link:', verificationUrl);
-    
     return NextResponse.json({
-      message: 'Registration successful. Please check your email to verify your account.',
+      message: 'Регистрация успешна. Проверьте почту для подтверждения email.',
       email: user.email,
     });
     

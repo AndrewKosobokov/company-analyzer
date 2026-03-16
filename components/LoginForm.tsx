@@ -72,17 +72,15 @@ export default function LoginForm() {
         throw new Error(data.error || data.message || 'Registration failed');
       }
       
-      // SUCCESS: Show email verification message
+      // SUCCESS: требуется подтверждение email
       showNotification(
-        `Регистрация успешна! Проверьте вашу почту для подтверждения email.`,
+        `Регистрация успешна! Проверьте почту для подтверждения email.`,
         'success',
         6000
       );
       
-      // Switch to login tab and clear form
+      // Switch to login tab, keep email/password чтобы сразу войти без повторного ввода
       setActiveTab('login');
-      setEmail('');
-      setPassword('');
       setConfirmPassword('');
       setName('');
       
