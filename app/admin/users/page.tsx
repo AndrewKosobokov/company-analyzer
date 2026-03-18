@@ -49,7 +49,7 @@ export default function UsersPage() {
   return (
     <>
       <main 
-        className="container" 
+        className="container admin-page" 
         style={{ 
           maxWidth: '1400px', 
           paddingTop: '120px',

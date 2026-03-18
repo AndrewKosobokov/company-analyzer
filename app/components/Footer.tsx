@@ -4,7 +4,7 @@ import React from 'react';
 
 function Footer() {
   return (
-    <footer style={{
+    <footer className="footer" style={{
       borderTop: '1px solid #E5E5E7',
       padding: '32px 24px',
       marginTop: '64px',

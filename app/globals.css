@@ -1083,3 +1083,394 @@ button:disabled {
     transform: translateY(0);
   }
 }
+
+/* ============================================
+   DARK THEME
+   Активируется через class="dark" на <html>
+   next-themes управляет переключением
+   Светлая тема в :root выше — не трогать
+   ============================================ */
+
+.dark {
+  /* Фоны — не чёрный, а тёмно-серый как у Apple */
+  --background-primary: #111111;
+  --background-secondary: #1c1c1e;
+  --background-tertiary: #161618;
+
+  /* Текст */
+  --text-primary: #f5f5f7;
+  --text-secondary: #98989d;
+  --text-tertiary: #6e6e73;
+
+  /* Границы */
+  --border-color: #2c2c2e;
+
+  /* Кнопки — инвертируем для тёмного фона */
+  --button-primary: #f5f5f7;
+  --button-hover: #e5e5ea;
+
+  /* Тени — значительно глубже */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+/* Header */
+.dark .header {
+  background: rgba(17, 17, 17, 0.85);
+  border-bottom-color: #2c2c2e;
+}
+
+/* Button primary — текст должен быть тёмным на светлой кнопке */
+.dark .button-primary {
+  color: #111111;
+}
+
+.dark .button-primary:hover:not(:disabled) {
+  background: #e5e5ea;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.12);
+}
+
+/* Button secondary */
+.dark .button-secondary {
+  border-color: #3a3a3c;
+}
+
+.dark .button-secondary:hover:not(:disabled) {
+  background: var(--background-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Form inputs */
+.dark .form-input {
+  background: var(--background-secondary);
+  border-color: #3a3a3c;
+}
+
+.dark .form-input:focus {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 4px rgba(245, 245, 247, 0.1);
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  border-color: #f5f5f7;
+  box-shadow: 0 0 0 4px rgba(245, 245, 247, 0.1);
+}
+
+/* Cards */
+.dark .card {
+  background: var(--background-secondary);
+}
+
+.dark .card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Auth */
+.dark .auth-card {
+  background: var(--background-secondary);
+}
+
+/* Контейнер вкладок — тёмный фон */
+.dark .auth-tabs,
+.dark .analysis-tabs-container {
+  background: var(--background-tertiary) !important;
+}
+
+/* Неактивная вкладка — просто серый текст, прозрачный фон */
+.dark .auth-tab,
+.dark .analysis-tabs-container button {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Активная вкладка — СВЕТЛАЯ (белая) с тёмным текстом */
+.dark .auth-tab.active,
+.dark .analysis-tabs-container button.active {
+  background: #f5f5f7 !important;
+  color: #111111 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Hover на неактивной */
+.dark .auth-tab:hover:not(.active),
+.dark .analysis-tabs-container button:hover:not(.active) {
+  color: var(--text-primary) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Кнопка Открыть и другие в списке компаний/отчётов */
+.dark .company-actions .button-primary {
+  background: var(--button-primary) !important;
+  color: #111111 !important;
+}
+
+.dark .company-actions .button-primary:hover {
+  background: var(--button-hover) !important;
+}
+
+.dark .company-actions .button-secondary,
+.dark .company-actions button {
+  border-color: #3a3a3c;
+  color: var(--text-primary);
+  background: transparent;
+}
+
+.dark .company-actions .button-secondary:hover,
+.dark .company-actions button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #636366;
+}
+
+/* Pricing */
+.dark .pricing-card {
+  background: var(--background-secondary);
+}
+
+.dark .pricing-card.recommended {
+  border-color: var(--text-primary);
+}
+
+/* Analysis / Report / Profile */
+.dark .report-content,
+.dark .profile-section {
+  background: var(--background-secondary);
+}
+
+/* Убрать двойную вложенность фонов */
+.dark .analysis-form > div:not(.analysis-tabs-container):not(.form-group) {
+  background: transparent;
+}
+
+/* TOC (оглавление отчёта) */
+.dark .report-toc-container {
+  background: var(--background-secondary);
+  border-color: #2c2c2e;
+}
+
+.dark .toc-link.active {
+  color: var(--text-primary);
+  border-left-color: var(--text-primary);
+}
+
+/* Companies list */
+.dark .company-item {
+  background: var(--background-secondary);
+}
+
+/* Share dropdown — был захардкожен белый */
+.dark .share-dropdown-menu {
+  background-color: var(--background-secondary);
+  border-color: #3a3a3c;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dark .share-dropdown-menu button:hover {
+  background-color: var(--background-tertiary);
+}
+
+/* Card hover */
+.dark .card-hover:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Блок "Информация для звонка" в отчёте */
+.dark .markdown-content .call-info-section {
+  background-color: var(--background-secondary) !important;
+  border-left-color: #636366 !important;
+  box-shadow: none !important;
+}
+
+.dark .markdown-content .call-info-section h2,
+.dark .markdown-content .call-info-section h3,
+.dark .markdown-content .call-info-section p,
+.dark .markdown-content .call-info-section ul,
+.dark .markdown-content .call-info-section ol {
+  color: var(--text-primary) !important;
+}
+
+.dark .markdown-content .call-info-section h3:not(:first-of-type) {
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Футер */
+.dark footer,
+.dark .footer {
+  background: var(--background-primary) !important;
+  border-top-color: #2c2c2e !important;
+  color: var(--text-secondary) !important;
+}
+
+.dark footer a,
+.dark .footer a {
+  color: var(--text-secondary) !important;
+}
+
+.dark footer a:hover,
+.dark .footer a:hover {
+  color: var(--text-primary) !important;
+}
+
+.dark footer span,
+.dark .footer span {
+  color: var(--text-secondary) !important;
+}
+
+/* Переопределяем браузерный автофилл для тёмной темы */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1c1c1e inset !important;
+  -webkit-text-fill-color: #f5f5f7 !important;
+  caret-color: #f5f5f7;
+  border-color: #3a3a3c !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Форма логина — поля */
+.dark .auth-card .form-input,
+.dark .auth-card input {
+  background: var(--background-secondary) !important;
+  border-color: #3a3a3c !important;
+  color: var(--text-primary) !important;
+}
+
+.dark .auth-card .form-input:focus,
+.dark .auth-card input:focus {
+  border-color: #636366 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ---- Страница анализа ---- */
+
+/* Поле ввода — убираем яркий белый бордер, явный бордер */
+.dark .analysis-form .form-input,
+.dark .analysis-form input,
+.dark .analysis-form textarea {
+  background: #161618;
+  border: 1.5px solid #3a3a3c !important;
+  color: var(--text-primary);
+}
+
+/* Focus — тонкое свечение вместо жирного белого */
+.dark .analysis-form .form-input:focus,
+.dark .analysis-form input:focus,
+.dark .analysis-form textarea:focus {
+  border-color: #636366 !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+  outline: none;
+}
+
+/* Кнопка "Анализировать" — белая с тёмным текстом, чтобы выделялась */
+.dark .analysis-form .button-primary,
+.dark .analysis-form button[type="submit"] {
+  background: #f5f5f7 !important;
+  color: #111111 !important;
+  border: none;
+  opacity: 1;
+}
+
+.dark .analysis-form .button-primary:hover:not(:disabled),
+.dark .analysis-form button[type="submit"]:hover:not(:disabled) {
+  background: #e5e5ea !important;
+  color: #111111 !important;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Disabled-состояние кнопки — чуть заметнее чем сейчас */
+.dark .analysis-form .button-primary:disabled,
+.dark .analysis-form button:disabled {
+  background: #3a3a3c !important;
+  color: #636366 !important;
+  opacity: 1;
+}
+
+/* ---- Админ-панель ---- */
+.dark .admin-page,
+.dark [class*="admin-"] {
+  background: var(--background-primary) !important;
+  color: var(--text-primary);
+}
+
+.dark table {
+  background: var(--background-secondary) !important;
+  color: var(--text-primary);
+}
+
+.dark th {
+  background: var(--background-tertiary) !important;
+  color: var(--text-secondary);
+  border-bottom-color: #2c2c2e;
+}
+
+.dark td {
+  border-bottom-color: #2c2c2e;
+  color: var(--text-primary);
+}
+
+.dark tr:hover td {
+  background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.dark .admin-stat-card,
+.dark .stats-card {
+  background: var(--background-secondary) !important;
+  border-color: #2c2c2e;
+}
+
+.dark .badge-active,
+.dark .status-active {
+  background: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+}
+
+.dark .badge-inactive,
+.dark .status-inactive {
+  background: rgba(255, 69, 58, 0.15);
+  color: #ff453a;
+}
+
+/* Карточки на главной странице админки */
+.dark .admin-page .admin-card,
+.dark .admin-page [class*="admin-card"] {
+  background: var(--background-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: #2c2c2e !important;
+}
+
+.dark .admin-page .admin-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Иконка внутри карточки админки */
+.dark .admin-page .admin-card > div:first-child {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .admin-page .admin-card svg {
+  color: var(--text-primary) !important;
+  stroke: var(--text-primary) !important;
+}
+
+.dark .admin-page .admin-card h2,
+.dark .admin-page .admin-card p {
+  color: var(--text-primary) !important;
+}
+
+/* Заголовок страницы админки */
+.dark .admin-page .admin-page-title,
+.dark .admin-page h1 {
+  color: var(--text-primary) !important;
+}
+
+/* Бейдж «Рекомендуется» на карточке тарифа */
+.dark .pricing-card .recommended-badge,
+.dark .pricing-card.recommended .recommended-badge,
+.dark .recommended-badge {
+  background: #f5f5f7 !important;
+  color: #111111 !important;
+}

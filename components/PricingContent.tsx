@@ -205,7 +205,7 @@ export default function PricingContent() {
             }}
           >
             {/* Recommended Badge */}
-            <div style={{
+            <div className="recommended-badge" style={{
               position: 'absolute',
               top: '-12px',
               left: '50%',

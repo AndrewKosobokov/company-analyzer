@@ -209,7 +209,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#F5F5F7', paddingTop: '80px' }}>
+      <div className="admin-page" style={{ minHeight: 'calc(100vh - 80px)', backgroundColor: '#F5F5F7', paddingTop: '80px' }}>
         {/* Шапка */}
         <div style={{
           backgroundColor: 'white',

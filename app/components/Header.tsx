@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 function Header() {
   const pathname = usePathname();
@@ -89,6 +90,7 @@ function Header() {
               >
                 Выйти
               </button>
+              <ThemeToggle />
             </>
           ) : (
             // Меню для НЕзалогиненных пользователей
@@ -105,6 +107,7 @@ function Header() {
               >
                 Войти
               </Link>
+              <ThemeToggle />
             </>
           )}
         </nav>
