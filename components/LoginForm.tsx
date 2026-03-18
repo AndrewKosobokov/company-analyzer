@@ -32,7 +32,7 @@ export default function LoginForm() {
     try {
       // login() из AuthContext сам делает fetch и устанавливает cookies
       await login(email, password);
-      router.push('/analysis');
+      window.location.href = '/analysis';
     } catch (err) {
       const errorMessage = getErrorMessage(err);
       setError(errorMessage);

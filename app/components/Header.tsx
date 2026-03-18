@@ -33,7 +33,7 @@ function Header() {
     <header className="header">
       <div className="header-container">
         {/* Logo + Subtitle */}
-        <Link href="/analysis" className="logo">
+        <Link href="/" className="logo">
           <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
           <div style={{ 
             fontSize: '13px', 
