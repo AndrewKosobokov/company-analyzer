@@ -395,7 +395,7 @@ export default function ReportPage() {
               onClick={() => {
                 const { companyName } = extractCompanyInfo(report.reportText);
                 const displayName = companyName || report.companyName;
-                const shareUrl = `https://metalvector.ru/report/${params.id}`;
+                const shareUrl = `https://metalvector.ru/public/report/${params.id}`;
                 const text = `Отчёт: ${displayName}`;
                 window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`, '_blank');
               }}
@@ -412,7 +412,7 @@ export default function ReportPage() {
               onClick={() => {
                 const { companyName } = extractCompanyInfo(report.reportText);
                 const displayName = companyName || report.companyName;
-                const shareUrl = `https://metalvector.ru/report/${params.id}`;
+                const shareUrl = `https://metalvector.ru/public/report/${params.id}`;
                 const text = `Отчёт: ${displayName}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + shareUrl)}`, '_blank');
               }}

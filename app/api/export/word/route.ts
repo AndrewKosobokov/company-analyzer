@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Извлекаем правильное название компании из текста отчета
-    function extractCompanyName(reportText: string): string {
+    const extractCompanyName = (reportText: string): string => {
       // Вариант 1: Ищем "**Компания:** Название"
       const companyMatch = reportText.match(/\*\*Компания:\*\*\s*([^\n*]+)/);
       if (companyMatch) {
@@ -80,12 +80,12 @@ export async function GET(request: NextRequest) {
     
     // Конвертируем Markdown в HTML
     const { marked } = await import('marked');
-    let reportHtml = marked(analysis.reportText);
+    let reportHtml = await marked(analysis.reportText);
     
     // Оборачиваем желтый блок в таблицу для лучшей поддержки в Word
     // КРИТИЧНО: Используем HTML-атрибуты (cellpadding) для Word, CSS не работает!
     reportHtml = reportHtml.replace(
-      /<div class="call-info-section">(.*?)<\/div>/gs,
+      /<div class="call-info-section">([\s\S]*?)<\/div>/g,
       `<table width="100%" cellpadding="25" cellspacing="0" 
              style="background-color: #FFF9E6; border-collapse: collapse; margin: 30px 0;">
         <tr>
