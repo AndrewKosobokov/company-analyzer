@@ -1,4 +1,5 @@
 import { tildaSans } from './fonts';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from '@/components/NotificationProvider';
 import { ToastProvider } from '@/components/ui/ToastProvider';
@@ -70,12 +71,13 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={tildaSans.variable}>
+    <html lang="ru" className={tildaSans.variable} suppressHydrationWarning>
       <head>
         <link rel="canonical" href="https://metalvector.ru" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={tildaSans.className}>
+        <ThemeProvider>
         <OrganizationSchema />
         <SoftwareApplicationSchema />
         <WebSiteSchema />
@@ -92,6 +94,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </ToastProvider>
           </NotificationProvider>
         </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

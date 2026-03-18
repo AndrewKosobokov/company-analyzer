@@ -64,7 +64,7 @@ export default function AdminPage() {
 
   return (
     <main 
-      className="container" 
+      className="container admin-page" 
       style={{ 
         maxWidth: '1200px', 
         paddingTop: '120px',
@@ -74,7 +74,7 @@ export default function AdminPage() {
         transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
       }}
     >
-      <h1 style={{ 
+      <h1 className="admin-page-title" style={{ 
         fontSize: '48px', 
         marginBottom: '48px', 
         fontWeight: 600, 
@@ -94,6 +94,7 @@ export default function AdminPage() {
       }}>
         <Link 
           href="/admin/dashboard"
+          className="admin-card"
           style={{ 
             display: 'flex',
             flexDirection: 'column',
@@ -145,6 +146,7 @@ export default function AdminPage() {
 
         <Link 
           href="/admin/users"
+          className="admin-card"
           style={{ 
             display: 'flex',
             flexDirection: 'column',

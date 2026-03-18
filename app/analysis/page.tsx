@@ -268,9 +268,11 @@ export default function AnalysisPage() {
             transitionDelay: '0.1s'
           }}
         >
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="analysis-form">
             {/* Apple-style segmented control toggle */}
-            <div style={{
+            <div
+              className="analysis-tabs-container"
+              style={{
               display: 'flex',
               backgroundColor: '#F5F5F7',
               borderRadius: '8px',
@@ -281,6 +283,7 @@ export default function AnalysisPage() {
             }}>
               <button
                 type="button"
+                className={analysisMode === 'company' ? 'active' : ''}
                 onClick={() => setAnalysisMode('company')}
                 style={{
                   flex: 1,
@@ -311,6 +314,7 @@ export default function AnalysisPage() {
               </button>
               <button
                 type="button"
+                className={analysisMode === 'product' ? 'active' : ''}
                 onClick={() => setAnalysisMode('product')}
                 style={{
                   flex: 1,

@@ -328,7 +328,9 @@ export default function CompaniesPage() {
       >
         {/* Apple-style segmented control toggle for filter */}
         {companies.length > 0 && !error && (
-          <div style={{
+          <div
+            className="analysis-tabs-container"
+            style={{
             display: 'flex',
             backgroundColor: '#F5F5F7',
             borderRadius: '8px',
@@ -341,6 +343,7 @@ export default function CompaniesPage() {
           }}>
             <button
               type="button"
+              className={filterType === 'company' ? 'active' : ''}
               onClick={() => setFilterType('company')}
               style={{
                 flex: 1,
@@ -371,6 +374,7 @@ export default function CompaniesPage() {
             </button>
             <button
               type="button"
+              className={filterType === 'product' ? 'active' : ''}
               onClick={() => setFilterType('product')}
               style={{
                 flex: 1,
