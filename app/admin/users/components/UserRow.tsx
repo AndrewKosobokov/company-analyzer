@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTheme } from 'next-themes';
 
 interface User {
   id: string;
@@ -21,6 +22,8 @@ interface UserRowProps {
 }
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [analysesCount, setAnalysesCount] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
@@ -216,21 +219,21 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       e.currentTarget.style.backgroundColor = 'transparent';
     }}
     >
-      <td style={cellStyle}>{user.email}</td>
-      <td style={cellStyle}>{user.name || '—'}</td>
-      <td style={cellStyle}>
+      <td style={getCellStyle(isDark)}>{user.email}</td>
+      <td style={getCellStyle(isDark)}>{user.name || '—'}</td>
+      <td style={getCellStyle(isDark)}>
         <span style={{
           padding: '4px 12px',
           borderRadius: '6px',
           fontSize: '13px',
           fontWeight: 500,
           backgroundColor: getPlanColor(user.plan),
-          color: '#1D1D1F'
+          color: isDark ? '#111111' : '#1D1D1F'
         }}>
           {getPlanLabel(user.plan)}
         </span>
       </td>
-      <td style={cellStyle}>
+      <td style={getCellStyle(isDark)}>
         <div style={{ minWidth: '150px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
             <div style={{ fontSize: '13px', fontWeight: 500 }}>{user.analysesRemaining}</div>
@@ -243,11 +246,11 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
                 transition: 'width 0.3s ease'
               }} />
             </div>
-            <span style={{ color: '#86868B', fontSize: '13px' }}>{Math.round(percentage)}%</span>
+            <span style={{ color: isDark ? '#f5f5f7' : '#86868B', fontSize: '13px' }}>{Math.round(percentage)}%</span>
           </div>
         </div>
       </td>
-      <td style={cellStyle}>
+      <td style={getCellStyle(isDark)}>
         <span style={{
           padding: '4px 8px',
           borderRadius: '4px',
@@ -259,12 +262,12 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
           {isActive ? '● Активен' : '○ Неактивен'}
         </span>
       </td>
-      <td style={cellStyle}>
+      <td style={getCellStyle(isDark)}>
         <span style={{ fontSize: '14px', color: '#86868B' }}>
           {getRelativeTime(lastActivityDate)}
         </span>
       </td>
-      <td style={cellStyle}>
+      <td style={getCellStyle(isDark)}>
         <button
           onClick={onEdit}
           style={{
@@ -308,11 +311,13 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
   );
 }
 
-const cellStyle: React.CSSProperties = {
-  padding: '16px',
-  fontSize: '15px',
-  color: '#1D1D1F'
-};
+function getCellStyle(isDark: boolean): React.CSSProperties {
+  return {
+    padding: '16px',
+    fontSize: '15px',
+    color: isDark ? '#f5f5f7' : '#1D1D1F'
+  };
+}
 
 function getPlanColor(plan: string): string {
   const colors: Record<string, string> = {
