@@ -88,6 +88,7 @@ export default function UsersPage() {
         
         <h1 style={{ fontSize: '36px', marginBottom: '32px' }}>Управление пользователями</h1>
         <div
+          className="admin-users-table-wrapper"
           style={{
             opacity: isMounted ? 1 : 0,
             transform: isMounted ? 'translateY(0)' : 'translateY(10px)',

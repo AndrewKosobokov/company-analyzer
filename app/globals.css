@@ -1409,7 +1409,18 @@ button:disabled {
 
 .dark td {
   border-bottom-color: #2c2c2e;
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+}
+
+/* Процент анализов и текст в ячейках таблицы пользователей */
+.dark .admin-page td {
+  color: var(--text-primary) !important;
+}
+
+/* Процент (33%) и время активности — не трогаем бейджи с background */
+.dark .admin-page td div span,
+.dark .admin-page td span:not([style*="background"]) {
+  color: var(--text-primary) !important;
 }
 
 .dark tr:hover td {
