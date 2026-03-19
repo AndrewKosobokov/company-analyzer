@@ -23,7 +23,9 @@ interface UserRowProps {
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && theme === 'dark';
   const [analysesCount, setAnalysesCount] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
