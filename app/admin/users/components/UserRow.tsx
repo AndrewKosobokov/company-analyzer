@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useTheme } from 'next-themes';
 
 interface User {
   id: string;
@@ -22,10 +21,6 @@ interface UserRowProps {
 }
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
-  const { theme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const isDark = mounted && theme === 'dark';
   const [analysesCount, setAnalysesCount] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
@@ -221,21 +216,20 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       e.currentTarget.style.backgroundColor = 'transparent';
     }}
     >
-      <td style={getCellStyle(isDark)}>{user.email}</td>
-      <td style={getCellStyle(isDark)}>{user.name || '—'}</td>
-      <td style={getCellStyle(isDark)}>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">{user.email}</td>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">{user.name || '—'}</td>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
         <span style={{
           padding: '4px 12px',
           borderRadius: '6px',
           fontSize: '13px',
           fontWeight: 500,
-          backgroundColor: getPlanColor(user.plan),
-          color: isDark ? '#111111' : '#1D1D1F'
-        }}>
+          backgroundColor: getPlanColor(user.plan)
+        }} className="text-[#1D1D1F] dark:text-[#111111]">
           {getPlanLabel(user.plan)}
         </span>
       </td>
-      <td style={getCellStyle(isDark)}>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
         <div style={{ minWidth: '150px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
             <div style={{ fontSize: '13px', fontWeight: 500 }}>{user.analysesRemaining}</div>
@@ -248,11 +242,11 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
                 transition: 'width 0.3s ease'
               }} />
             </div>
-            <span style={{ color: isDark ? '#f5f5f7' : '#86868B', fontSize: '13px' }}>{Math.round(percentage)}%</span>
+            <span className="text-[#86868B] dark:text-[#f5f5f7] text-[13px]">{Math.round(percentage)}%</span>
           </div>
         </div>
       </td>
-      <td style={getCellStyle(isDark)}>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
         <span style={{
           padding: '4px 8px',
           borderRadius: '4px',
@@ -264,12 +258,12 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
           {isActive ? '● Активен' : '○ Неактивен'}
         </span>
       </td>
-      <td style={getCellStyle(isDark)}>
-        <span style={{ fontSize: '14px', color: '#86868B' }}>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
+        <span className="text-[14px] text-[#86868B] dark:text-[#f5f5f7]">
           {getRelativeTime(lastActivityDate)}
         </span>
       </td>
-      <td style={getCellStyle(isDark)}>
+      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
         <button
           onClick={onEdit}
           style={{
@@ -311,14 +305,6 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     {deleteModal}
     </>
   );
-}
-
-function getCellStyle(isDark: boolean): React.CSSProperties {
-  return {
-    padding: '16px',
-    fontSize: '15px',
-    color: isDark ? '#f5f5f7' : '#1D1D1F'
-  };
 }
 
 function getPlanColor(plan: string): string {
