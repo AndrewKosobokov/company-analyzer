@@ -75,7 +75,7 @@ export const AnalysisProgressBar = ({
       <div style={{
         fontSize: '20px',
         fontWeight: '600',
-        color: '#1D1D1F',
+        color: 'var(--text-primary)',
         textAlign: 'center',
         marginBottom: '16px'
       }}>
@@ -86,14 +86,14 @@ export const AnalysisProgressBar = ({
       <div style={{
         width: '100%',
         height: '4px',
-        backgroundColor: '#E5E5EA',
+        backgroundColor: 'var(--border-color)',
         borderRadius: '2px',
         overflow: 'hidden',
         marginBottom: '20px'
       }}>
         <div style={{
           height: '100%',
-          backgroundColor: '#1D1D1F',
+          backgroundColor: 'var(--button-primary)',
           width: `${progress}%`,
           transition: 'width 0.3s ease',
           borderRadius: '2px'
@@ -103,7 +103,7 @@ export const AnalysisProgressBar = ({
       {/* Текущий этап (по центру под линией) */}
       <div style={{
         fontSize: '15px',
-        color: '#86868B',
+        color: 'var(--text-secondary)',
         fontWeight: '500',
         textAlign: 'center',
         minHeight: '22px'

@@ -101,7 +101,7 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
         <div
           onClick={(e) => e.stopPropagation()}
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'var(--background-secondary)',
             borderRadius: '16px',
             padding: '32px',
             maxWidth: '500px',
@@ -109,13 +109,13 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
           }}
         >
-          <h2 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '24px', color: 'var(--text-primary)' }}>
             Редактирование пользователя
           </h2>
 
           {/* Email (readonly) */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#86868B' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: 'var(--text-secondary)' }}>
               Email
             </label>
             <input
@@ -125,18 +125,18 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
               style={{
                 width: '100%',
                 padding: '12px 16px',
-                border: '1px solid #D2D2D7',
+                border: '1px solid var(--border-color)',
                 borderRadius: '8px',
                 fontSize: '15px',
-                backgroundColor: '#F5F5F7',
-                color: '#86868B'
+                backgroundColor: 'var(--background-tertiary)',
+                color: 'var(--text-secondary)'
               }}
             />
           </div>
 
           {/* Тариф */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#1D1D1F' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: 'var(--text-primary)' }}>
               Тариф
             </label>
             <select
@@ -145,10 +145,12 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
               style={{
                 width: '100%',
                 padding: '12px 16px',
-                border: '1px solid #D2D2D7',
+                border: '1px solid var(--border-color)',
                 borderRadius: '8px',
                 fontSize: '15px',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                backgroundColor: 'var(--background-secondary)',
+                color: 'var(--text-primary)'
               }}
             >
               <option value="trial">Trial</option>
@@ -160,7 +162,7 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
 
           {/* Анализы */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: '#1D1D1F' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '8px', color: 'var(--text-primary)' }}>
               Анализы
             </label>
             
@@ -170,10 +172,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  border: analysesMode === 'set' ? '2px solid #1D1D1F' : '1px solid #E5E5E7',
+                  border: analysesMode === 'set' ? '2px solid var(--button-primary)' : '1px solid var(--border-color)',
                   borderRadius: '8px',
-                  background: analysesMode === 'set' ? '#1D1D1F' : '#FFFFFF',
-                  color: analysesMode === 'set' ? '#FFFFFF' : '#1D1D1F',
+                  background: analysesMode === 'set' ? 'var(--button-primary)' : 'var(--background-secondary)',
+                  color: analysesMode === 'set' ? '#FFFFFF' : 'var(--text-primary)',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -187,10 +189,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  border: analysesMode === 'add' ? '2px solid #1D1D1F' : '1px solid #E5E5E7',
+                  border: analysesMode === 'add' ? '2px solid var(--button-primary)' : '1px solid var(--border-color)',
                   borderRadius: '8px',
-                  background: analysesMode === 'add' ? '#1D1D1F' : '#FFFFFF',
-                  color: analysesMode === 'add' ? '#FFFFFF' : '#1D1D1F',
+                  background: analysesMode === 'add' ? 'var(--button-primary)' : 'var(--background-secondary)',
+                  color: analysesMode === 'add' ? '#FFFFFF' : 'var(--text-primary)',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -204,10 +206,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 style={{
                   flex: 1,
                   padding: '8px 12px',
-                  border: analysesMode === 'subtract' ? '2px solid #1D1D1F' : '1px solid #E5E5E7',
+                  border: analysesMode === 'subtract' ? '2px solid var(--button-primary)' : '1px solid var(--border-color)',
                   borderRadius: '8px',
-                  background: analysesMode === 'subtract' ? '#1D1D1F' : '#FFFFFF',
-                  color: analysesMode === 'subtract' ? '#FFFFFF' : '#1D1D1F',
+                  background: analysesMode === 'subtract' ? 'var(--button-primary)' : 'var(--background-secondary)',
+                  color: analysesMode === 'subtract' ? '#FFFFFF' : 'var(--text-primary)',
                   cursor: 'pointer',
                   fontSize: '14px',
                   fontWeight: 500,
@@ -226,13 +228,15 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
               style={{
                 width: '100%',
                 padding: '12px 16px',
-                border: '1px solid #D2D2D7',
+                border: '1px solid var(--border-color)',
                 borderRadius: '8px',
-                fontSize: '15px'
+                fontSize: '15px',
+                backgroundColor: 'var(--background-tertiary)',
+                color: 'var(--text-primary)'
               }}
             />
             
-            <div style={{ fontSize: '13px', color: '#86868B', marginTop: '4px' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
               Текущее значение: {user.analysesRemaining}
             </div>
           </div>
@@ -259,9 +263,10 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
               style={{
                 flex: 1,
                 padding: '12px 24px',
-                border: '1px solid #D2D2D7',
+                border: '1px solid var(--border-color)',
                 borderRadius: '8px',
-                background: '#FFFFFF',
+                backgroundColor: 'transparent',
+                color: 'var(--text-primary)',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 fontSize: '15px',
                 fontWeight: 500,
@@ -279,7 +284,7 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
                 padding: '12px 24px',
                 border: 'none',
                 borderRadius: '8px',
-                background: saving ? '#86868B' : '#1D1D1F',
+                background: saving ? 'var(--text-secondary)' : 'var(--button-primary)',
                 color: '#FFFFFF',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 fontSize: '15px',
@@ -288,12 +293,12 @@ export default function EditUserModal({ user, onClose, onSuccess }: EditUserModa
               }}
               onMouseEnter={(e) => {
                 if (!saving) {
-                  e.currentTarget.style.background = '#2D2D2F';
+                  e.currentTarget.style.background = 'var(--button-hover)';
                 }
               }}
               onMouseLeave={(e) => {
                 if (!saving) {
-                  e.currentTarget.style.background = '#1D1D1F';
+                  e.currentTarget.style.background = 'var(--button-primary)';
                 }
               }}
             >
