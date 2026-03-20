@@ -128,13 +128,13 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       zIndex: 1000,
     }}>
       <div style={{
-        backgroundColor: 'white',
+        backgroundColor: isDarkMode ? '#1c1c1e' : 'white',
         padding: '30px',
         borderRadius: '12px',
         maxWidth: '400px',
         width: '90%',
       }}>
-        <h3 style={{ marginBottom: '20px' }}>Удалить пользователя?</h3>
+        <h3 style={{ marginBottom: '20px', color: isDarkMode ? '#f5f5f7' : '#1D1D1F' }}>Удалить пользователя?</h3>
 
         <p style={{ marginBottom: '20px', color: '#86868B' }}>
           Это действие необратимо. Для подтверждения введите имя пользователя:
@@ -144,7 +144,8 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
           marginBottom: '10px',
           fontWeight: 'bold',
           padding: '10px',
-          backgroundColor: '#F5F5F7',
+          backgroundColor: isDarkMode ? '#2c2c2e' : '#F5F5F7',
+          color: isDarkMode ? '#f5f5f7' : '#1d1d1f',
           borderRadius: '8px',
         }}>
           {confirmLabel}
@@ -163,6 +164,8 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
             fontSize: '15px',
             marginBottom: '20px',
             boxSizing: 'border-box',
+            backgroundColor: isDarkMode ? '#161618' : 'white',
+            color: isDarkMode ? '#f5f5f7' : '#1D1D1F',
           }}
         />
 
@@ -179,6 +182,7 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
               border: '1px solid var(--border-color)',
               borderRadius: '8px',
               cursor: 'pointer',
+              color: isDarkMode ? '#f5f5f7' : '#1D1D1F',
             }}
           >
             Отмена
