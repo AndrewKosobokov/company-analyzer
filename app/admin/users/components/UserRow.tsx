@@ -112,6 +112,8 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     return `${Math.floor(days / 365)} г назад`;
   };
 
+  const isDarkMode = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
   const deleteModal = showDeleteModal && typeof document !== 'undefined' && createPortal(
     <div style={{
       position: 'fixed',
@@ -210,7 +212,8 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       transition: 'background-color 0.2s ease'
     }}
     onMouseEnter={(e) => {
-      e.currentTarget.style.backgroundColor = '#F9F9F9';
+      const isDark = document.documentElement.classList.contains('dark');
+      e.currentTarget.style.backgroundColor = isDark ? 'rgba(255,255,255,0.05)' : '#F9F9F9';
     }}
     onMouseLeave={(e) => {
       e.currentTarget.style.backgroundColor = 'transparent';
@@ -268,19 +271,23 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
           onClick={onEdit}
           style={{
             padding: '6px 12px',
-            border: '1px solid #D2D2D7',
+            border: '1px solid',
+            borderColor: isDarkMode ? '#3a3a3c' : '#e5e5e5',
             borderRadius: '6px',
-            background: '#FFFFFF',
+            backgroundColor: isDarkMode ? '#2c2c2e' : '#FFFFFF',
+            color: isDarkMode ? '#f5f5f7' : '#1D1D1F',
             cursor: 'pointer',
             fontSize: '13px',
             fontWeight: 500,
             transition: 'all 0.2s ease'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#F5F5F7';
+            const isDark = document.documentElement.classList.contains('dark');
+            e.currentTarget.style.backgroundColor = isDark ? '#3a3a3c' : '#F5F5F7';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#FFFFFF';
+            const isDark = document.documentElement.classList.contains('dark');
+            e.currentTarget.style.backgroundColor = isDark ? '#2c2c2e' : '#FFFFFF';
           }}
         >
           Редактировать
