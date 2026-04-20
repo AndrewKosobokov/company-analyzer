@@ -14,7 +14,7 @@ interface UserProfile {
   plan: string;
   analysesRemaining: number;
   analysesInitial: number;
-  planStartDate: string;
+  planStartDate: string | null;
 }
 
 interface Payment {
@@ -36,9 +36,7 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
-  const [totalAnalyses, setTotalAnalyses] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
-  const [progressWidth, setProgressWidth] = useState(0);
   const router = useRouter();
   const { logout } = useAuth();
   
@@ -100,28 +98,6 @@ export default function ProfilePage() {
     }
   }, []);
 
-  // Считаем сколько анализов уже сделано
-  useEffect(() => {
-    const fetchAnalysesCount = async () => {
-      const res = await fetch('/api/user/analyses-count', {
-        credentials: 'include'
-      });
-      const data = await res.json();
-      setTotalAnalyses(data.count || 0);
-    };
-    if (profile) {
-      fetchAnalysesCount();
-      // Animate progress bar after data is loaded
-      setTimeout(() => {
-        const initial = profile.analysesInitial || 0;
-        const remaining = profile.analysesRemaining || 0;
-        const validRemaining = Math.max(0, Math.min(remaining, initial));
-        const used = initial - validRemaining;
-        const percentage = initial > 0 ? (used / initial) * 100 : 0;
-        setProgressWidth(percentage);
-      }, 300);
-    }
-  }, [profile, totalAnalyses]);
   
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,45 +233,7 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        {/* Warning: Low balance */}
-        {profile.analysesRemaining <= 5 && profile.plan !== 'trial' && (
-          <div className="card" style={{
-            backgroundColor: '#FEF3C7',
-            border: '1px solid #FDE047',
-            marginBottom: 'var(--space-xl)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-              <span style={{ fontSize: '24px' }}>⚠️</span>
-              <div>
-                <h3 style={{ 
-                  fontSize: '17px', 
-                  fontWeight: 600,
-                  marginBottom: '8px',
-                  color: '#92400E'
-                }}>
-                  У вас заканчиваются отчёты
-                </h3>
-                <p style={{ 
-                  fontSize: '15px', 
-                  color: '#78350F',
-                  marginBottom: 'var(--space-md)'
-                }}>
-                  Осталось всего {profile.analysesRemaining} {profile.analysesRemaining === 1 ? 'анализ' : 'анализа'}. 
-                  Пополните баланс, чтобы не потерять доступ к генерации отчётов в важный момент.
-                </p>
-                <Link 
-                  href="/pricing" 
-                  className="button-primary"
-                  style={{ display: 'inline-block' }}
-                >
-                  Пополнить сейчас
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Section 2: My Tariff */}
+        {/* Section 2: Subscription */}
         <div 
           className="profile-section"
           style={{
@@ -311,103 +249,48 @@ export default function ProfilePage() {
             paddingBottom: 'var(--space-md)',
             borderBottom: '1px solid var(--border-color)'
           }}>
-            Мой тариф: {getPlanName(profile.plan)}
+            Подписка
           </h2>
           
           <div className="card">
-            {/* Large counter */}
-            <div style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
-              <div style={{ 
-                fontSize: '72px', 
-                fontWeight: 700, 
-                color: 'var(--text-primary)',
-                lineHeight: 1 
-              }}>
-                {profile.analysesRemaining}
-              </div>
-              <div style={{ 
-                fontSize: '15px', 
-                color: 'var(--text-secondary)', 
-                marginTop: '8px' 
-              }}>
-                отчётов осталось
-              </div>
-              {(() => {
-                const initial = profile.analysesInitial || 0;
-                const remaining = profile.analysesRemaining || 0;
-                const validRemaining = Math.max(0, Math.min(remaining, initial));
-                const used = initial - validRemaining;
-                const percentage = initial > 0 ? (used / initial) * 100 : 0;
-
-                return (
-                  <>
-                    <div style={{ marginTop: '16px', fontSize: '15px', color: '#86868B' }}>
-                      Использовано: {used} из {initial}
-                    </div>
-                    <div style={{ marginTop: '12px', width: '100%', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
-                      <div style={{ 
-                        width: `${progressWidth || percentage}%`, 
-                        height: '100%', 
-                        background: percentage > 80 ? '#FF3B30' : '#34C759', 
-                        borderRadius: '4px',
-                        transition: 'width 0.5s ease-out'
-                      }} />
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Progress bar */}
-            {(() => {
-              const initial = profile.analysesInitial || 0;
-              const remaining = profile.analysesRemaining || 0;
-              const validRemaining = Math.max(0, Math.min(remaining, initial));
-              const used = initial - validRemaining;
-              const percentage = initial > 0 ? (used / initial) * 100 : 0;
-
-              return (
-                <div style={{ marginBottom: 'var(--space-lg)' }}>
-                  <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    fontSize: '13px',
-                    color: 'var(--text-secondary)',
-                    marginBottom: '8px'
-                  }}>
-                    <span>Использовано: {used} из {initial}</span>
-                    <span>{percentage.toFixed(1)}%</span>
+            {!profile.planStartDate || profile.plan === 'trial' ? (
+              <>
+                <p style={{ fontSize: '17px', color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)' }}>
+                  Активная подписка отсутствует
+                </p>
+                <Link 
+                  href="/pricing" 
+                  className="button-primary"
+                  style={{ display: 'inline-block' }}
+                >
+                  Подключить
+                </Link>
+              </>
+            ) : (
+              <>
+                <div style={{ marginBottom: 'var(--space-md)' }}>
+                  <div style={{ display: 'flex', gap: 'var(--space-md)', marginBottom: 'var(--space-sm)' }}>
+                    <span style={{ fontSize: '15px', color: 'var(--text-secondary)', minWidth: '140px' }}>Дата начала:</span>
+                    <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
+                      {new Date(profile.planStartDate).toLocaleDateString('ru-RU')}
+                    </span>
                   </div>
-                  <div style={{ 
-                    height: '8px', 
-                    backgroundColor: 'var(--surface-secondary)',
-                    borderRadius: '4px',
-                    overflow: 'hidden'
-                  }}>
-                    <div style={{
-                      height: '100%',
-                      width: `${progressWidth || percentage}%`,
-                      backgroundColor: 'var(--brand-primary)',
-                      transition: 'width 0.5s ease-out'
-                    }} />
+                  <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
+                    <span style={{ fontSize: '15px', color: 'var(--text-secondary)', minWidth: '140px' }}>Действует до:</span>
+                    <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
+                      {new Date(new Date(profile.planStartDate).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
+                    </span>
                   </div>
                 </div>
-              );
-            })()}
-
-            {/* Button */}
-            <Link 
-              href="/pricing" 
-              className="button-primary"
-              style={{ 
-                display: 'block',
-                textAlign: 'center',
-                padding: '12px 24px',
-                marginTop: 'var(--space-lg)'
-              }}
-            >
-              Пополнить отчёты
-            </Link>
+                <Link 
+                  href="/pricing" 
+                  className="button-primary"
+                  style={{ display: 'inline-block', marginTop: 'var(--space-lg)' }}
+                >
+                  Продлить
+                </Link>
+              </>
+            )}
           </div>
         </div>
         

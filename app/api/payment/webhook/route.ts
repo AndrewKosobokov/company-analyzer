@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
-// import { verifyWebhookSignature } from '@/lib/yukassa';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
-    // const signature = req.headers.get('x-yookassa-signature');
-
-    // if (signature && !verifyWebhookSignature(body, signature)) {
-    //   return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    // }
-
     const event = JSON.parse(body);
     const payment = event.object;
 
@@ -30,21 +23,41 @@ export async function POST(req: NextRequest) {
 
       await prisma.payment.update({ where: { paymentId: payment.id }, data: { status: 'succeeded' } });
 
-      await prisma.user.update({
-        where: { id: dbPayment.userId },
-        data: {
-          analysesRemaining: {
-            increment: dbPayment.analysesCount,
-          },
-          plan: dbPayment.planName, // ← Добавить это!
-        },
-      });
+      const meta = (dbPayment.metadata ?? {}) as Record<string, unknown>;
+      const subscriptionDays = typeof meta.subscriptionDays === 'number' ? meta.subscriptionDays : 0;
+      const isUnlimited = subscriptionDays > 0;
 
-      console.log('✅ Payment processed:', { 
-        userId: dbPayment.userId, 
-        analyses: dbPayment.analysesCount,
-        newPlan: dbPayment.planName // ← Добавить в лог
-      });
+      if (isUnlimited) {
+        // Subscription plan: grant unlimited access for subscriptionDays
+        await prisma.user.update({
+          where: { id: dbPayment.userId },
+          data: {
+            plan: dbPayment.planName,
+            planStartDate: new Date(),
+            analysesRemaining: 99999,
+            analysesInitial: 99999,
+          },
+        });
+        console.log('✅ Subscription activated:', {
+          userId: dbPayment.userId,
+          plan: dbPayment.planName,
+          subscriptionDays,
+        });
+      } else {
+        // Legacy per-analysis plan
+        await prisma.user.update({
+          where: { id: dbPayment.userId },
+          data: {
+            analysesRemaining: { increment: dbPayment.analysesCount },
+            plan: dbPayment.planName,
+          },
+        });
+        console.log('✅ Analyses credited:', {
+          userId: dbPayment.userId,
+          analyses: dbPayment.analysesCount,
+          plan: dbPayment.planName,
+        });
+      }
     }
 
     return NextResponse.json({ success: true });
@@ -53,5 +66,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }
-
-

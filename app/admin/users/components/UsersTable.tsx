@@ -122,8 +122,6 @@ export default function UsersTable() {
             <tr style={{ borderBottom: '2px solid #D2D2D7' }}>
               <th style={headerStyle}>Email</th>
               <th style={headerStyle}>Имя</th>
-              <th style={headerStyle}>Тариф</th>
-              <th style={headerStyle}>Анализов</th>
               <th style={headerStyle}>Статус</th>
               <th style={headerStyle}>Активность</th>
               <th style={headerStyle}>Действия</th>
@@ -132,7 +130,7 @@ export default function UsersTable() {
           <tbody>
             {paginatedUsers.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#86868B', fontSize: '15px' }}>
+                <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: '#86868B', fontSize: '15px' }}>
                   Пользователи не найдены
                 </td>
               </tr>

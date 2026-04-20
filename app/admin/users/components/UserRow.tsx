@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
 interface User {
@@ -21,45 +21,9 @@ interface UserRowProps {
 }
 
 export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
-  const [analysesCount, setAnalysesCount] = useState(0);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const fetchCount = async () => {
-      try {
-        const res = await fetch(`/api/admin/users/analyses-count?userId=${user.id}`, {
-          credentials: 'include'
-        });
-        const data = await res.json();
-        setAnalysesCount(data.count || 0);
-      } catch (error) {
-        console.error('Error fetching count:', error);
-      }
-    };
-    fetchCount();
-  }, [user.id]);
-
-  // ПРАВИЛЬНЫЙ РАСЧЕТ ИСПОЛЬЗОВАННЫХ АНАЛИЗОВ И ПРОГРЕССА
-  
-  // 1. Получаем initial из пользователя
-  const initial = user.analysesInitial || 0;
-  const remaining = user.analysesRemaining || 0;
-
-  // 2. Защита от "испорченных" данных (если remaining > initial)
-  const validRemaining = Math.max(0, Math.min(remaining, initial));
-
-  // 3. Правильный расчет использованных
-  const used = initial - validRemaining;
-
-  // 4. Правильный процент использования
-  const percentage = initial > 0 ? (used / initial) * 100 : 0;
-  
-  const progressColor = 
-    percentage > 50 ? '#34C759' : 
-    percentage > 20 ? '#FF9500' : 
-    '#FF3B30';
 
   // Статус активности
   const lastActivityDate = new Date(user.updatedAt);
@@ -227,34 +191,6 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
       <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">{user.name || '—'}</td>
       <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
         <span style={{
-          padding: '4px 12px',
-          borderRadius: '6px',
-          fontSize: '13px',
-          fontWeight: 500,
-          backgroundColor: getPlanColor(user.plan)
-        }} className="text-[#1D1D1F] dark:text-[#111111]">
-          {getPlanLabel(user.plan)}
-        </span>
-      </td>
-      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
-        <div style={{ minWidth: '150px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
-            <div style={{ fontSize: '13px', fontWeight: 500 }}>{user.analysesRemaining}</div>
-            <div style={{ width: '100px', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
-              <div style={{ 
-                width: `${percentage}%`, 
-                height: '100%', 
-                background: '#34C759', 
-                borderRadius: '4px',
-                transition: 'width 0.3s ease'
-              }} />
-            </div>
-            <span className="text-[#86868B] dark:text-[#f5f5f7] text-[13px]">{Math.round(percentage)}%</span>
-          </div>
-        </div>
-      </td>
-      <td className="px-4 py-4 text-[#1D1D1F] dark:text-[#f5f5f7] text-[15px]">
-        <span style={{
           padding: '4px 8px',
           borderRadius: '4px',
           fontSize: '12px',
@@ -316,25 +252,5 @@ export default function UserRow({ user, onEdit, onRefresh }: UserRowProps) {
     {deleteModal}
     </>
   );
-}
-
-function getPlanColor(plan: string): string {
-  const colors: Record<string, string> = {
-    'trial': '#E3F2FD',
-    'start': '#F3E5F5',
-    'optimal': '#E8F5E9',
-    'profi': '#FFF3E0'
-  };
-  return colors[plan] || '#F5F5F7';
-}
-
-function getPlanLabel(plan: string): string {
-  const labels: Record<string, string> = {
-    'trial': 'Trial',
-    'start': 'Start',
-    'optimal': 'Optimal',
-    'profi': 'Profi'
-  };
-  return labels[plan] || plan;
 }
 

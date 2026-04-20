@@ -5,9 +5,11 @@ import { getAccessToken } from '@/app/lib/cookies';
 import { createPayment } from '@/lib/yukassa';
 
 const PLANS = {
-  start: { price: 4500, analyses: 40, name: 'Start' },
-  optimal: { price: 8500, analyses: 80, name: 'Optimal' },
-  profi: { price: 12000, analyses: 200, name: 'Profi' },
+  unlimited: { price: 3500, name: 'Безлимит', subscriptionDays: 30 },
+  // Legacy plans kept for backward compatibility with existing payments
+  start: { price: 4500, name: 'Start', subscriptionDays: 0 },
+  optimal: { price: 8500, name: 'Optimal', subscriptionDays: 0 },
+  profi: { price: 12000, name: 'Profi', subscriptionDays: 0 },
 } as const;
 
 export async function POST(req: NextRequest) {
@@ -30,15 +32,14 @@ export async function POST(req: NextRequest) {
 
     const { planId } = await req.json();
     const plan = PLANS[planId as keyof typeof PLANS];
-    
+
     if (!plan) {
       return NextResponse.json({ error: 'Invalid plan' }, { status: 400 });
     }
 
-    // Получаем email пользователя
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { email: true }
+      select: { email: true },
     });
 
     if (!user) {
@@ -47,12 +48,14 @@ export async function POST(req: NextRequest) {
 
     const payment = await createPayment({
       amount: plan.price,
-      description: `MetalVector - Тариф ${plan.name}`,
+      description: planId === 'unlimited'
+        ? 'MetalVector — Безлимитный доступ на 1 месяц'
+        : `MetalVector - Тариф ${plan.name}`,
       metadata: {
         userId: decoded.userId,
         planName: plan.name,
-        analysesCount: plan.analyses,
-        userEmail: user.email
+        subscriptionDays: 30,
+        userEmail: user.email,
       },
       returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?paymentId={paymentId}`,
     });
@@ -64,7 +67,7 @@ export async function POST(req: NextRequest) {
         status: payment.status,
         paymentId: payment.id,
         planName: plan.name,
-        analysesCount: plan.analyses,
+        analysesCount: 0,
         metadata: payment.metadata as any,
       },
     });
@@ -81,5 +84,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
-
