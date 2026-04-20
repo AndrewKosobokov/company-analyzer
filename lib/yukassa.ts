@@ -10,7 +10,7 @@ export interface CreatePaymentParams {
   metadata: {
     userId: string;
     planName: string;
-    analysesCount: number;
+    subscriptionDays?: number;
     userEmail?: string;
   };
   returnUrl: string;
