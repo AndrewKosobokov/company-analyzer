@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/app/context/AuthContext';
 import { DollarSign, CreditCard, TrendingUp, RefreshCw, Users, AlertCircle } from 'lucide-react';
 import { MetricCard } from './components/MetricCard';
-import { UserDistributionChart } from './components/UserDistributionChart';
 import { AIHealthStatus } from './components/AIHealthStatus';
 
 interface MetricsData {
@@ -38,16 +37,6 @@ interface MetricsData {
   };
 }
 
-interface UsersData {
-  distribution: {
-    trial: number;
-    start: number;
-    optimal: number;
-    profi: number;
-  };
-  totalUsers: number;
-}
-
 interface AIHealthData {
   errors24h: number;
   averageGenerationTime: number;
@@ -56,7 +45,6 @@ interface AIHealthData {
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<MetricsData | null>(null);
-  const [users, setUsers] = useState<UsersData | null>(null);
   const [aiHealth, setAIHealth] = useState<AIHealthData | null>(null);
   const [period, setPeriod] = useState(30);
   const [loading, setLoading] = useState(true);
@@ -83,11 +71,8 @@ export default function DashboardPage() {
       setError(null);
       
       try {
-        const [metricsRes, usersRes, aiHealthRes] = await Promise.all([
+        const [metricsRes, aiHealthRes] = await Promise.all([
           fetch(`/api/admin/dashboard/metrics?period=${period}`, {
-            credentials: 'include'
-          }),
-          fetch('/api/admin/dashboard/users', {
             credentials: 'include'
           }),
           fetch('/api/admin/dashboard/ai-health', {
@@ -95,26 +80,24 @@ export default function DashboardPage() {
           })
         ]);
         
-        if (metricsRes.status === 401 || usersRes.status === 401 || aiHealthRes.status === 401) {
+        if (metricsRes.status === 401 || aiHealthRes.status === 401) {
           router.push('/login');
           return;
         }
 
-        if (metricsRes.status === 403 || usersRes.status === 403 || aiHealthRes.status === 403) {
+        if (metricsRes.status === 403 || aiHealthRes.status === 403) {
           setError('Доступ запрещён. Требуется роль администратора.');
           return;
         }
         
-        if (!metricsRes.ok || !usersRes.ok || !aiHealthRes.ok) {
+        if (!metricsRes.ok || !aiHealthRes.ok) {
           throw new Error('Ошибка загрузки данных');
         }
         
         const metricsData = await metricsRes.json();
-        const usersData = await usersRes.json();
         const aiHealthData = await aiHealthRes.json();
         
         setMetrics(metricsData);
-        setUsers(usersData);
         setAIHealth(aiHealthData);
       } catch (err) {
         console.error('Ошибка загрузки данных дашборда:', err);
@@ -203,7 +186,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!metrics || !users || !aiHealth) {
+  if (!metrics || !aiHealth) {
     return null;
   }
 
@@ -334,26 +317,12 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* Нижний блок: график + AI здоровье */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '24px'
-          }}>
-            {/* Круговая диаграмма */}
-            <div style={{ minWidth: '300px' }}>
-              <UserDistributionChart data={users.distribution} />
-            </div>
-            
-            {/* AI здоровье */}
-            <div style={{ minWidth: '300px' }}>
-              <AIHealthStatus
-                errors24h={aiHealth.errors24h}
-                averageGenerationTime={aiHealth.averageGenerationTime}
-                successRate={aiHealth.successRate}
-              />
-            </div>
-          </div>
+          {/* AI здоровье */}
+          <AIHealthStatus
+            errors24h={aiHealth.errors24h}
+            averageGenerationTime={aiHealth.averageGenerationTime}
+            successRate={aiHealth.successRate}
+          />
         </div>
       </div>
     </>

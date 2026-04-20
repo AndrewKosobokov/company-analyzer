@@ -18,7 +18,6 @@ interface Company {
   companyInn: string;
   reportText?: string;
   createdAt: string;
-  analysisType?: string;
 }
 
 // Функция сокращения организационно-правовой формы ТОЛЬКО для списка отчётов
@@ -107,7 +106,6 @@ export default function CompaniesPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<'company' | 'product'>('company');
   const router = useRouter();
   const { logout } = useAuth();
   
@@ -167,42 +165,25 @@ export default function CompaniesPage() {
     fetchCompanies();
   }, []);
 
-  // Filter companies based on search query and filter type
+  // Filter companies based on search query
   const filteredCompanies = useMemo(() => {
-    let filtered = companies;
+    if (!searchQuery.trim()) return companies;
 
-    // Filter by analysis type
-    filtered = filtered.filter(company => {
-      if (filterType === 'company') {
-        // Компании: есть ИНН
-        return company.companyInn !== null && company.companyInn !== '';
-      } else {
-        // Продукция: нет ИНН
-        return company.companyInn === null || company.companyInn === '';
-      }
-    });
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
+    const query = searchQuery.toLowerCase().trim();
+    return companies.filter(company => {
+      const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
+      const innMatch = company.reportText?.match(/\*\*ИНН:\*\*\s*(\d+)/);
+      const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
+      const displayInn = innMatch ? innMatch[1] : company.companyInn;
       
-      filtered = filtered.filter(company => {
-        const companyMatch = company.reportText?.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
-        const innMatch = company.reportText?.match(/\*\*ИНН:\*\*\s*(\d+)/);
-        const displayName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : company.companyName;
-        const displayInn = innMatch ? innMatch[1] : company.companyInn;
-        
-        return (
-          (displayName?.toLowerCase().includes(query) || false) ||
-          (displayInn?.includes(query) || false) ||
-          (company.companyName?.toLowerCase().includes(query) || false) ||
-          (company.companyInn?.includes(query) || false)
-        );
-      });
-    }
-
-    return filtered;
-  }, [companies, searchQuery, filterType]);
+      return (
+        (displayName?.toLowerCase().includes(query) || false) ||
+        (displayInn?.includes(query) || false) ||
+        (company.companyName?.toLowerCase().includes(query) || false) ||
+        (company.companyInn?.includes(query) || false)
+      );
+    });
+  }, [companies, searchQuery]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -326,86 +307,6 @@ export default function CompaniesPage() {
           paddingBottom: '64px'
         }}
       >
-        {/* Apple-style segmented control toggle for filter */}
-        {companies.length > 0 && !error && (
-          <div
-            className="analysis-tabs-container"
-            style={{
-            display: 'flex',
-            backgroundColor: '#F5F5F7',
-            borderRadius: '8px',
-            padding: '4px',
-            marginBottom: 'var(--space-lg)',
-            maxWidth: '500px',
-            margin: '0 auto var(--space-lg) auto',
-            position: 'relative',
-            transition: 'all 0.3s ease'
-          }}>
-            <button
-              type="button"
-              className={filterType === 'company' ? 'active' : ''}
-              onClick={() => setFilterType('company')}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                fontSize: '15px',
-                fontWeight: 500,
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                backgroundColor: filterType === 'company' ? '#1D1D1F' : 'transparent',
-                color: filterType === 'company' ? '#FFFFFF' : '#1D1D1F',
-                transition: 'all 0.3s ease',
-                outline: 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (filterType !== 'company') {
-                  e.currentTarget.style.background = '#E5E5E7';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (filterType !== 'company') {
-                  e.currentTarget.style.background = 'transparent';
-                }
-              }}
-            >
-              Отчёты по компаниям
-            </button>
-            <button
-              type="button"
-              className={filterType === 'product' ? 'active' : ''}
-              onClick={() => setFilterType('product')}
-              style={{
-                flex: 1,
-                padding: '10px 16px',
-                fontSize: '15px',
-                fontWeight: 500,
-                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                backgroundColor: filterType === 'product' ? '#1D1D1F' : 'transparent',
-                color: filterType === 'product' ? '#FFFFFF' : '#1D1D1F',
-                transition: 'all 0.3s ease',
-                outline: 'none'
-              }}
-              onMouseEnter={(e) => {
-                if (filterType !== 'product') {
-                  e.currentTarget.style.background = '#E5E5E7';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (filterType !== 'product') {
-                  e.currentTarget.style.background = 'transparent';
-                }
-              }}
-            >
-              Отчёты по продукции
-            </button>
-          </div>
-        )}
-        
         {/* Search Bar - Show if there are companies or if searching */}
         {(companies.length > 0 || searchQuery) && !error && (
           <SearchBar

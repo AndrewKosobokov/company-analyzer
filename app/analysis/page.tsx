@@ -8,9 +8,7 @@ import { useNotification } from '@/components/NotificationProvider';
 import { useAuth } from '@/app/context/AuthContext';
 
 export default function AnalysisPage() {
-  const [analysisMode, setAnalysisMode] = useState<'company' | 'product'>('company');
   const [companyIdentifier, setCompanyIdentifier] = useState('');
-  const [productName, setProductName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [stage, setStage] = useState<'fetching' | 'analyzing' | 'generating'>('fetching');
@@ -28,63 +26,53 @@ export default function AnalysisPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    const currentMode = analysisMode;
+
     let finalUrl = '';
     let finalInn = '';
     const trimmedIdentifier = companyIdentifier.trim();
-    const trimmedProductName = productName.trim();
 
-    if (currentMode === 'company') {
-      if (!trimmedIdentifier) {
-        setError('Пожалуйста, введите данные');
-        return;
+    if (!trimmedIdentifier) {
+      setError('Пожалуйста, введите данные');
+      return;
+    }
+
+    const looksLikeUrl =
+      /^https?:\/\//i.test(trimmedIdentifier) ||
+      trimmedIdentifier.toLowerCase().includes('www.') ||
+      trimmedIdentifier.includes('.');
+
+    if (looksLikeUrl) {
+      let normalizedUrl = trimmedIdentifier;
+      if (!/^https?:\/\//i.test(normalizedUrl)) {
+        normalizedUrl = `https://${normalizedUrl}`;
       }
-
-      const trimmedInput = trimmedIdentifier.trim();
-      const looksLikeUrl =
-        /^https?:\/\//i.test(trimmedInput) ||
-        trimmedInput.toLowerCase().includes('www.') ||
-        trimmedInput.includes('.');
-
-      if (looksLikeUrl) {
-        let normalizedUrl = trimmedInput;
-        if (!/^https?:\/\//i.test(normalizedUrl)) {
-          normalizedUrl = `https://${normalizedUrl}`;
+      try {
+        const parsedUrl = new URL(normalizedUrl);
+        if (!parsedUrl.hostname.includes('.')) {
+          throw new Error('invalid host');
         }
-        try {
-          const parsedUrl = new URL(normalizedUrl);
-          if (!parsedUrl.hostname.includes('.')) {
-            throw new Error('invalid host');
-          }
-          finalUrl = normalizedUrl;
-        } catch {
-          setError('Введите корректный URL компании');
-          return;
-        }
-      } else {
-        const numericCandidate = trimmedInput.replace(/\D/g, '');
-        if (
-          numericCandidate &&
-          (numericCandidate.length === 10 || numericCandidate.length === 12) &&
-          /^\d+$/.test(numericCandidate)
-        ) {
-          finalInn = numericCandidate;
-        } else {
-          setError('ИНН должен содержать 10 или 12 цифр');
-          return;
-        }
-      }
-
-      if (typeof analysesRemaining === 'number' && analysesRemaining <= 0) {
-        setShowLimitModal(true);
+        finalUrl = normalizedUrl;
+      } catch {
+        setError('Введите корректный URL компании');
         return;
       }
     } else {
-      if (!trimmedProductName) {
-        setError('Введите название продукции');
+      const numericCandidate = trimmedIdentifier.replace(/\D/g, '');
+      if (
+        numericCandidate &&
+        (numericCandidate.length === 10 || numericCandidate.length === 12) &&
+        /^\d+$/.test(numericCandidate)
+      ) {
+        finalInn = numericCandidate;
+      } else {
+        setError('ИНН должен содержать 10 или 12 цифр');
         return;
       }
+    }
+
+    if (typeof analysesRemaining === 'number' && analysesRemaining <= 0) {
+      setShowLimitModal(true);
+      return;
     }
     
     setLoading(true);
@@ -104,20 +92,12 @@ export default function AnalysisPage() {
     }, 1400);
 
     const stageTimeouts: ReturnType<typeof setTimeout>[] = [];
-    const progressMessages =
-      currentMode === 'company'
-        ? [
-            'Сбор данных о компании...',
-            'Анализ информации...',
-            'Генерация отчёта...',
-            'Финализация...'
-          ]
-        : [
-            'Сбор данных о рынке...',
-            'Стратификация сегментов...',
-            'Формирование списка предприятий...',
-            'Финализация...'
-          ];
+    const progressMessages = [
+      'Сбор данных о компании...',
+      'Анализ информации...',
+      'Генерация отчёта...',
+      'Финализация...'
+    ];
 
     stageTimeouts.push(setTimeout(() => setProgressMessage(progressMessages[0]), 5000));
     stageTimeouts.push(setTimeout(() => setProgressMessage(progressMessages[1]), 20000));
@@ -130,11 +110,8 @@ export default function AnalysisPage() {
     };
     
     try {
-      const endpoint = currentMode === 'company' ? '/api/analyze' : '/api/product-analyze';
-      const payload =
-        currentMode === 'company'
-          ? { url: finalUrl || undefined, inn: finalInn || undefined }
-          : { productName: trimmedProductName };
+      const endpoint = '/api/analyze';
+      const payload = { url: finalUrl || undefined, inn: finalInn || undefined };
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -152,7 +129,6 @@ export default function AnalysisPage() {
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         if (
-          currentMode === 'company' &&
           response.status === 403 &&
           (data?.analysesRemaining === 0 || (data?.error || '').includes('Лимит анализов'))
         ) {
@@ -165,12 +141,7 @@ export default function AnalysisPage() {
       const data = await response.json();
       
       setTimeout(() => {
-        showNotification(
-          currentMode === 'company'
-            ? 'Анализ компании готов! Открываем отчет...'
-            : 'Анализ продукции готов! Открываем отчет...'
-          , 'success'
-        );
+        showNotification('Анализ компании готов! Открываем отчет...', 'success');
 
         if (data.id) {
           router.push(`/report/${data.id}`);
@@ -182,10 +153,7 @@ export default function AnalysisPage() {
       
     } catch (err) {
       cleanupProgress();
-      const isCompany = currentMode === 'company';
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : isCompany ? 'Ошибка при анализе компании' : 'Ошибка при анализе продукции';
+      const errorMessage = err instanceof Error ? err.message : 'Ошибка при анализе компании';
       setError(errorMessage);
       showNotification(errorMessage, 'error');
       setLoading(false);
@@ -269,82 +237,6 @@ export default function AnalysisPage() {
           }}
         >
           <form onSubmit={handleSubmit} className="analysis-form">
-            {/* Apple-style segmented control toggle */}
-            <div
-              className="analysis-tabs-container"
-              style={{
-              display: 'flex',
-              backgroundColor: '#F5F5F7',
-              borderRadius: '8px',
-              padding: '4px',
-              marginBottom: 'var(--space-xl)',
-              position: 'relative',
-              transition: 'all 0.3s ease'
-            }}>
-              <button
-                type="button"
-                className={analysisMode === 'company' ? 'active' : ''}
-                onClick={() => setAnalysisMode('company')}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  fontSize: '15px',
-                  fontWeight: 500,
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  backgroundColor: analysisMode === 'company' ? '#1D1D1F' : 'transparent',
-                  color: analysisMode === 'company' ? '#FFFFFF' : '#1D1D1F',
-                  transition: 'all 0.3s ease',
-                  outline: 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (analysisMode !== 'company') {
-                    e.currentTarget.style.background = '#E5E5E7';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (analysisMode !== 'company') {
-                    e.currentTarget.style.background = 'transparent';
-                  }
-                }}
-              >
-                Анализ компании
-              </button>
-              <button
-                type="button"
-                className={analysisMode === 'product' ? 'active' : ''}
-                onClick={() => setAnalysisMode('product')}
-                style={{
-                  flex: 1,
-                  padding: '10px 16px',
-                  fontSize: '15px',
-                  fontWeight: 500,
-                  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  backgroundColor: analysisMode === 'product' ? '#1D1D1F' : 'transparent',
-                  color: analysisMode === 'product' ? '#FFFFFF' : '#1D1D1F',
-                  transition: 'all 0.3s ease',
-                  outline: 'none'
-                }}
-                onMouseEnter={(e) => {
-                  if (analysisMode !== 'product') {
-                    e.currentTarget.style.background = '#E5E5E7';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (analysisMode !== 'product') {
-                    e.currentTarget.style.background = 'transparent';
-                  }
-                }}
-              >
-                Анализ продукции
-              </button>
-            </div>
-
             {/* Error Message */}
             {error && (
               <div style={{
@@ -363,41 +255,19 @@ export default function AnalysisPage() {
             )}
             
             {/* Company Analysis Form */}
-            {analysisMode === 'company' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">
-                    Вставьте ссылку на сайт, либо ИНН компании
-                  </label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder=""
-                    value={companyIdentifier}
-                    onChange={(e) => setCompanyIdentifier(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-                
-              </>
-            )}
-
-            {/* Product Analysis Form */}
-            {analysisMode === 'product' && (
-              <>
-                <div className="form-group">
-                  <label className="form-label">Введите название продукции</label>
-                  <input
-                    type="text"
-                    className="form-input"
-                    placeholder=""
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-              </>
-            )}
+            <div className="form-group">
+              <label className="form-label">
+                Вставьте ссылку на сайт, либо ИНН компании
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder=""
+                value={companyIdentifier}
+                onChange={(e) => setCompanyIdentifier(e.target.value)}
+                disabled={loading}
+              />
+            </div>
             
             <button 
               type="submit" 
@@ -428,12 +298,7 @@ export default function AnalysisPage() {
                 }
               }}
             >
-              {loading 
-                ? 'Анализ...' 
-                : analysisMode === 'company' 
-                  ? 'Анализировать компанию' 
-                  : 'Анализировать продукцию'
-              }
+              {loading ? 'Анализ...' : 'Анализировать компанию'}
             </button>
             
             {loading && (
@@ -450,7 +315,7 @@ export default function AnalysisPage() {
                 }}
               >
                 <AnalysisProgressBar 
-                  estimatedTimeSeconds={analysisMode === 'company' ? 67 : 45}
+                  estimatedTimeSeconds={67}
                 />
               </div>
             )}
