@@ -62,6 +62,15 @@ export default function ReportPage() {
   const [report, setReport] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [rusprofileData, setRusprofileData] = useState<{
+    ogrn: string | null;
+    inn: string | null;
+    kpp: string | null;
+    capital: string | null;
+    activity: string | null;
+    address: string | null;
+    director: string | null;
+  } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -128,6 +137,22 @@ export default function ReportPage() {
     fetchReport();
   }, [params.id]);
 
+
+  // Fetch rusprofile data after report loads
+  useEffect(() => {
+    if (!report) return;
+    const { inn } = extractCompanyInfo(report.reportText);
+    const displayInn = inn || report.companyInn;
+    if (!displayInn) return;
+
+    fetch(`/api/company/rusprofile?inn=${displayInn}`)
+      .then(res => res.json())
+      .then(data => {
+        const hasAnyValue = Object.values(data).some(v => v !== null);
+        if (hasAnyValue) setRusprofileData(data);
+      })
+      .catch(() => {});
+  }, [report]);
 
   // STEP 1: Debug - Show actual h2 headers from report
   useEffect(() => {
@@ -284,6 +309,32 @@ export default function ReportPage() {
                   <p style={{ fontSize: '17px', color: 'var(--text-secondary)' }}>
                     ИНН: {displayInn} • {new Date(report.createdAt).toLocaleDateString('ru-RU')}
                   </p>
+                  {rusprofileData && (
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '12px',
+                      margin: '20px 0',
+                      padding: '20px',
+                      background: 'var(--background-secondary)',
+                      borderRadius: '12px',
+                      border: '1px solid var(--border-color)'
+                    }}>
+                      {[
+                        { label: 'ОГРН', value: rusprofileData.ogrn },
+                        { label: 'ИНН/КПП', value: rusprofileData.inn && rusprofileData.kpp ? `${rusprofileData.inn} / ${rusprofileData.kpp}` : rusprofileData.inn },
+                        { label: 'Уставный капитал', value: rusprofileData.capital },
+                        { label: 'Основной вид деятельности', value: rusprofileData.activity },
+                        { label: 'Юридический адрес', value: rusprofileData.address },
+                        { label: 'Руководитель', value: rusprofileData.director },
+                      ].filter(item => item.value).map(item => (
+                        <div key={item.label}>
+                          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px' }}>{item.label}</div>
+                          <div style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 500 }}>{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </>
               );
             })()}
