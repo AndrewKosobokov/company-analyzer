@@ -15,8 +15,14 @@ interface ReportData {
   analysisType?: string | null;
 }
 
+function sanitizeReportText(reportText: string): string {
+  return reportText.replace(/^["']?\s*Анализирую компанию с ИНН[^\n]*["']?\s*\n+/i, '');
+}
+
 // Extract company info from report text
 function extractCompanyInfo(reportText: string): { companyName: string | null; inn: string | null } {
+  reportText = sanitizeReportText(reportText);
+
   // Extract company name from "**Компания:** Full Name"
   const companyMatch = reportText.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
   let companyName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : null;
@@ -38,6 +44,7 @@ export default function PublicReportPage() {
   const [report, setReport] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const reportText = sanitizeReportText(report?.reportText || '');
   
   useEffect(() => {
     const fetchReport = async () => {
@@ -132,7 +139,7 @@ export default function PublicReportPage() {
         {/* Header Section */}
         <div style={{ marginBottom: '32px' }}>
           {(() => {
-            const { companyName, inn } = extractCompanyInfo(report.reportText);
+            const { companyName, inn } = extractCompanyInfo(reportText);
             const displayName = companyName || report.companyName;
             const displayInn = inn || report.companyInn;
             
@@ -285,7 +292,7 @@ export default function PublicReportPage() {
               ),
             }}
           >
-            {report.reportText}
+            {reportText}
           </ReactMarkdown>
         </div>
 

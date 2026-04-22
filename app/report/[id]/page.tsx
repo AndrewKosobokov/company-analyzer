@@ -32,8 +32,14 @@ type CompanyDetails = {
   director: string | null;
 };
 
+function sanitizeReportText(reportText: string): string {
+  return reportText.replace(/^["']?\s*Анализирую компанию с ИНН[^\n]*["']?\s*\n+/i, '');
+}
+
 // Extract company info from report text
 function extractCompanyInfo(reportText: string): { companyName: string | null; inn: string | null } {
+  reportText = sanitizeReportText(reportText);
+
   // Extract company name from "**Компания:** Full Name"
   const companyMatch = reportText.match(/\*\*Компания:\*\*\s*(.+?)(?=\n|\*\*|$)/);
   let companyName = companyMatch ? companyMatch[1].replace(/\*\*/g, '').trim() : null;
@@ -80,7 +86,7 @@ export default function ReportPage() {
   const { logout } = useAuth();
   const isProductAnalysis = !report?.companyInn || report?.companyInn === '';
   const navigationItems = isProductAnalysis ? productNavigationItems : companyNavigationItems;
-  const reportText = report?.reportText || '';
+  const reportText = sanitizeReportText(report?.reportText || '');
   
   // Оборачиваем раздел "ИНФОРМАЦИЯ ДЛЯ ЗВОНКА" в HTML-блок для стилизации
   const processedMarkdown = wrapCallInfoSection(reportText);
@@ -177,11 +183,11 @@ export default function ReportPage() {
   useEffect(() => {
     if (report?.reportText) {
       console.log('\n=== FULL REPORT TEXT ===');
-      console.log(report.reportText);
+      console.log(reportText);
       console.log('=== END REPORT ===\n');
       
       // Extract all h2 headers from markdown
-      const h2Matches = report.reportText.match(/^##\s+.+$/gm);
+      const h2Matches = reportText.match(/^##\s+.+$/gm);
       console.log('=== FOUND H2 HEADERS ===');
       if (h2Matches) {
         h2Matches.forEach((header, index) => {
@@ -192,7 +198,7 @@ export default function ReportPage() {
       }
       console.log('=== END H2 HEADERS ===\n');
     }
-  }, [report]);
+  }, [report, reportText]);
 
   const handleDelete = async () => {
     try {
@@ -405,7 +411,7 @@ export default function ReportPage() {
                 const displayName = companyName || report.companyName;
                 const displayInn = inn || report.companyInn;
                 const { exportToWord } = await import('@/utils/exportReport');
-                await exportToWord(displayName, displayInn, report.reportText);
+                await exportToWord(displayName, displayInn, reportText);
               }}
               className="button-secondary"
               style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
@@ -423,7 +429,7 @@ export default function ReportPage() {
             <button 
               onClick={async () => {
                 const { copyToClipboard } = await import('@/utils/exportReport');
-                const success = await copyToClipboard(report.reportText);
+                const success = await copyToClipboard(reportText);
                 if (success) {
                   setCopySuccess(true);
                   setTimeout(() => setCopySuccess(false), 2000);

@@ -21,8 +21,9 @@ const API_PUBLIC_PATHS = [
   '/api/auth/reset-password',
   '/api/auth/verify-email',
   '/api/auth/refresh',
-'/api/payment/webhook',
-  '/api/public/report'  // ← ДОБАВЬ ЭТУ СТРОКУ
+  '/api/payment/webhook',
+  '/api/public/report',
+  '/api/company/dadata'
 ];
 
 export async function middleware(request: NextRequest) {
