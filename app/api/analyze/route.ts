@@ -184,12 +184,21 @@ export async function POST(request: NextRequest) {
     if (finalInn) {
       try {
         const dadataResponse = await fetch(
-          `${request.nextUrl.origin}/api/company/dadata?inn=${encodeURIComponent(finalInn)}`,
-          { cache: 'no-store' }
+          'https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/party',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Accept: 'application/json',
+              Authorization: `Token ${process.env.DADATA_API_KEY || ''}`
+            },
+            body: JSON.stringify({ query: finalInn })
+          }
         );
         if (dadataResponse.ok) {
           const dadataResult = await dadataResponse.json();
-          companyNameFromDadata = dadataResult?.name ?? null;
+          const dadataData = dadataResult?.suggestions?.[0]?.data;
+          companyNameFromDadata = dadataData?.name?.short_with_opf ?? dadataData?.name?.full_with_opf ?? null;
         }
       } catch (error) {
         console.warn('⚠️ [DaData] Failed to fetch company name:', error);
