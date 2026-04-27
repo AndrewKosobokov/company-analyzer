@@ -1,8 +1,9 @@
-export function generatePrompt(siteText: string, url: string, inn?: string): string {
+export function generatePrompt(siteText: string, url: string, inn?: string, companyName?: string): string {
   const innOrUrlBlock = inn
     ? `ПЕРВЫЙ ШАГ — найди компанию через Google Search по запросу "ИНН ${inn}" или "компания ИНН ${inn}". Используй ТОЛЬКО результаты где ИНН точно совпадает с ${inn}.
 
 Ты работаешь ИСКЛЮЧИТЕЛЬНО с компанией, у которой ИНН: **${inn}**
+${companyName ? `Точное название компании: **${companyName}**` : ''}
 
 - Запрещено анализировать любую другую компанию
 - Если Google Search подтягивает данные по другому ИНН — игнорируй их полностью

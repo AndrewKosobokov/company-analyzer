@@ -180,8 +180,24 @@ export async function POST(request: NextRequest) {
       console.log('[Website] No URL provided, INN-only analysis');
     }
 
+    let companyNameFromDadata: string | null = null;
+    if (finalInn) {
+      try {
+        const dadataResponse = await fetch(
+          `${request.nextUrl.origin}/api/company/dadata?inn=${encodeURIComponent(finalInn)}`,
+          { cache: 'no-store' }
+        );
+        if (dadataResponse.ok) {
+          const dadataResult = await dadataResponse.json();
+          companyNameFromDadata = dadataResult?.name ?? null;
+        }
+      } catch (error) {
+        console.warn('⚠️ [DaData] Failed to fetch company name:', error);
+      }
+    }
+
     // 5. GENERATE PROMPT
-    const prompt = generatePrompt(siteText, finalUrl, finalInn);
+    const prompt = generatePrompt(siteText, finalUrl, finalInn, companyNameFromDadata);
     console.log(`📝 Generated prompt (${prompt.length} chars, site: ${siteText.length} chars)`);
 
     // 6. CALL VERTEX AI (MAIN ANALYSIS + MIND MAP)

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 type CompanyDetailsResponse = {
+  name: string | null;
   ogrn: string | null;
   inn: string | null;
   kpp: string | null;
@@ -11,6 +12,7 @@ type CompanyDetailsResponse = {
 };
 
 const emptyResponse: CompanyDetailsResponse = {
+  name: null,
   ogrn: null,
   inn: null,
   kpp: null,
@@ -50,6 +52,7 @@ export async function GET(req: NextRequest) {
     }
 
     const payload: CompanyDetailsResponse = {
+      name: data.name?.short_with_opf ?? data.name?.full_with_opf ?? null,
       ogrn: data.ogrn ?? null,
       inn: data.inn ?? null,
       kpp: data.kpp ?? null,
