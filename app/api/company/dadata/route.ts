@@ -49,12 +49,32 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(emptyResponse, { status: 200 });
     }
 
+    // Получаем название ОКВЭД через suggest
+    let okvedName: string | null = null;
+    if (data.okved) {
+      try {
+        const okvedRes = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/okved', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Token ${process.env.DADATA_API_KEY || ''}`
+          },
+          body: JSON.stringify({ query: data.okved, count: 1 })
+        });
+        if (okvedRes.ok) {
+          const okvedData = await okvedRes.json();
+          okvedName = okvedData?.suggestions?.[0]?.value ?? null;
+        }
+      } catch {}
+    }
+
     const payload: CompanyDetailsResponse = {
       ogrn: data.ogrn ?? null,
       inn: data.inn ?? null,
       kpp: data.kpp ?? null,
       capital: data.finance?.ustavcap ? `${data.finance.ustavcap.toLocaleString('ru-RU')} ₽` : null,
-      activity: data.okved ? `${data.okved} — ${data.okveds?.[0]?.name ?? data.okved_type ?? ''}`.replace(/ — $/, '') : null,
+      activity: data.okved ? `${data.okved} — ${okvedName ?? ''}`.replace(/ — $/, '') : null,
       address: data.address?.value ?? null,
       director: data.management?.name ? `${data.management.name} (${data.management.post})` : null
     };
