@@ -78,7 +78,9 @@ export async function GET(req: NextRequest) {
       capital: data.finance?.ustavcap ? `${data.finance.ustavcap.toLocaleString('ru-RU')} ₽` : null,
       activity: data.okved ? `${data.okved} — ${okvedName ?? ''}`.replace(/ — $/, '') : null,
       address: data.address?.value ?? null,
-      director: data.management?.name ? `${data.management.name} (${data.management.post})` : null
+      director: data.management?.name
+        ? `${data.management.name}${data.management.post ? ` (${data.management.post})` : ''}`
+        : null
     };
 
     return NextResponse.json(payload, { status: 200 });
