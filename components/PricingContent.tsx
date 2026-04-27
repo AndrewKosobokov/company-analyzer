@@ -90,7 +90,7 @@ export default function PricingContent() {
               margin: 'var(--space-lg) 0',
             }}
           >
-            3 500 ₽
+            4 500 ₽
           </div>
           <p
             style={{

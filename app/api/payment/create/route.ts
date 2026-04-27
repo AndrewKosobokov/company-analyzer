@@ -5,7 +5,7 @@ import { getAccessToken } from '@/app/lib/cookies';
 import { createPayment } from '@/lib/yukassa';
 
 const PLANS = {
-  unlimited: { price: 3500, name: 'Безлимит', subscriptionDays: 30 },
+  unlimited: { price: 4500, name: 'Безлимит', subscriptionDays: 30 },
   // Legacy plans kept for backward compatibility with existing payments
   start: { price: 4500, name: 'Start', subscriptionDays: 0 },
   optimal: { price: 8500, name: 'Optimal', subscriptionDays: 0 },
