@@ -26,11 +26,9 @@ export default function OfferPage() {
       <section className="space-y-3 mb-8">
         <h2 className="text-lg md:text-xl font-medium text-black">3. Стоимость и оплата</h2>
         <ul className="list-disc pl-5 space-y-2 text-gray-600">
-          <li>Start: 4 500 ₽ за 40 анализов</li>
-          <li>Optimal: 8 500 ₽ за 80 анализов</li>
-          <li>Profi: 12 000 ₽ за 200 анализов</li>
+          <li>Безлимит: 4 500 ₽ за 1 месяц доступа (неограниченное количество анализов)</li>
           <li>Оплата через ЮKassa</li>
-          <li>Анализы действуют до полного использования</li>
+          <li>Доступ активируется на 30 дней с момента оплаты</li>
         </ul>
       </section>
 
@@ -46,7 +44,7 @@ export default function OfferPage() {
 
       <section className="space-y-3 mb-8">
         <h2 className="text-lg md:text-xl font-medium text-black">6. Ответственность</h2>
-        <p className="text-gray-600">Исполнитель не несёт ответственности за любые решения, принятые на основе отчётов.</p>
+        <p className="text-gray-600">Исполнитель не несёт ответственности за любые решения, принятые на основе отчётов. Данные формируются на основе открытых источников и технологий искусственного интеллекта.</p>
       </section>
 
       <section className="space-y-3 mb-8">
@@ -58,6 +56,7 @@ export default function OfferPage() {
         <h2 className="text-lg md:text-xl font-medium text-black">8. Реквизиты исполнителя</h2>
         <p className="text-gray-600">Исполнитель: Кособоков Андрей Алексеевич, ИНН 540409814223.</p>
         <p className="text-gray-600">Адрес: 630105, Российская Федерация, Новосибирская область, г. Новосибирск, ул. Кропоткина, д. 109, кв. 70</p>
+        <p className="text-gray-600">Email: support@metalvector.ru</p>
       </section>
     </main>
   );
