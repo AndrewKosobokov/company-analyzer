@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
       inn: data.inn ?? null,
       kpp: data.kpp ?? null,
       capital: data.finance?.ustavcap ? `${data.finance.ustavcap.toLocaleString('ru-RU')} ₽` : null,
-      activity: data.okved ? `${data.okved} — ${data.okved_type}` : null,
+      activity: data.okved ? `${data.okved} — ${data.okveds?.[0]?.name ?? data.okved_type ?? ''}`.replace(/ — $/, '') : null,
       address: data.address?.value ?? null,
       director: data.management?.name ? `${data.management.name} (${data.management.post})` : null
     };
