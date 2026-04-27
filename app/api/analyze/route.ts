@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. GENERATE PROMPT
-    const prompt = generatePrompt(siteText, finalUrl, finalInn, companyNameFromDadata);
+    const prompt = generatePrompt(siteText, finalUrl, finalInn, companyNameFromDadata ?? undefined);
     console.log(`📝 Generated prompt (${prompt.length} chars, site: ${siteText.length} chars)`);
 
     // 6. CALL VERTEX AI (MAIN ANALYSIS + MIND MAP)
