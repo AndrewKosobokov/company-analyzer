@@ -51,13 +51,32 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(emptyResponse, { status: 200 });
     }
 
+    let okvedName: string | null = null;
+    if (data.okved) {
+      try {
+        const okvedRes = await fetch('https://suggestions.dadata.ru/suggestions/api/4_1/rs/findById/okved2', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Token ${process.env.DADATA_API_KEY || ''}`
+          },
+          body: JSON.stringify({ query: data.okved })
+        });
+        if (okvedRes.ok) {
+          const okvedData = await okvedRes.json();
+          okvedName = okvedData?.suggestions?.[0]?.data?.name ?? null;
+        }
+      } catch {}
+    }
+
     const payload: CompanyDetailsResponse = {
       name: data.name?.short_with_opf ?? data.name?.full_with_opf ?? null,
       ogrn: data.ogrn ?? null,
       inn: data.inn ?? null,
       kpp: data.kpp ?? null,
       capital: data.finance?.ustavcap ? `${data.finance.ustavcap.toLocaleString('ru-RU')} ₽` : null,
-      activity: data.okved ?? null,
+      activity: data.okved ? `${data.okved} — ${okvedName ?? ''}`.replace(/ — $/, '') : null,
       address: data.address?.value ?? null,
       director: data.management?.name ? `${data.management.name} (${data.management.post})` : null
     };
