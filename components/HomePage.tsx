@@ -100,7 +100,7 @@ export default function HomePage() {
               e.currentTarget.style.boxShadow = '';
             }}
           >
-            Посмотреть тарифы
+            Посмотреть тариф
           </Link>
         </div>
         <p
@@ -276,7 +276,7 @@ export default function HomePage() {
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/login" className="button-primary">Начать бесплатно</Link>
-            <Link href="/pricing" className="button-secondary">Посмотреть тарифы</Link>
+            <Link href="/pricing" className="button-secondary">Посмотреть тариф</Link>
           </div>
         </div>
       </section>
