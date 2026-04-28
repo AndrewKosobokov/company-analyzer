@@ -59,10 +59,11 @@ export default function HomePage() {
                 alignItems: 'center',
                 gap: '8px',
                 padding: '8px 16px',
-                background: 'var(--background-secondary)',
+                background: 'var(--background-primary)',
+                border: '1px solid var(--border-color)',
                 borderRadius: '100px',
                 fontSize: '15px',
-                color: 'var(--text-secondary)',
+                color: 'var(--text-primary)',
                 fontWeight: 500
               }}
             >
