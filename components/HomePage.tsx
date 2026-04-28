@@ -114,6 +114,36 @@ export default function HomePage() {
         </p>
       </section>
 
+      <section style={{
+        padding: 'var(--space-2xl) var(--space-lg)',
+        background: 'var(--background-secondary)'
+      }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+          <p style={{
+            fontSize: '15px',
+            color: 'var(--text-secondary)',
+            marginBottom: '24px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            fontWeight: 500
+          }}>
+            Пример отчёта
+          </p>
+          <div style={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+          }}>
+            <img
+              src="/report-preview.png"
+              alt="Пример отчёта Металл Вектор"
+              style={{ width: '100%', display: 'block' }}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section style={{ padding: 'var(--space-4xl) var(--space-lg)', background: 'var(--background-primary)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
