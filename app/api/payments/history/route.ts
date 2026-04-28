@@ -4,12 +4,14 @@ import prisma from '@/app/lib/prisma';
 
 export async function GET(req: NextRequest) {
   try {
+    const accessToken = req.cookies.get('access_token')?.value;
     const authHeader = req.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const headerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+    const token = accessToken || headerToken;
+
+    if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const token = authHeader.substring(7);
     let decoded: any;
     try {
       decoded = jwt.verify(token, process.env.JWT_SECRET!);
