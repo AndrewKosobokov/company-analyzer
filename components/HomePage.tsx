@@ -38,6 +38,38 @@ export default function HomePage() {
 <br />
 Мы выявляем скрытые потребности в редких и сертифицированных позициях, превращая холодные звонки в экспертные переговоры с <strong>готовым скриптом</strong>.
         </p>
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            marginBottom: 'var(--space-xl)'
+          }}
+        >
+          {[
+            { text: '60 секунд на анализ' },
+            { text: 'Готовый скрипт звонка' },
+            { text: 'Высокомаржинальные позиции' },
+          ].map((item, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 16px',
+                background: 'var(--background-secondary)',
+                borderRadius: '100px',
+                fontSize: '15px',
+                color: 'var(--text-secondary)',
+                fontWeight: 500
+              }}
+            >
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
         <div className="hero-buttons">
           <Link 
             href="/login" 
@@ -70,6 +102,15 @@ export default function HomePage() {
             Посмотреть тарифы
           </Link>
         </div>
+        <p
+          style={{
+            marginTop: '16px',
+            fontSize: '14px',
+            color: 'var(--text-secondary)'
+          }}
+        >
+          3 бесплатных анализа при регистрации
+        </p>
       </section>
 
       {/* Features Section */}
