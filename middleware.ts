@@ -49,6 +49,9 @@ export async function middleware(request: NextRequest) {
   
   // Get access token from cookie
   const accessToken = request.cookies.get('access_token')?.value;
+  if (pathname.startsWith('/api/payments')) {
+    console.log('[Middleware] payments request, token exists:', !!accessToken);
+  }
   
   // Also check Authorization header for backward compatibility
   const authHeader = request.headers.get('Authorization');
@@ -76,6 +79,7 @@ export async function middleware(request: NextRequest) {
     await jwtVerify(token, secret);
     return NextResponse.next();
   } catch (error) {
+    console.error('[Middleware] JWT verify error:', error instanceof Error ? error.message : error);
     // Token expired or invalid
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
