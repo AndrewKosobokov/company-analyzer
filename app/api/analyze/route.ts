@@ -253,9 +253,8 @@ export async function POST(request: NextRequest) {
     console.log('📊 [INN] Final INN to save:', finalCompanyInn || 'None');
 
     // 8. SAVE TO DATABASE
-    const companyName = finalUrl
-      ? `Компания ${finalUrl}`
-      : `Компания ИНН ${finalCompanyInn || 'Не указан'}`;
+    const companyName = companyNameFromDadata
+      || (finalUrl ? `Компания ${finalUrl}` : `Компания ИНН ${finalCompanyInn || 'Не указан'}`);
 
     const creditsUsed = 1;
 
