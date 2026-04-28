@@ -818,103 +818,97 @@ textarea.form-input {
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
-  h1 {
-    font-size: 48px;
+  h1 { font-size: 48px; }
+  h2 { font-size: 32px; }
+  h3 { font-size: 24px; }
+
+  .hero {
+    min-height: auto;
+    padding: var(--space-3xl) var(--space-md);
   }
-  
   .hero h1 {
     font-size: 48px;
+    max-height: none;
+    margin-bottom: var(--space-md);
   }
-  
-  .hero .subtitle {
-    font-size: 21px;
-  }
-  
-  .hero p {
-    font-size: 17px;
-  }
-  
-  .nav {
-    display: none;
-  }
-  
-  .pricing-grid {
-    grid-template-columns: 1fr;
-  }
-  
+  .hero .subtitle { font-size: 21px; }
+  .hero p { font-size: 17px; }
   .hero-buttons {
     flex-direction: column;
+    align-items: center;
     width: 100%;
+    gap: var(--space-sm);
   }
-  
-  .hero-buttons .button-primary,
-  .hero-buttons .button-secondary {
+  .hero-buttons a,
+  .hero-buttons button {
     width: 100%;
+    max-width: 320px;
   }
-  
+
+  .header-container { padding: 0 var(--space-md); }
+  .nav { gap: var(--space-md); }
+  .nav-link { font-size: 15px; }
+  .header-button { padding: 8px 16px; font-size: 15px; }
+
+  .container { padding: 0 var(--space-md); }
+  .card { padding: var(--space-lg); }
+
+  .pricing-grid { grid-template-columns: 1fr; }
+  .pricing-card { padding: var(--space-xl); }
+
+  .report-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
   .report-actions {
-    flex-direction: column;
+    flex-direction: column !important;
+    gap: var(--space-sm) !important;
   }
-  
-  .report-actions button {
-    width: 100%;
+  .report-actions button,
+  .report-actions a {
+    width: 100% !important;
   }
-  
+
+  .companies-list { gap: var(--space-md); }
   .company-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-md);
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: var(--space-sm);
   }
-
-  .company-info {
-    width: 100%;
-    margin-right: 0;
-  }
-
-  .company-info .company-name {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-  }
-
   .company-actions {
     width: 100%;
-    justify-content: flex-start;
+    display: flex;
+    gap: var(--space-sm);
     flex-wrap: wrap;
   }
-  
-  .profile-grid {
-    grid-template-columns: 1fr;
+  .company-actions a,
+  .company-actions button {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
   }
-  
-  .report-layout {
-    grid-template-columns: 1fr;
-  }
-  
-  .report-toc-container {
-    position: relative;
-    top: 0;
-    max-height: none;
-    margin-bottom: var(--space-lg);
+
+  .profile-grid { grid-template-columns: 1fr !important; }
+  .profile-section { padding: var(--space-lg) !important; }
+
+  .button-primary,
+  .button-secondary {
+    min-height: 48px;
+    font-size: 17px;
   }
 }
 
 @media (max-width: 480px) {
-  h1 {
-    font-size: 36px;
-  }
-  
-  .hero h1 {
-    font-size: 36px;
-  }
-  
-  .hero .subtitle {
-    font-size: 19px;
-  }
-  
-  .pricing-card .price {
-    font-size: 36px;
-  }
+  h1 { font-size: 36px; }
+  h2 { font-size: 28px; }
+
+  .hero h1 { font-size: 36px; }
+  .hero .subtitle { font-size: 19px; }
+
+  .card { padding: var(--space-md); border-radius: var(--radius-lg); }
+
+  .pricing-card .price { font-size: 36px; }
 }
 
 /* ============================================
