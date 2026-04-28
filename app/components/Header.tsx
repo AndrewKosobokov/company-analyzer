@@ -67,7 +67,7 @@ function Header() {
                 href="/pricing" 
                 className={isActive('/pricing') ? 'button-primary header-button' : 'nav-link'}
               >
-                Тарифы
+                Тариф
               </Link>
               <Link 
                 href="/profile" 
@@ -99,7 +99,7 @@ function Header() {
                 href="/pricing" 
                 className="nav-link"
               >
-                Тарифы
+                Тариф
               </Link>
               <Link 
                 href="/login" 
