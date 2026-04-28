@@ -82,6 +82,17 @@ export async function middleware(request: NextRequest) {
     console.error('[Middleware] JWT verify error:', error instanceof Error ? error.message : error);
     // Token expired or invalid
     if (pathname.startsWith('/api/')) {
+      const refreshToken = request.cookies.get('refresh_token')?.value;
+      if (refreshToken) {
+        try {
+          const refreshSecret = new TextEncoder().encode(process.env.JWT_SECRET);
+          await jwtVerify(refreshToken, refreshSecret);
+          // refresh token валиден — редиректим на refresh endpoint
+          const refreshUrl = new URL('/api/auth/refresh', request.url);
+          refreshUrl.searchParams.set('redirect', pathname);
+          return NextResponse.redirect(refreshUrl);
+        } catch {}
+      }
       return NextResponse.json(
         { error: 'Token expired', needsRefresh: true },
         { status: 401 }
