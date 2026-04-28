@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       await prisma.payment.update({ where: { paymentId: payment.id }, data: { status: 'succeeded' } });
 
       const meta = (dbPayment.metadata ?? {}) as Record<string, unknown>;
-      const subscriptionDays = typeof meta.subscriptionDays === 'number' ? meta.subscriptionDays : 0;
+const subscriptionDays = Number(meta.subscriptionDays) || 0;
       const isUnlimited = subscriptionDays > 0;
 
       if (isUnlimited) {
