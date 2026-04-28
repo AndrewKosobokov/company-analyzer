@@ -23,7 +23,8 @@ const API_PUBLIC_PATHS = [
   '/api/auth/refresh',
   '/api/payment/webhook',
   '/api/public/report',
-  '/api/company/dadata'
+  '/api/company/dadata',
+  '/api/payments/history'
 ];
 
 export async function middleware(request: NextRequest) {
