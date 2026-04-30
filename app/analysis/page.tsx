@@ -257,7 +257,7 @@ export default function AnalysisPage() {
             {/* Company Analysis Form */}
             <div className="form-group">
               <label className="form-label">
-                Вставьте ссылку на сайт, либо ИНН компании
+                Вставьте ИНН компании, либо ссылку на сайт
               </label>
               <input
                 type="text"
