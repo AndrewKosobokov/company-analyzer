@@ -9,11 +9,26 @@ export default function PricingContent() {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
-  const { isAuthenticated } = useAuth();
+  const [subscriptionEnd, setSubscriptionEnd] = useState<string | null>(null);
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     setTimeout(() => setIsMounted(true), 50);
   }, []);
+
+  useEffect(() => {
+    if (user?.planStartDate && user?.plan !== 'trial') {
+      const end = new Date(user.planStartDate);
+      end.setMonth(end.getMonth() + 1);
+      if (end > new Date()) {
+        setSubscriptionEnd(end.toLocaleDateString('ru-RU'));
+      } else {
+        setSubscriptionEnd(null);
+      }
+    } else {
+      setSubscriptionEnd(null);
+    }
+  }, [user]);
 
   const handleSelectPlan = async (planId: string) => {
     setLoading(planId);
@@ -115,33 +130,57 @@ export default function PricingContent() {
             </li>
           </ul>
 
-          <button
-            type="button"
-            onClick={() => handleSelectPlan('unlimited')}
-            disabled={loading === 'unlimited'}
-            className="button-primary"
-            style={{
-              width: '100%',
-              marginTop: 'var(--space-lg)',
-              transition: 'all 0.3s ease',
-            }}
-            onMouseEnter={(e) => {
-              if (loading !== 'unlimited') {
+          {subscriptionEnd ? (
+            <>
+              <div style={{
+                padding: '16px',
+                background: 'var(--background-secondary)',
+                borderRadius: '12px',
+                textAlign: 'center',
+                marginTop: 'var(--space-lg)'
+              }}>
+                <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Подписка активна до</p>
+                <p style={{ fontSize: '21px', fontWeight: 600, color: 'var(--text-primary)' }}>{subscriptionEnd}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleSelectPlan('unlimited')}
+                disabled={loading === 'unlimited'}
+                className="button-secondary"
+                style={{ width: '100%', marginTop: 'var(--space-md)' }}
+              >
+                {loading === 'unlimited' ? 'Загрузка...' : 'Продлить подписку'}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleSelectPlan('unlimited')}
+              disabled={loading === 'unlimited'}
+              className="button-primary"
+              style={{
+                width: '100%',
+                marginTop: 'var(--space-lg)',
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (loading !== 'unlimited') {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'scale(0.98)';
+              }}
+              onMouseUp={(e) => {
                 e.currentTarget.style.transform = 'translateY(-2px)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.transform = 'scale(0.98)';
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-          >
-            {loading === 'unlimited' ? 'Загрузка...' : 'Подключить'}
-          </button>
+              }}
+            >
+              {loading === 'unlimited' ? 'Загрузка...' : 'Подключить'}
+            </button>
+          )}
           <p className="text-xs text-gray-500 text-center mt-3">
             Оплачивая услугу, вы подтверждаете согласие с{' '}
             <a href="/offer" target="_blank" className="text-gray-700 underline hover:text-gray-900">
