@@ -10,6 +10,7 @@ interface User {
   organizationName?: string;
   phone?: string;
   plan: string;
+  planStartDate: string | null;
   analysesRemaining: number;
   role: string;
 }
