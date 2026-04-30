@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     // 3. CHECK USER LIMITS
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { analysesRemaining: true, plan: true }
+      select: { analysesRemaining: true, plan: true, planStartDate: true }
     });
 
     if (!user) {
@@ -119,6 +119,19 @@ export async function POST(request: NextRequest) {
         error: 'Лимит анализов исчерпан. Обновите тариф.',
         analysesRemaining: 0
       }, { status: 403 });
+    }
+
+    // Check if subscription expired
+    if (user.plan !== 'trial' && user.plan !== null && user.planStartDate) {
+      const endDate = new Date(user.planStartDate);
+      endDate.setMonth(endDate.getMonth() + 1);
+      
+      if (endDate < new Date()) {
+        return NextResponse.json({
+          error: 'Подписка истекла. Продлите подписку для продолжения работы.',
+          subscriptionExpired: true
+        }, { status: 403 });
+      }
     }
 
     // 4. FETCH WEBSITE CONTENT (ONLY if URL provided)

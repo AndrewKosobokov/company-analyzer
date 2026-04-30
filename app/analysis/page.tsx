@@ -130,7 +130,7 @@ export default function AnalysisPage() {
         const data = await response.json().catch(() => ({}));
         if (
           response.status === 403 &&
-          (data?.analysesRemaining === 0 || (data?.error || '').includes('Лимит анализов'))
+          (data?.analysesRemaining === 0 || data?.subscriptionExpired || (data?.error || '').includes('Лимит анализов'))
         ) {
           setShowLimitModal(true);
           throw new Error(data?.error || 'Лимит анализов исчерпан');
