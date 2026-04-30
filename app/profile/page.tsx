@@ -421,7 +421,6 @@ export default function ProfilePage() {
                       <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600 }}>Дата</th>
                       <th style={{ padding: '12px', textAlign: 'left', fontWeight: 600 }}>Описание</th>
                       <th style={{ padding: '12px', textAlign: 'right', fontWeight: 600 }}>Сумма</th>
-                      <th style={{ padding: '12px', textAlign: 'center', fontWeight: 600 }}>Чек</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -435,15 +434,6 @@ export default function ProfilePage() {
                         </td>
                         <td style={{ padding: '12px', textAlign: 'right', fontWeight: 600 }}>
                           {payment.amount} ₽
-                        </td>
-                        <td style={{ padding: '12px', textAlign: 'center' }}>
-                          {payment.status === 'succeeded' ? (
-                            <button className="button-secondary" style={{ padding: '6px 12px', fontSize: '13px' }}>
-                              Скачать
-                            </button>
-                          ) : (
-                            <span style={{ color: 'var(--text-secondary)' }}>—</span>
-                          )}
                         </td>
                       </tr>
                     ))}
