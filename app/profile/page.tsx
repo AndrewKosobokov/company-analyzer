@@ -278,7 +278,7 @@ export default function ProfilePage() {
                   <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
                     <span style={{ fontSize: '15px', color: 'var(--text-secondary)', minWidth: '140px' }}>Действует до:</span>
                     <span style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
-                      {new Date(new Date(profile.planStartDate).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('ru-RU')}
+                      {(() => { const end = new Date(profile.planStartDate); end.setMonth(end.getMonth() + 1); return end.toLocaleDateString('ru-RU'); })()}
                     </span>
                   </div>
                 </div>
@@ -287,7 +287,7 @@ export default function ProfilePage() {
                   className="button-primary"
                   style={{ display: 'inline-block', marginTop: 'var(--space-lg)' }}
                 >
-                  Продлить
+                  Продлить подписку
                 </Link>
               </>
             )}

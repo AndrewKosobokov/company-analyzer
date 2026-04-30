@@ -24,16 +24,34 @@ export async function POST(req: NextRequest) {
       await prisma.payment.update({ where: { paymentId: payment.id }, data: { status: 'succeeded' } });
 
       const meta = (dbPayment.metadata ?? {}) as Record<string, unknown>;
-const subscriptionDays = Number(meta.subscriptionDays) || 0;
+      const subscriptionDays = Number(meta.subscriptionDays) || 0;
       const isUnlimited = subscriptionDays > 0;
 
       if (isUnlimited) {
-        // Subscription plan: grant unlimited access for subscriptionDays
+        // Subscription plan: extend existing subscription if still active
+        const currentUser = await prisma.user.findUnique({
+          where: { id: dbPayment.userId },
+          select: { planStartDate: true },
+        });
+
+        let newStartDate: Date;
+        if (currentUser?.planStartDate) {
+          const currentEndDate = new Date(currentUser.planStartDate);
+          currentEndDate.setMonth(currentEndDate.getMonth() + 1);
+          if (currentEndDate > new Date()) {
+            newStartDate = new Date(currentEndDate.getTime());
+          } else {
+            newStartDate = new Date();
+          }
+        } else {
+          newStartDate = new Date();
+        }
+
         await prisma.user.update({
           where: { id: dbPayment.userId },
           data: {
             plan: dbPayment.planName,
-            planStartDate: new Date(),
+            planStartDate: newStartDate,
             analysesRemaining: 99999,
             analysesInitial: 99999,
           },
