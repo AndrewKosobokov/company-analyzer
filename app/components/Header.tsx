@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
@@ -10,8 +11,10 @@ function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAdmin, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = useCallback(() => {
+    setIsMenuOpen(false);
     logout();
     router.push('/login');
   }, [logout, router]);
@@ -34,20 +37,20 @@ function Header() {
     <header className="header">
       <div className="header-container">
         {/* Logo + Subtitle */}
-        <Link href="/" className="logo">
-          <div style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
-          <div style={{ 
+        <Link href="/" className="logo" onClick={() => setIsMenuOpen(false)}>
+          <div className="logo-title" style={{ fontSize: '24px', fontWeight: 600 }}>Металл Вектор</div>
+          <div className="logo-subtitle" style={{ 
             fontSize: '13px', 
             color: 'var(--text-secondary)', 
             fontWeight: 400, 
-            marginTop: '2px' 
+            marginTop: '2px'
           }}>
             Аналитика. Фокус. Результат.
           </div>
         </Link>
 
         {/* Navigation */}
-        <nav className="nav">
+        <nav className="nav nav-desktop">
           {user ? (
             // Меню для залогиненных пользователей
             <>
@@ -111,7 +114,43 @@ function Header() {
             </>
           )}
         </nav>
+
+        <button
+          type="button"
+          className="hamburger-btn"
+          aria-label="Открыть меню"
+          aria-expanded={isMenuOpen}
+          onClick={() => setIsMenuOpen((prev) => !prev)}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
       </div>
+
+      {isMenuOpen && (
+        <div className="mobile-menu">
+          {user ? (
+            <>
+              <Link href="/analysis" onClick={() => setIsMenuOpen(false)}>Анализ</Link>
+              <Link href="/companies" onClick={() => setIsMenuOpen(false)}>Отчеты</Link>
+              <Link href="/pricing" onClick={() => setIsMenuOpen(false)}>Тариф</Link>
+              <Link href="/profile" onClick={() => setIsMenuOpen(false)}>Профиль</Link>
+              {isAdmin && (
+                <Link href="/admin" onClick={() => setIsMenuOpen(false)}>Админ-панель</Link>
+              )}
+              <button type="button" onClick={handleLogout}>Выйти</button>
+            </>
+          ) : (
+            <>
+              <Link href="/pricing" onClick={() => setIsMenuOpen(false)}>Тариф</Link>
+              <Link href="/login" onClick={() => setIsMenuOpen(false)}>Войти</Link>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 }

@@ -258,6 +258,14 @@ button, input, textarea, select {
   font-size: 17px;
 }
 
+.hamburger-btn {
+  display: none;
+}
+
+.mobile-menu {
+  display: none;
+}
+
 /* ============================================
    HERO SECTION
    ============================================ */
@@ -818,6 +826,54 @@ textarea.form-input {
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
+  .nav-desktop { display: none !important; }
+  .hamburger-btn { 
+    display: flex !important; 
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: block;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    z-index: 999;
+    padding: 8px 0 16px 0;
+  }
+  
+  .mobile-menu a,
+  .mobile-menu button {
+    display: block;
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 17px;
+    text-align: left;
+    border: none;
+    background: none;
+    color: var(--text-primary);
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .mobile-menu a:active,
+  .mobile-menu button:active {
+    background: var(--background-secondary);
+  }
+
   h1 { font-size: 48px; }
   h2 { font-size: 32px; }
   h3 { font-size: 24px; }
@@ -849,10 +905,18 @@ textarea.form-input {
   .header-container {
     padding: 0 var(--space-md);
     flex-wrap: nowrap;
+    position: relative;
   }
   .logo {
     font-size: 18px;
     white-space: nowrap;
+  }
+  .logo-title {
+    font-size: 20px !important;
+    font-weight: 600 !important;
+  }
+  .logo-subtitle {
+    display: none !important;
   }
   .nav {
     gap: var(--space-sm);
@@ -909,6 +973,11 @@ textarea.form-input {
     min-height: 48px;
     font-size: 17px;
   }
+}
+
+@media (min-width: 769px) {
+  .hamburger-btn { display: none !important; }
+  .mobile-menu { display: none !important; }
 }
 
 @media (max-width: 480px) {
