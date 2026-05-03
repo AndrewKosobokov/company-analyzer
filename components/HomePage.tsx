@@ -32,11 +32,23 @@ export default function HomePage() {
           transition: 'opacity 0.5s ease-out, transform 0.5s ease-out'
         }}
       >
+        <div
+          style={{
+            display: 'inline-block',
+            padding: '6px 14px',
+            background: 'var(--background-secondary)',
+            borderRadius: '100px',
+            fontSize: '14px',
+            fontWeight: 500,
+            color: 'var(--text-secondary)',
+            marginBottom: '16px'
+          }}
+        >
+          Для металлоторговых компаний
+        </div>
         <h1>Металл Вектор</h1>
         <p style={{ color: 'var(--text-primary)' }}>
-          <strong>Искусственный интеллект</strong>, который сканирует предприятия и мгновенно находит вашу <strong>максимальную маржу</strong>.
-<br />
-Мы выявляем скрытые потребности в редких и сертифицированных позициях, превращая холодные звонки в экспертные переговоры с <strong>готовым скриптом</strong>.
+          Искусственный интеллект сканирует предприятия и мгновенно находит вашу максимальную маржу на <strong>металлопрокате</strong>. Мы выявляем скрытые потребности в редких и сертифицированных позициях, превращая холодные звонки в экспертные переговоры с <strong>готовым скриптом</strong>.
         </p>
         <div
           style={{
@@ -112,6 +124,21 @@ export default function HomePage() {
         >
           3 бесплатных анализа при регистрации
         </p>
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 16px',
+            background: 'var(--background-secondary)',
+            borderRadius: '100px',
+            fontSize: '14px',
+            color: 'var(--text-secondary)',
+            marginTop: '12px'
+          }}
+        >
+          ✓ Создан практиками металлоторговли
+        </div>
       </section>
 
       <section style={{
