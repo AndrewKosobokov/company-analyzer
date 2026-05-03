@@ -36,7 +36,8 @@ export default function HomePage() {
           style={{
             display: 'inline-block',
             padding: '6px 14px',
-            background: 'var(--background-secondary)',
+            background: 'var(--background-primary)',
+            border: '1px solid var(--border-color)',
             borderRadius: '100px',
             fontSize: '14px',
             fontWeight: 500,
@@ -126,18 +127,17 @@ export default function HomePage() {
         </p>
         <div
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
+            display: 'inline-block',
             padding: '8px 16px',
-            background: 'var(--background-secondary)',
+            background: 'var(--background-primary)',
+            border: '1px solid var(--border-color)',
             borderRadius: '100px',
             fontSize: '14px',
             color: 'var(--text-secondary)',
             marginTop: '12px'
           }}
         >
-          ✓ Создан практиками металлоторговли
+          Создан практиками металлоторговли
         </div>
       </section>
 
